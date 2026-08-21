@@ -1,0 +1,4 @@
+.DS_Store
+node_modules/
+*.mov
+_render/frames_*/

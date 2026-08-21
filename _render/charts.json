@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1a",
+    "name": "Cooling Curve",
+    "subtitle": "Worldwide climate-related mortality decline",
+    "html": "1a-cooling-curve.html",
+    "mov": "1a-cooling-curve-alpha.mov",
+    "duration": 9.7
+  },
+  {
+    "id": "1b",
+    "name": "Canada Death Rate",
+    "subtitle": "Canada's climate-related death rate by decade, 1901-2020",
+    "html": "1b-canada-death-rate.html",
+    "mov": "1b-canada-death-rate-alpha.mov",
+    "duration": 7.3
+  },
+  {
+    "id": "2a",
+    "name": "Heat vs. Cold Deaths by Region",
+    "subtitle": "The Lancet: cold deaths outnumber heat deaths everywhere",
+    "html": "2a-heat-cold-region.html",
+    "mov": "2a-heat-cold-region-alpha.mov",
+    "duration": 10.3
+  },
+  {
+    "id": "2b",
+    "name": "Cold vs. Heat Mortality Trend",
+    "subtitle": "US & Canada death-rate trend lines, 2000-2019",
+    "html": "2b-cold-heat-trend.html",
+    "mov": "2b-cold-heat-trend-alpha.mov",
+    "duration": 12.5
+  }
+]

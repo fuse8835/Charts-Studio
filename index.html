@@ -1,0 +1,227 @@
+<meta charset="utf-8">
+<title>Chart Studio — Fraser Institute Series</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+
+  :root {
+    --ash-950: #05131f;
+    --ash-900: #071b2c;
+    --mint-400: #04ffba;
+    --heat-500: #e30063;
+    --mist-400: #7ea0bd;
+    --mist-300: #a9c2d6;
+    --paper-050: #f8fbff;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--ash-950);
+    color: var(--paper-050);
+  }
+
+  body {
+    font-family: 'Rajdhani', ui-sans-serif, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px 80px;
+    min-height: 100vh;
+  }
+
+  .wrap { width: 100%; max-width: 900px; }
+
+  h1 {
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 44px);
+    margin: 0 0 6px;
+  }
+
+  .lede {
+    color: var(--mist-300);
+    font-size: 16px;
+    margin: 0 0 40px;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--ash-900);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+  }
+
+  .card-id {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(4,255,186,.1);
+    color: var(--mint-400);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 19px;
+    margin: 0 0 3px;
+  }
+
+  .card-subtitle {
+    font-size: 13.5px;
+    color: var(--mist-300);
+    margin: 0;
+  }
+
+  .card-meta {
+    font-size: 11.5px;
+    color: var(--mist-400);
+    margin-top: 6px;
+    letter-spacing: .02em;
+  }
+
+  .card-actions {
+    flex: none;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: var(--paper-050);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    transition: background .15s ease;
+  }
+
+  .btn:hover { background: rgba(255,255,255,.12); }
+
+  .btn-solid {
+    background: var(--mint-400);
+    color: var(--ash-950);
+    border-color: var(--mint-400);
+  }
+
+  .btn-solid:hover { background: #6dffdb; }
+
+  .btn:disabled { opacity: .5; cursor: default; }
+
+  .status-row {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--mist-400);
+    min-height: 16px;
+  }
+
+  .status-row.error { color: var(--heat-500); }
+
+  .footer-note {
+    margin-top: 32px;
+    font-size: 12.5px;
+    color: var(--mist-400);
+    line-height: 1.6;
+  }
+
+  .footer-note code {
+    background: rgba(255,255,255,.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+</style>
+
+<div class="wrap">
+  <h1>Chart Studio</h1>
+  <p class="lede">All charts in the Fraser Institute climate-mortality series, in the order they were built. Open a chart to preview, scrub, and annotate it, or render its final ProRes 4444 alpha <code>.mov</code> directly from here.</p>
+
+  <div id="list"></div>
+
+  <p class="footer-note">
+    Rendering runs this same local server through a headless Chrome capture + ffmpeg encode &mdash; it can take a minute or two per chart, and only one render can run at a time. Keep this terminal window open while a render is in progress. New chart files just need an entry in <code>_render/charts.json</code> and a <code>&lt;script src="render-client.js" data-chart-id="..."&gt;</code> tag to show up here with a working render button.
+  </p>
+</div>
+
+<script>
+(async function () {
+  const listEl = document.getElementById('list');
+  let charts = [];
+  try {
+    charts = await (await fetch('/api/charts')).json();
+  } catch (err) {
+    listEl.textContent = 'Could not load chart list -- is the render server running?';
+    return;
+  }
+
+  charts.forEach((chart) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-id">${chart.id.toUpperCase()}</div>
+      <div class="card-body">
+        <p class="card-title">${chart.name}</p>
+        <p class="card-subtitle">${chart.subtitle}</p>
+        <p class="card-meta">${chart.duration}s runtime &middot; ${chart.html} &middot; ${chart.mov}</p>
+        <div class="status-row" data-status></div>
+      </div>
+      <div class="card-actions">
+        <a class="btn" href="/${chart.html}">Open chart</a>
+        <button class="btn btn-solid" type="button" data-render>Render .mov</button>
+      </div>
+    `;
+    listEl.appendChild(card);
+
+    const renderBtn = card.querySelector('[data-render]');
+    const statusEl = card.querySelector('[data-status]');
+    let busy = false;
+
+    renderBtn.addEventListener('click', () => {
+      if (busy) return;
+      busy = true;
+      renderBtn.disabled = true;
+      statusEl.classList.remove('error');
+      statusEl.textContent = 'Starting render...';
+
+      const es = new EventSource('/api/render?id=' + encodeURIComponent(chart.id));
+      es.onmessage = (e) => { statusEl.textContent = e.data; };
+      es.addEventListener('done', (e) => {
+        statusEl.textContent = e.data;
+        if (/failed/i.test(e.data)) statusEl.classList.add('error');
+        es.close();
+        busy = false;
+        renderBtn.disabled = false;
+      });
+      es.onerror = () => {
+        statusEl.textContent = 'Render connection lost -- check the server terminal.';
+        statusEl.classList.add('error');
+        es.close();
+        busy = false;
+        renderBtn.disabled = false;
+      };
+    });
+  });
+})();
+</script>
