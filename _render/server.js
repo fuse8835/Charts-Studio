@@ -72,14 +72,14 @@ async function renderChart(chart, send) {
   }
 
   await browser.close();
-  send(`Captured ${totalFrames} frames. Encoding ProRes 4444...`);
+  send(`Captured ${totalFrames} frames. Encoding HEVC with alpha...`);
 
   const outPath = path.join(ROOT, chart.mov);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
       '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
-      '-c:v', 'prores_videotoolbox', '-profile:v', '4444', '-pix_fmt', 'bgra',
-      '-allow_sw', '1', '-vf', 'setsar=1:1', outPath,
+      '-c:v', 'hevc_videotoolbox', '-tag:v', 'hvc1', '-pix_fmt', 'bgra',
+      '-alpha_quality', '0.9', '-allow_sw', '1', '-vf', 'setsar=1:1', outPath,
     ]);
     ff.on('error', reject);
     ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited with code ${code}`))));
