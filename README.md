@@ -15,16 +15,15 @@ Then open **http://localhost:8793**. The landing page lists every chart with an 
 
 ## Rendering a video
 
-Clicking "Render .mov" runs a headless-Chrome capture (deterministically seeking each frame via `document.getAnimations()`), encodes it to a ProRes 4444 intermediate with `ffmpeg`, then transcodes that down to HEVC with an alpha channel using Apple's own `avconvert` (`PresetHEVCHighestQualityWithAlpha`). Requirements on the machine running the server:
+Clicking "Render .mov" runs a headless-Chrome capture (deterministically seeking each frame via `document.getAnimations()`) and encodes the result to ProRes 4444 with an alpha channel via `ffmpeg`. Requirements on the machine running the server:
 
 - Node.js
 - Google Chrome installed (Playwright drives your real local Chrome via `channel: 'chrome'`, no separate browser download)
-- `ffmpeg` with the `prores_videotoolbox` encoder (macOS only)
-- `avconvert` (ships with macOS at `/usr/bin/avconvert` — no install needed)
+- `ffmpeg` with the `prores_videotoolbox` encoder (macOS only) — swap the encoder in `_render/server.js` if you're on another platform
 
-This two-step route matters: encoding HEVC-with-alpha directly via ffmpeg's `hevc_videotoolbox -alpha_quality` produces a file that *looks* fine under ffmpeg's own tools but renders as solid/opaque in QuickTime, Finder, Premiere, and After Effects (all of which decode via AVFoundation, not ffmpeg). Routing through `avconvert` — Apple's own AVFoundation-based transcoder — guarantees the alpha channel is one every Apple-ecosystem app reads correctly. It produces roughly 1/100th the file size of the ProRes 4444 this pipeline used originally, at visually indistinguishable quality.
+Rendered `.mov` files are **not** committed to this repo (they're multi-hundred-MB to multi-GB alpha-channel exports) — they're written straight to the project root and are gitignored. Regenerate them locally via the button above.
 
-Rendered `.mov` files are **not** committed to this repo — they're written straight to the project root and are gitignored. Regenerate them locally via the button above.
+Two smaller alternatives were tried (HEVC-with-alpha via Apple's `avconvert`, GoPro CineForm via ffmpeg's `cfhd` encoder) and both failed real Adobe After Effects import despite passing every automated test available, including AVFoundation-level verification (QuickLook thumbnails, a full ProRes round-trip). ProRes 4444 remains the only format verified to reliably preserve alpha across every tool this pipeline needs to feed, including AE specifically.
 
 ## Adding a new chart
 

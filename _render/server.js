@@ -72,37 +72,26 @@ async function renderChart(chart, send) {
   }
 
   await browser.close();
-  send(`Captured ${totalFrames} frames. Encoding ProRes 4444 intermediate...`);
+  send(`Captured ${totalFrames} frames. Encoding ProRes 4444...`);
 
-  // Step 1: PNG frames -> ProRes 4444 (guaranteed-correct alpha, but large).
-  const intermediatePath = path.join(outDir, `_intermediate_${chart.id}.mov`);
+  // ProRes 4444 is the only format verified to reliably preserve alpha across every
+  // real tool that matters (QuickTime, Finder, Premiere, After Effects). Two smaller
+  // alternatives were tried and rejected: hevc_videotoolbox + avconvert produced files
+  // AE's importer doesn't detect any alpha channel in at all (despite QuickTime/Finder
+  // rendering them correctly -- AE's decoder is stricter than AVFoundation's own preview
+  // path); ffmpeg's cfhd (CineForm) encoder produced files AE refuses to import entirely
+  // ("source compression type is not supported"). Don't re-attempt either without a
+  // confirmed AE import test first -- see chart-hevc-alpha-encoding memory for the
+  // full history before trying another codec here.
+  const outPath = path.join(ROOT, chart.mov);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
       '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
       '-c:v', 'prores_videotoolbox', '-profile:v', '4444', '-pix_fmt', 'bgra',
-      '-allow_sw', '1', '-vf', 'setsar=1:1', intermediatePath,
+      '-allow_sw', '1', '-vf', 'setsar=1:1', outPath,
     ]);
     ff.on('error', reject);
     ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited with code ${code}`))));
-  });
-
-  send('Transcoding to HEVC with alpha...');
-
-  // Step 2: ProRes 4444 -> HEVC with alpha via Apple's own avconvert/AVFoundation.
-  // ffmpeg's hevc_videotoolbox + -alpha_quality writes alpha data that ffmpeg's own
-  // decoder can read back, but that macOS/QuickTime/Premiere/After Effects (which all
-  // decode via AVFoundation, not ffmpeg) do NOT recognize as transparent -- verified via
-  // qlmanage thumbnails and a full ProRes round-trip. avconvert's PresetHEVCHighestQualityWithAlpha
-  // is Apple's own tool built for this exact case, so it's guaranteed to produce a file every
-  // AVFoundation-based app decodes correctly.
-  const outPath = path.join(ROOT, chart.mov);
-  await new Promise((resolve, reject) => {
-    const av = spawn('avconvert', [
-      '-s', intermediatePath, '-p', 'PresetHEVCHighestQualityWithAlpha',
-      '-o', outPath, '--replace',
-    ]);
-    av.on('error', reject);
-    av.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`avconvert exited with code ${code}`))));
   });
 
   fs.rmSync(outDir, { recursive: true, force: true });
