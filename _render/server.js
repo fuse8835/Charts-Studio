@@ -76,19 +76,21 @@ async function renderChart(chart, send) {
 
   // ProRes 4444 is the only format verified to reliably preserve alpha across every
   // real tool that matters (QuickTime, Finder, Premiere, After Effects). Two smaller
-  // alternatives were tried and rejected: hevc_videotoolbox + avconvert produced files
-  // AE's importer doesn't detect any alpha channel in at all (despite QuickTime/Finder
-  // rendering them correctly -- AE's decoder is stricter than AVFoundation's own preview
-  // path); ffmpeg's cfhd (CineForm) encoder produced files AE refuses to import entirely
-  // ("source compression type is not supported"). Don't re-attempt either without a
-  // confirmed AE import test first -- see chart-hevc-alpha-encoding memory for the
-  // full history before trying another codec here.
+  // codec alternatives were tried and rejected outright (HEVC-with-alpha, GoPro CineForm
+  // -- see chart-hevc-alpha-encoding memory before trying another codec here), but the
+  // ProRes 4444 hardware encoder (prores_videotoolbox) turned out to be encoding at
+  // roughly 3x Apple's own nominal ProRes 4444 bitrate, plus using 16-bit alpha precision
+  // when 8-bit is standard. Switching to the software encoder (prores_ks) with explicit
+  // -bits_per_mb and -alpha_bits lands right at Apple's documented nominal rate with no
+  // visible quality loss -- confirmed via pixel-diff and a real After Effects import test
+  // (Kevin verified transparency renders correctly). Same codec/profile throughout, so no
+  // compatibility risk, just ~4x smaller files than the old hardware-encoder defaults.
   const outPath = path.join(ROOT, chart.mov);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
       '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
-      '-c:v', 'prores_videotoolbox', '-profile:v', '4444', '-pix_fmt', 'bgra',
-      '-allow_sw', '1', '-vf', 'setsar=1:1', outPath,
+      '-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le',
+      '-bits_per_mb', '200', '-alpha_bits', '8', '-vf', 'setsar=1:1', outPath,
     ]);
     ff.on('error', reject);
     ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited with code ${code}`))));
