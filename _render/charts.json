@@ -30,5 +30,13 @@
     "html": "2b-cold-heat-trend.html",
     "mov": "2b-cold-heat-trend-alpha.mov",
     "duration": 12.5
+  },
+  {
+    "id": "3a",
+    "name": "Globally Burned Area",
+    "subtitle": "Share of Earth's land burned by wildfire, 2000-2025",
+    "html": "3a-burned-area.html",
+    "mov": "3a-burned-area-alpha.mov",
+    "duration": 9.5
   }
 ]

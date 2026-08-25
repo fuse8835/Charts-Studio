@@ -56,6 +56,20 @@ Design system (applies to all charts unless noted): dark navy background (~#032C
 
 ---
 
+---
+
+## Script 3
+
+### 3A — Globally Burned Area
+- **Subject:** Share of Earth's land surface burned by wildfire each year, worldwide, 2000-2025
+- **Files:** [3a-burned-area.html](3a-burned-area.html) · 3a-burned-area-alpha.mov (not yet rendered)
+- **Structure:** Single-act — animated line chart (horizontal gridlines only), jagged data line (straight segments, not smoothed — matches the source's shape), a dashed linear-regression trend line that draws in *after* the data line, then two highlighted/circled data points (2022 low, 2025 latest) with value labels, "Source: NASA, 2026" bottom-right
+- **Data source:** Client-provided vector files (`Essay 03-A.svg` / `.pdf`, from the shared Google Drive script folder). The SVG was far more useful than the PDF — real coordinates, directly parseable — so SVG-only was agreed as the format going forward. Values were reconstructed from the SVG's gridline pixel calibration (y-axis) and point-spacing pattern (x-axis/years); years 2000, 2008, and 2010 are absent from the source data. Cross-validated against the production script's own narrated figures (2022: 2.17%, 2025: 2.2% — both matched exactly), and the independently-computed regression trend line matched the source SVG's dashed trend line's start/end values closely, confirming it's a true least-squares fit, not a simple endpoint-to-endpoint line.
+- **Choreography source:** the actual documentary script (`M1 Copy of #3 - Docu Script - Planet is Not Burning - Final.docx`) was provided and used directly for beat timing — main data line draws under "What's clear from the data...", the dashed trend line explicitly animates in *after* the main line ("Animate the dotted trend line in Chart #1"), then the 2022/2025 points get circled under the "lowest level... quite close" narration line.
+- **Deviation called out and confirmed:** the client reference image uses a full forest-photo background and a Fraser Institute logo; Kevin confirmed to keep the series' standard navy-gradient background (transparent for compositing) and to omit the logo, matching every other chart in the series.
+- **Status:** Built and verified in live preview; not yet rendered to video. Duration is a first-pass estimate (9.5s) — review before treating as final.
+- **Last revised:** 2026-08-25
+
 ## Template for new entries
 
 ```
