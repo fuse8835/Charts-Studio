@@ -80,17 +80,21 @@ async function renderChart(chart, send) {
   // -- see chart-hevc-alpha-encoding memory before trying another codec here), but the
   // ProRes 4444 hardware encoder (prores_videotoolbox) turned out to be encoding at
   // roughly 3x Apple's own nominal ProRes 4444 bitrate, plus using 16-bit alpha precision
-  // when 8-bit is standard. Switching to the software encoder (prores_ks) with explicit
-  // -bits_per_mb and -alpha_bits lands right at Apple's documented nominal rate with no
-  // visible quality loss -- confirmed via pixel-diff and a real After Effects import test
-  // (Kevin verified transparency renders correctly). Same codec/profile throughout, so no
-  // compatibility risk, just ~4x smaller files than the old hardware-encoder defaults.
+  // when 8-bit is standard. Switching to the software encoder (prores_ks) fixes both --
+  // but bits_per_mb below ~1000 introduces visible banding on smooth background gradients
+  // (confirmed via a contrast-stretch test isolating the gradient region; text/detail areas
+  // look fine even much lower, which is why the first pass at 200 missed this). 1222 is the
+  // lowest value that stayed clean in that test, and not coincidentally lines up with
+  // Apple's own documented nominal 4444 rate -- so it's a principled floor, not a guess.
+  // Confirmed via a real After Effects import test (Kevin verified transparency renders
+  // correctly). Same codec/profile throughout, so no compatibility risk, just ~3.5x smaller
+  // files than the old hardware-encoder defaults.
   const outPath = path.join(ROOT, chart.mov);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
       '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
       '-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le',
-      '-bits_per_mb', '200', '-alpha_bits', '8', '-vf', 'setsar=1:1', outPath,
+      '-bits_per_mb', '1222', '-alpha_bits', '8', '-vf', 'setsar=1:1', outPath,
     ]);
     ff.on('error', reject);
     ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited with code ${code}`))));
