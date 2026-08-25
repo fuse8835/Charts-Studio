@@ -401,7 +401,276 @@
   }
 
   @keyframes scrub {
-    from { left: 132px; }
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(100% - 0px)); }
+  }
+
+  /* ---- pins: numbered markers dropped on the frame for review ---- */
+
+  .pins-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 40;
+  }
+
+  #frame.pin-mode { cursor: crosshair; }
+
+  .pin {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    margin-left: -13px;
+    margin-top: -13px;
+    border-radius: 50%;
+    background: var(--vivid-500);
+    border: 2px solid var(--paper-050);
+    color: var(--paper-050);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .pin.is-active { background: var(--mint-400); color: var(--ash-950); }
+
+  /* ---- review & annotate panel ---- */
+
+  .review-panel {
+    background: var(--ash-900);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px;
+    padding: 18px 20px 20px;
+  }
+
+  .review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .review-head h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--paper-050);
+    margin: 0;
+  }
+
+  .review-actions { display: flex; gap: 8px; }
+
+  .pill-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: .02em;
+    color: var(--paper-100);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .pill-btn:hover { background: rgba(255,255,255,.12); }
+  .pill-btn.is-active { background: var(--vivid-500); border-color: var(--vivid-500); color: #fff; }
+
+  .pill-btn-solid {
+    background: var(--mint-400);
+    border-color: var(--mint-400);
+    color: var(--ash-950);
+  }
+  .pill-btn-solid:hover { background: var(--mint-300); }
+
+  .review-hint {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--mist-400);
+    margin: 0 0 16px;
+  }
+  .review-hint b { color: var(--mist-300); }
+
+  .scrub-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .icon-btn {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--paper-100);
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.12); }
+
+  .scrubber {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,.14);
+    outline: none;
+  }
+  .scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--mint-400);
+    box-shadow: 0 0 6px rgba(4,255,186,.6);
+    cursor: pointer;
+  }
+  .scrubber::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border: none;
+    border-radius: 50%;
+    background: var(--mint-400);
+    box-shadow: 0 0 6px rgba(4,255,186,.6);
+    cursor: pointer;
+  }
+
+  .scrub-time {
+    flex: none;
+    width: 46px;
+    text-align: right;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--mist-300);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .notes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notes-list:empty::before {
+    content: "No notes yet \2014 click + Add note, then click the frame above.";
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+    color: var(--mist-400);
+    padding: 10px 0;
+  }
+
+  .note-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+
+  .note-num {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--vivid-500);
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .note-time {
+    flex: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--mint-400);
+    background: rgba(4,255,186,.1);
+    border-radius: 6px;
+    padding: 4px 7px;
+    margin-top: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .note-time:hover { background: rgba(4,255,186,.2); }
+
+  .note-text {
+    flex: 1;
+    min-width: 0;
+    resize: vertical;
+    background: transparent;
+    border: none;
+    color: var(--paper-100);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 3px 0;
+  }
+  .note-text:focus { outline: none; }
+  .note-text::placeholder { color: var(--mist-400); }
+
+  .note-del {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.14);
+    color: var(--mist-300);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .note-del:hover { background: rgba(255,80,80,.18); border-color: rgba(255,80,80,.4); color: #fff; }
+
+  .feedback-out {
+    width: 100%;
+    margin-top: 14px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    color: var(--mist-300);
+    font-family: ui-monospace, monospace;
+    font-size: 11.5px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    resize: vertical;
+  }
+
+  body.export-mode .review-panel,
+  body.export-mode .pins-layer {
+    display: none !important;
   }
 
   .caption {
@@ -412,6 +681,14 @@
     line-height: 1.5;
     color: var(--mist-400);
     margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001s !important;
+      animation-delay: 0s !important;
+      transition: none !important;
+    }
   }
 </style>
 
@@ -444,6 +721,8 @@
       <g id="linesGroup"></g>
       <g id="pointGroup"></g>
     </svg>
+
+    <div class="pins-layer" id="pinsLayer"></div>
   </div>
 </div>
 
@@ -455,6 +734,28 @@
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
   <div class="playhead" id="playhead"></div>
+</div>
+
+<div class="stage-wrap review-panel">
+  <div class="review-head">
+    <h2>Review &amp; annotate</h2>
+    <div class="review-actions">
+      <button id="addPinBtn" class="pill-btn" type="button">+ Add note</button>
+      <button id="copyNotesBtn" class="pill-btn pill-btn-solid" type="button">Copy feedback</button>
+    </div>
+  </div>
+
+  <p class="review-hint">Scrub to the moment you want to talk about, click <b>+ Add note</b>, then click on the frame above to drop a numbered pin. Write your note, then hit <b>Copy feedback</b> and paste the result back into chat.</p>
+
+  <div class="scrub-row">
+    <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
+    <input type="range" id="scrubber" class="scrubber" min="0" max="9500" step="10" value="0">
+    <span id="scrubTime" class="scrub-time">0.0s</span>
+  </div>
+
+  <ol id="notesList" class="notes-list"></ol>
+
+  <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
 <p class="caption">A single-act animated line chart &mdash; backdrop, grid, axis, data line, linear trend line, two highlighted data points &mdash; the same structure you'd key in Jitter or After Effects. Data in the <b>DATA</b> array in the source; the dashed trend line is a live least-squares regression computed from that array, not a hardcoded value. Append <b>?export</b> to the URL for a transparent-background version ready to capture with alpha for Premiere.</p>
@@ -674,6 +975,202 @@
   }
 
   replayBtn.addEventListener('click', replay);
+
+  // ---- review & annotate: scrubber ----
+  const scrubber = document.getElementById('scrubber');
+  const scrubTimeEl = document.getElementById('scrubTime');
+  const scrubPlayBtn = document.getElementById('scrubPlayBtn');
+  const totalMs = Math.round(totalSec * 1000);
+  scrubber.max = totalMs;
+
+  let isScrubbing = false;
+  let isPlaying = true;
+
+  function pauseAllAnimations() { document.getAnimations().forEach(a => a.pause()); }
+  function playAllAnimations() { document.getAnimations().forEach(a => a.play()); }
+
+  function setScrubTime(ms) {
+    document.getAnimations().forEach(a => { a.currentTime = ms; });
+    scrubber.value = ms;
+    scrubTimeEl.textContent = (ms / 1000).toFixed(1) + 's';
+  }
+
+  scrubber.addEventListener('pointerdown', () => {
+    isScrubbing = true;
+    isPlaying = false;
+    pauseAllAnimations();
+    scrubPlayBtn.innerHTML = '&#9654;';
+  });
+  scrubber.addEventListener('input', () => setScrubTime(Number(scrubber.value)));
+  scrubber.addEventListener('pointerup', () => { isScrubbing = false; });
+
+  scrubPlayBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      isPlaying = false;
+      pauseAllAnimations();
+      scrubPlayBtn.innerHTML = '&#9654;';
+    } else {
+      isPlaying = true;
+      if (Number(scrubber.value) >= totalMs - 20) {
+        replay();
+        setScrubTime(0);
+      }
+      playAllAnimations();
+      scrubPlayBtn.innerHTML = '&#10074;&#10074;';
+    }
+  });
+
+  (function trackPlayhead() {
+    function tick() {
+      if (isPlaying && !isScrubbing) {
+        const ref = frame.getAnimations()[0];
+        const t = Math.min(ref ? ref.currentTime || 0 : 0, totalMs);
+        scrubber.value = t;
+        scrubTimeEl.textContent = (t / 1000).toFixed(1) + 's';
+        if (t >= totalMs - 20) {
+          isPlaying = false;
+          scrubPlayBtn.innerHTML = '&#9654;';
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  // ---- review & annotate: pins + notes ----
+  const pinsLayer = document.getElementById('pinsLayer');
+  const notesList = document.getElementById('notesList');
+  const addPinBtn = document.getElementById('addPinBtn');
+  const copyNotesBtn = document.getElementById('copyNotesBtn');
+  const feedbackOut = document.getElementById('feedbackOut');
+
+  let pinMode = false;
+  let pinSeq = 0;
+  const pins = [];
+
+  addPinBtn.addEventListener('click', () => {
+    pinMode = !pinMode;
+    addPinBtn.classList.toggle('is-active', pinMode);
+    frame.classList.toggle('pin-mode', pinMode);
+  });
+
+  frame.addEventListener('click', (e) => {
+    if (!pinMode) return;
+    if (e.target.closest('.replay') || e.target.closest('.pin')) return;
+    const rect = frame.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    pinSeq += 1;
+    const pin = { id: pinSeq, num: pinSeq, xPct, yPct, timeMs: Number(scrubber.value), text: '' };
+    pins.push(pin);
+    renderPins();
+    renderNotes();
+    pinMode = false;
+    addPinBtn.classList.remove('is-active');
+    frame.classList.remove('pin-mode');
+    requestAnimationFrame(() => {
+      const ta = notesList.querySelector(`.note-text[data-id="${pin.id}"]`);
+      if (ta) ta.focus();
+    });
+  });
+
+  function renumberPins() { pins.forEach((p, i) => { p.num = i + 1; }); }
+
+  function highlightPin(id) {
+    const idx = pins.findIndex(p => p.id === id);
+    Array.from(pinsLayer.children).forEach((el, i) => el.classList.toggle('is-active', i === idx));
+  }
+
+  function renderPins() {
+    pinsLayer.innerHTML = '';
+    pins.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'pin';
+      el.style.left = p.xPct + '%';
+      el.style.top = p.yPct + '%';
+      el.textContent = p.num;
+      el.title = 't=' + (p.timeMs / 1000).toFixed(1) + 's';
+      el.addEventListener('click', () => { setScrubTime(p.timeMs); highlightPin(p.id); });
+      pinsLayer.appendChild(el);
+    });
+  }
+
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function renderNotes() {
+    notesList.innerHTML = '';
+    pins.forEach(p => {
+      const li = document.createElement('li');
+      li.className = 'note-row';
+
+      const num = document.createElement('div');
+      num.className = 'note-num';
+      num.textContent = p.num;
+
+      const time = document.createElement('button');
+      time.type = 'button';
+      time.className = 'note-time';
+      time.textContent = 't=' + (p.timeMs / 1000).toFixed(1) + 's';
+      time.addEventListener('click', () => { setScrubTime(p.timeMs); highlightPin(p.id); });
+
+      const textEl = document.createElement('textarea');
+      textEl.className = 'note-text';
+      textEl.rows = 1;
+      textEl.placeholder = 'What should change here?';
+      textEl.value = p.text;
+      textEl.dataset.id = p.id;
+      textEl.addEventListener('input', () => { p.text = textEl.value; autoGrow(textEl); });
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'note-del';
+      del.innerHTML = '&times;';
+      del.setAttribute('aria-label', 'Delete note');
+      del.addEventListener('click', () => {
+        const i = pins.findIndex(x => x.id === p.id);
+        if (i >= 0) pins.splice(i, 1);
+        renumberPins();
+        renderPins();
+        renderNotes();
+      });
+
+      li.appendChild(num);
+      li.appendChild(time);
+      li.appendChild(textEl);
+      li.appendChild(del);
+      notesList.appendChild(li);
+      autoGrow(textEl);
+    });
+  }
+
+  function regionLabel(xPct, yPct) {
+    const h = xPct < 33 ? 'left' : xPct < 67 ? 'center' : 'right';
+    const v = yPct < 33 ? 'top' : yPct < 67 ? 'middle' : 'bottom';
+    if (h === 'center' && v === 'middle') return 'center';
+    if (v === 'middle') return h;
+    if (h === 'center') return v;
+    return `${v}-${h}`;
+  }
+
+  copyNotesBtn.addEventListener('click', async () => {
+    const lines = pins.map(p => `${p.num}. [t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
+    const text = lines.length ? lines.join('\n') : 'No notes added yet.';
+    feedbackOut.value = text;
+    autoGrow(feedbackOut);
+    const original = copyNotesBtn.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      copyNotesBtn.textContent = 'Copied!';
+    } catch (err) {
+      feedbackOut.focus();
+      feedbackOut.select();
+      copyNotesBtn.textContent = 'Select below ↓';
+    }
+    setTimeout(() => { copyNotesBtn.textContent = original; }, 1600);
+  });
 })();
 </script>
 <script src="render-client.js" data-chart-id="3a"></script>
