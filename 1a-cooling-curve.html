@@ -1114,8 +1114,8 @@
     const vline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     vline.setAttribute('x1', gx);
     vline.setAttribute('x2', gx);
-    vline.setAttribute('y1', PAD.top);
-    vline.setAttribute('y2', PAD.top + plotH);
+    vline.setAttribute('y1', PAD.top + plotH);
+    vline.setAttribute('y2', PAD.top);
     vline.classList.add('gridline');
     vline.style.animationDelay = `calc(var(--start-grid) + ${0.05 + xi * 0.35}s)`;
     gridGroup.appendChild(vline);
