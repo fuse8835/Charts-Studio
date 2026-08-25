@@ -1008,18 +1008,21 @@
     document.body.classList.add('export-mode');
   }
 
+  // Values match the client-provided SVG (Asset 1.svg) exactly -- reconstructed from its
+  // gridline pixel calibration, nearest-1000 rounding. See chart-catalogue.md for the diff
+  // against the previous (approximate) curve.
   const DATA = [
     { year: 1920, value: 485000 },
-    { year: 1930, value: 425000 },
-    { year: 1940, value: 345000 },
+    { year: 1930, value: 446000 },
+    { year: 1940, value: 371000 },
     { year: 1950, value: 210000 },
-    { year: 1960, value: 200000 },
-    { year: 1970, value: 175000 },
-    { year: 1980, value: 50000 },
-    { year: 1990, value: 66000 },
-    { year: 2000, value: 52000 },
-    { year: 2010, value: 24000 },
-    { year: 2020, value: 9800 }
+    { year: 1960, value: 169000 },
+    { year: 1970, value: 56000 },
+    { year: 1980, value: 67000 },
+    { year: 1990, value: 32000 },
+    { year: 2000, value: 24000 },
+    { year: 2010, value: 11000 },
+    { year: 2020, value: 13000 }
   ];
 
   const W = 1200, H = 750;
