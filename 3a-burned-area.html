@@ -248,10 +248,9 @@
     fill: none;
     stroke: var(--paper-100);
     stroke-opacity: .55;
-    stroke-width: 2;
-    stroke-dasharray: 9 7;
-    animation: draw var(--dur-trend) var(--ease-soft) forwards;
-    animation-delay: var(--start-trend);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: .1 13;
   }
 
   .point-highlight {
@@ -874,19 +873,38 @@
   const intercept = yBar - slope * xBar;
   const trendVal = yr => intercept + slope * yr;
 
+  const trendX1 = x(YEAR_MIN + 1), trendY1 = y(trendVal(YEAR_MIN + 1));
+  const trendX2 = x(YEAR_MAX), trendY2 = y(trendVal(YEAR_MAX));
+
+  // Dotted style needs its own short dash pattern, which conflicts with the
+  // stroke-dashoffset "draw" technique used elsewhere -- so this reveals via
+  // a clip-rect wipe instead (same technique as 2B's dashed-ref lines).
+  const trendClip = document.createElementNS(svgNS, 'clipPath');
+  trendClip.setAttribute('id', 'trendClip');
+  const trendClipRect = document.createElementNS(svgNS, 'rect');
+  trendClipRect.setAttribute('id', 'trendClipRect');
+  trendClipRect.setAttribute('x', trendX1);
+  trendClipRect.setAttribute('y', 0);
+  trendClipRect.setAttribute('width', 0);
+  trendClipRect.setAttribute('height', H);
+  trendClip.appendChild(trendClipRect);
+  trendGroup.appendChild(trendClip);
+
   const trendLine = document.createElementNS(svgNS, 'line');
-  trendLine.setAttribute('x1', x(YEAR_MIN + 1));
-  trendLine.setAttribute('y1', y(trendVal(YEAR_MIN + 1)));
-  trendLine.setAttribute('x2', x(YEAR_MAX));
-  trendLine.setAttribute('y2', y(trendVal(YEAR_MAX)));
+  trendLine.setAttribute('x1', trendX1);
+  trendLine.setAttribute('y1', trendY1);
+  trendLine.setAttribute('x2', trendX2);
+  trendLine.setAttribute('y2', trendY2);
   trendLine.classList.add('trend-line');
+  trendLine.setAttribute('clip-path', 'url(#trendClip)');
   trendGroup.appendChild(trendLine);
-  const trendLen = trendLine.getTotalLength ? Math.hypot(
-    x(YEAR_MAX) - x(YEAR_MIN + 1),
-    y(trendVal(YEAR_MAX)) - y(trendVal(YEAR_MIN + 1))
-  ) : 0;
-  trendLine.style.strokeDasharray = trendLen;
-  trendLine.style.strokeDashoffset = trendLen;
+
+  const trendWipeStyle = document.createElement('style');
+  trendWipeStyle.textContent = `
+    #trendClipRect { animation: trendWipe var(--dur-trend) var(--ease-soft) forwards; animation-delay: var(--start-trend); }
+    @keyframes trendWipe { from { width: 0; } to { width: ${trendX2 - trendX1}px; } }
+  `;
+  document.head.appendChild(trendWipeStyle);
 
   // ---- highlighted points: 2022 (lowest) and 2025 (latest) ----
   const pointGroup = document.getElementById('pointGroup');
@@ -917,7 +935,7 @@
     pointGroup.appendChild(g);
   }
   highlightPoint(2022, 'p1', true);
-  highlightPoint(2025, 'p2', false);
+  highlightPoint(2025, 'p2', true);
 
   // ---- dev timeline panel ----
   const ruler = document.getElementById('ruler');
