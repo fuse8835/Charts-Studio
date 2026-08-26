@@ -46,5 +46,13 @@
     "html": "3b-burned-area-by-region.html",
     "mov": "3b-burned-area-by-region-alpha.mov",
     "duration": 23.4
+  },
+  {
+    "id": "3c",
+    "name": "Prescribed Burning in Canada",
+    "subtitle": "Prescribed burning area, 1990-2023 -- a 99.5% decline",
+    "html": "3c-prescribed-burning.html",
+    "mov": "3c-prescribed-burning-alpha.mov",
+    "duration": 9.3
   }
 ]
