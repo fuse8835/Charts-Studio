@@ -166,7 +166,7 @@
     color: var(--paper-050);
     opacity: 0;
     transform: translateY(8px);
-    animation: riseIn .3s ease-out forwards, titleHold 3.9s linear forwards;
+    animation: riseIn .3s ease-out forwards, titleHold 5s linear forwards;
   }
 
   .source-note {
@@ -190,7 +190,7 @@
     height: 100%;
   }
 
-  .scene { opacity: 0; animation: sceneWindow 3.9s linear forwards; }
+  .scene { opacity: 0; animation: sceneWindow 5s linear forwards; }
 
   .gridline {
     stroke: var(--mist-400);
@@ -198,7 +198,7 @@
     stroke-width: 1;
     stroke-dasharray: 1200;
     stroke-dashoffset: 1200;
-    animation: draw .3s cubic-bezier(.3,.8,.4,1) forwards;
+    animation: draw .5s cubic-bezier(.3,.8,.4,1) forwards;
   }
 
   @keyframes draw { to { stroke-dashoffset: 0; } }
@@ -209,7 +209,7 @@
     font-weight: 500;
     fill: var(--mist-300);
     opacity: 0;
-    animation: fadeOnly .25s ease-out forwards;
+    animation: fadeOnly .4s ease-out forwards;
   }
 
   @keyframes fadeOnly { to { opacity: 1; } }
@@ -225,7 +225,7 @@
     transform-box: fill-box;
     transform-origin: bottom;
     transform: scaleY(0);
-    animation: growBar .5s var(--ease-soft) forwards;
+    animation: growBar .8s var(--ease-soft) forwards;
   }
 
   @keyframes growBar { to { transform: scaleY(1); } }
@@ -697,7 +697,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="23400" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="30000" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -755,7 +755,7 @@
     }
   ];
 
-  const SCENE_WINDOW = 3.9;
+  const SCENE_WINDOW = 5;
   const W = 1200, H = 750;
   const PAD = { top: 190, right: 60, bottom: 130, left: 210 };
   const plotW = W - PAD.left - PAD.right;
@@ -787,7 +787,7 @@
       line.setAttribute('y1', gy);
       line.setAttribute('y2', gy);
       line.classList.add('gridline');
-      line.style.animationDelay = (sceneStart + 0.1 + i * 0.02) + 's';
+      line.style.animationDelay = (sceneStart + 0.1 + i * 0.04) + 's';
       gridGroup.appendChild(line);
 
       const label = document.createElementNS(svgNS, 'text');
@@ -795,7 +795,7 @@
       label.setAttribute('y', gy + 4);
       label.setAttribute('text-anchor', 'end');
       label.classList.add('tick-label');
-      label.style.animationDelay = (sceneStart + 0.25 + i * 0.015) + 's';
+      label.style.animationDelay = (sceneStart + 0.3 + i * 0.03) + 's';
       label.textContent = v.toLocaleString('en-US');
       gridGroup.appendChild(label);
     });
@@ -807,7 +807,7 @@
       const label = document.createElementNS(svgNS, 'text');
       label.setAttribute('transform', `translate(${xCenter(i)}, ${baselineY + 54}) rotate(-45)`);
       label.classList.add('tick-label');
-      label.style.animationDelay = (sceneStart + 0.3 + i * 0.008) + 's';
+      label.style.animationDelay = (sceneStart + 0.4 + i * 0.015) + 's';
       label.textContent = yr;
       axisXGroup.appendChild(label);
     });
@@ -822,7 +822,7 @@
       bar.setAttribute('width', barWidth);
       bar.setAttribute('height', baselineY - topY);
       bar.classList.add('bar');
-      bar.style.animationDelay = (sceneStart + 0.4 + i * 0.008) + 's';
+      bar.style.animationDelay = (sceneStart + 0.7 + i * 0.02) + 's';
       barsGroup.appendChild(bar);
     });
     g.appendChild(barsGroup);
@@ -867,7 +867,7 @@
 
     const wipeStyle = document.createElement('style');
     wipeStyle.textContent = `
-      #trendClipRect${sceneIdx} { animation: trendWipe${sceneIdx} .35s var(--ease-soft) forwards; animation-delay: ${sceneStart + 1.05}s; }
+      #trendClipRect${sceneIdx} { animation: trendWipe${sceneIdx} .5s var(--ease-soft) forwards; animation-delay: ${sceneStart + 2.1}s; }
       @keyframes trendWipe${sceneIdx} { from { width: 0; } to { width: ${tx2 - tx1}px; } }
     `;
     document.head.appendChild(wipeStyle);
