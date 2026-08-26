@@ -38,5 +38,13 @@
     "html": "3a-burned-area.html",
     "mov": "3a-burned-area-alpha.mov",
     "duration": 9.5
+  },
+  {
+    "id": "3b",
+    "name": "Burned Area by Region",
+    "subtitle": "Six-region sequence: North America, Europe, South America, Oceania, Africa, Asia",
+    "html": "3b-burned-area-by-region.html",
+    "mov": "3b-burned-area-by-region-alpha.mov",
+    "duration": 23.4
   }
 ]
