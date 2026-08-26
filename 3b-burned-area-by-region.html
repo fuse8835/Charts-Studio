@@ -804,7 +804,7 @@
     YEARS.forEach((yr, i) => {
       if (yr % 2 !== 1) return; // label every other year (2001, 2003, ...), matching source
       const label = document.createElementNS(svgNS, 'text');
-      label.setAttribute('transform', `translate(${xCenter(i)}, ${baselineY + 48}) rotate(-45)`);
+      label.setAttribute('transform', `translate(${xCenter(i)}, ${baselineY + 54}) rotate(-45)`);
       label.classList.add('tick-label');
       label.style.animationDelay = (sceneStart + 0.3 + i * 0.008) + 's';
       label.textContent = yr;
