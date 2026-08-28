@@ -749,16 +749,22 @@
   ];
 
   // Same river + terrain reused identically in all four panels -- it's the same location
-  // across time, only the city (rings + street/building texture) grows. The river forks,
-  // matching the reference: one trunk from the top splitting into two branches near where
-  // the city sits.
+  // across time, only the city (rings + street/building texture) grows. Single continuous
+  // winding river (an S-curve with two bends), matching Kevin's own reference map.svg --
+  // corrected from an earlier version that read it as a fork, which it isn't.
   const RING_CENTER = { x: panelW * 0.52, y: panelH * 0.46 };
-  const FORK_POINT = { x: panelW * 0.46, y: panelH * 0.60 };
 
-  const RIVER_TRUNK_D = `M ${panelW * 0.40} -10 C ${panelW * 0.28} ${panelH * 0.20}, ${panelW * 0.34} ${panelH * 0.36}, ${panelW * 0.44} ${panelH * 0.46} C ${panelW * 0.50} ${panelH * 0.52}, ${FORK_POINT.x} ${panelH * 0.55}, ${FORK_POINT.x} ${FORK_POINT.y}`;
-  const RIVER_BRANCH_A_D = `M ${FORK_POINT.x} ${FORK_POINT.y} C ${panelW * 0.38} ${panelH * 0.72}, ${panelW * 0.24} ${panelH * 0.80}, ${panelW * 0.10} ${panelH + 10}`;
-  const RIVER_BRANCH_B_D = `M ${FORK_POINT.x} ${FORK_POINT.y} C ${panelW * 0.56} ${panelH * 0.74}, ${panelW * 0.68} ${panelH * 0.82}, ${panelW * 0.80} ${panelH + 10}`;
-  const RIVER_PATHS = [RIVER_TRUNK_D, RIVER_BRANCH_A_D, RIVER_BRANCH_B_D];
+  const RIVER_D = `M ${panelW * 0.38} -10 C ${panelW * 0.30} ${panelH * 0.18}, ${panelW * 0.24} ${panelH * 0.28}, ${panelW * 0.30} ${panelH * 0.40} C ${panelW * 0.36} ${panelH * 0.52}, ${panelW * 0.58} ${panelH * 0.44}, ${panelW * 0.60} ${panelH * 0.58} C ${panelW * 0.62} ${panelH * 0.70}, ${panelW * 0.42} ${panelH * 0.66}, ${panelW * 0.36} ${panelH * 0.80} C ${panelW * 0.32} ${panelH * 0.90}, ${panelW * 0.30} ${panelH * 0.96}, ${panelW * 0.28} ${panelH + 10}`;
+  const RIVER_PATHS = [RIVER_D];
+
+  // small detached oxbow pond near the lower bend, matching the reference
+  const OXBOW = { cx: panelW * 0.47, cy: panelH * 0.62, rx: 10, ry: 6 };
+
+  // major rural highways crossing the whole panel, unclipped by the city circle
+  const HIGHWAYS = [
+    { x1: -10, y1: panelH * 0.22, x2: panelW + 10, y2: panelH * 0.16 },
+    { x1: panelW * 0.14, y1: -10, x2: panelW * 0.2, y2: panelH + 10 }
+  ];
 
   const TERRAIN_BLOBS = [
     `M 20 20 Q 60 5 95 25 Q 115 45 90 60 Q 55 70 30 50 Q 10 35 20 20 Z`,
@@ -788,44 +794,45 @@
 
   const MAX_R = YEARS[YEARS.length - 1].exurban;
   const CITY_HALF = MAX_R + 8;
-  const BLOCK = 16;
+  const BLOCK = 12;
   const rand = mulberry32(4242);
   const cityTemplate = document.createElementNS(svgNS, 'g');
   cityTemplate.id = 'cityTemplate';
 
   for (let gx = -CITY_HALF; gx <= CITY_HALF; gx += BLOCK) {
-    const jitter = (rand() - 0.5) * 3;
+    const jitter = (rand() - 0.5) * 1.5;
     const major = Math.round((gx + CITY_HALF) / BLOCK) % 4 === 0;
     const line = document.createElementNS(svgNS, 'line');
     line.setAttribute('x1', gx + jitter); line.setAttribute('y1', -CITY_HALF);
     line.setAttribute('x2', gx + jitter); line.setAttribute('y2', CITY_HALF);
-    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.32)');
-    line.setAttribute('stroke-width', major ? 1.6 : 0.7);
+    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
+    line.setAttribute('stroke-width', major ? 1.5 : 0.6);
     cityTemplate.appendChild(line);
   }
   for (let gy = -CITY_HALF; gy <= CITY_HALF; gy += BLOCK) {
-    const jitter = (rand() - 0.5) * 3;
+    const jitter = (rand() - 0.5) * 1.5;
     const major = Math.round((gy + CITY_HALF) / BLOCK) % 4 === 0;
     const line = document.createElementNS(svgNS, 'line');
     line.setAttribute('x1', -CITY_HALF); line.setAttribute('y1', gy + jitter);
     line.setAttribute('x2', CITY_HALF); line.setAttribute('y2', gy + jitter);
-    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.32)');
-    line.setAttribute('stroke-width', major ? 1.6 : 0.7);
+    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
+    line.setAttribute('stroke-width', major ? 1.5 : 0.6);
     cityTemplate.appendChild(line);
   }
   for (let gx = -CITY_HALF; gx < CITY_HALF; gx += BLOCK) {
     for (let gy = -CITY_HALF; gy < CITY_HALF; gy += BLOCK) {
       if (Math.hypot(gx + BLOCK / 2, gy + BLOCK / 2) > CITY_HALF) continue;
-      const count = 1 + Math.floor(rand() * 3);
+      if (rand() < 0.12) continue; // occasional empty lot, matching the reference's variation
+      const count = 2 + Math.floor(rand() * 3);
       for (let b = 0; b < count; b++) {
-        const bw = 3 + rand() * 6;
-        const bh = 3 + rand() * 6;
-        const bx = gx + 2 + rand() * (BLOCK - bw - 4);
-        const by = gy + 2 + rand() * (BLOCK - bh - 4);
+        const bw = 2.5 + rand() * 4.5;
+        const bh = 2.5 + rand() * 4.5;
+        const bx = gx + 1.5 + rand() * (BLOCK - bw - 3);
+        const by = gy + 1.5 + rand() * (BLOCK - bh - 3);
         const rect = document.createElementNS(svgNS, 'rect');
         rect.setAttribute('x', bx); rect.setAttribute('y', by);
         rect.setAttribute('width', bw); rect.setAttribute('height', bh);
-        rect.setAttribute('fill', 'rgba(68,78,72,.5)');
+        rect.setAttribute('fill', 'rgba(68,78,72,.55)');
         cityTemplate.appendChild(rect);
       }
     }
@@ -872,6 +879,16 @@
       inner.appendChild(blob);
     });
 
+    HIGHWAYS.forEach(h => {
+      const road = document.createElementNS(svgNS, 'line');
+      road.setAttribute('x1', h.x1); road.setAttribute('y1', h.y1);
+      road.setAttribute('x2', h.x2); road.setAttribute('y2', h.y2);
+      road.setAttribute('stroke', 'rgba(85,95,90,.5)');
+      road.setAttribute('stroke-width', 2);
+      road.classList.add('panel-terrain');
+      inner.appendChild(road);
+    });
+
     RIVER_PATHS.forEach(d => {
       const flood = document.createElementNS(svgNS, 'path');
       flood.setAttribute('d', d);
@@ -893,6 +910,15 @@
       river.classList.add('panel-river');
       inner.appendChild(river);
     });
+
+    const oxbow = document.createElementNS(svgNS, 'ellipse');
+    oxbow.setAttribute('cx', OXBOW.cx);
+    oxbow.setAttribute('cy', OXBOW.cy);
+    oxbow.setAttribute('rx', OXBOW.rx);
+    oxbow.setAttribute('ry', OXBOW.ry);
+    oxbow.setAttribute('fill', 'var(--flood-200)');
+    oxbow.classList.add('panel-flood');
+    inner.appendChild(oxbow);
 
     // street/building texture: same shared template every panel, clipped to that year's
     // exurban radius so a smaller circle just reveals less of the same underlying city.
