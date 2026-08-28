@@ -186,18 +186,13 @@
     height: 100%;
   }
 
+  /* map + city exist from frame 0 -- only the colored rings animate in */
   .panel-bg,
   .panel-terrain,
   .panel-flood,
-  .panel-river {
-    opacity: 0;
-    animation: fadeOnly var(--dur-terrain) ease-out forwards;
-    animation-delay: var(--start-terrain);
-  }
-
+  .panel-river,
   .panel-texture {
-    opacity: 0;
-    animation: fadeOnly .3s ease-out forwards;
+    opacity: 1;
   }
 
   .bullseye-ring {
@@ -780,9 +775,11 @@
     { label: '2040', exurban: 78, suburban: 60, urban: 40, start: 'var(--start-ring-2040)' }
   ];
 
-  // ---- city block/street/building texture: generated once, reused via <use> in every
-  // panel so all four show exactly the same underlying city, just clipped to that year's
-  // exurban radius -- growing the circle reveals more of the same pattern, per Kevin's note.
+  // ---- city block/street/building texture: one independent template PER year, each
+  // scaled so its street grid fills exactly that year's exurban circle -- 1950 is a small,
+  // proportionally-scaled city, 2040 is the same layout at full size. Same seed every time
+  // so the four feel like the same city at different sizes, not four unrelated ones. Static
+  // (no fade-in) -- the city exists from frame 0; only the rings animate in on top of it.
   function mulberry32(seed) {
     return function () {
       seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
@@ -792,53 +789,63 @@
     };
   }
 
-  const MAX_R = YEARS[YEARS.length - 1].exurban;
-  const CITY_HALF = MAX_R + 8;
-  const BLOCK = 12;
-  const rand = mulberry32(4242);
-  const cityTemplate = document.createElementNS(svgNS, 'g');
-  cityTemplate.id = 'cityTemplate';
+  const CITY_ROTATION = 22; // degrees, matching the angled grid in Kevin's reference
 
-  for (let gx = -CITY_HALF; gx <= CITY_HALF; gx += BLOCK) {
-    const jitter = (rand() - 0.5) * 1.5;
-    const major = Math.round((gx + CITY_HALF) / BLOCK) % 4 === 0;
-    const line = document.createElementNS(svgNS, 'line');
-    line.setAttribute('x1', gx + jitter); line.setAttribute('y1', -CITY_HALF);
-    line.setAttribute('x2', gx + jitter); line.setAttribute('y2', CITY_HALF);
-    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
-    line.setAttribute('stroke-width', major ? 1.5 : 0.6);
-    cityTemplate.appendChild(line);
-  }
-  for (let gy = -CITY_HALF; gy <= CITY_HALF; gy += BLOCK) {
-    const jitter = (rand() - 0.5) * 1.5;
-    const major = Math.round((gy + CITY_HALF) / BLOCK) % 4 === 0;
-    const line = document.createElementNS(svgNS, 'line');
-    line.setAttribute('x1', -CITY_HALF); line.setAttribute('y1', gy + jitter);
-    line.setAttribute('x2', CITY_HALF); line.setAttribute('y2', gy + jitter);
-    line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
-    line.setAttribute('stroke-width', major ? 1.5 : 0.6);
-    cityTemplate.appendChild(line);
-  }
-  for (let gx = -CITY_HALF; gx < CITY_HALF; gx += BLOCK) {
-    for (let gy = -CITY_HALF; gy < CITY_HALF; gy += BLOCK) {
-      if (Math.hypot(gx + BLOCK / 2, gy + BLOCK / 2) > CITY_HALF) continue;
-      if (rand() < 0.12) continue; // occasional empty lot, matching the reference's variation
-      const count = 2 + Math.floor(rand() * 3);
-      for (let b = 0; b < count; b++) {
-        const bw = 2.5 + rand() * 4.5;
-        const bh = 2.5 + rand() * 4.5;
-        const bx = gx + 1.5 + rand() * (BLOCK - bw - 3);
-        const by = gy + 1.5 + rand() * (BLOCK - bh - 3);
-        const rect = document.createElementNS(svgNS, 'rect');
-        rect.setAttribute('x', bx); rect.setAttribute('y', by);
-        rect.setAttribute('width', bw); rect.setAttribute('height', bh);
-        rect.setAttribute('fill', 'rgba(68,78,72,.55)');
-        cityTemplate.appendChild(rect);
+  function buildCityTemplate(id, radius) {
+    const rand = mulberry32(4242);
+    const half = radius;
+    const block = radius * 0.22;
+    const g = document.createElementNS(svgNS, 'g');
+    g.id = id;
+    const rot = document.createElementNS(svgNS, 'g');
+    rot.setAttribute('transform', `rotate(${CITY_ROTATION})`);
+    g.appendChild(rot);
+
+    for (let gx = -half; gx <= half; gx += block) {
+      const jitter = (rand() - 0.5) * block * 0.12;
+      const major = Math.round((gx + half) / block) % 4 === 0;
+      const line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', gx + jitter); line.setAttribute('y1', -half);
+      line.setAttribute('x2', gx + jitter); line.setAttribute('y2', half);
+      line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
+      line.setAttribute('stroke-width', major ? radius * 0.02 : radius * 0.008);
+      rot.appendChild(line);
+    }
+    for (let gy = -half; gy <= half; gy += block) {
+      const jitter = (rand() - 0.5) * block * 0.12;
+      const major = Math.round((gy + half) / block) % 4 === 0;
+      const line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', -half); line.setAttribute('y1', gy + jitter);
+      line.setAttribute('x2', half); line.setAttribute('y2', gy + jitter);
+      line.setAttribute('stroke', major ? 'rgba(85,95,90,.55)' : 'rgba(110,122,114,.34)');
+      line.setAttribute('stroke-width', major ? radius * 0.02 : radius * 0.008);
+      rot.appendChild(line);
+    }
+    for (let gx = -half; gx < half; gx += block) {
+      for (let gy = -half; gy < half; gy += block) {
+        if (Math.hypot(gx + block / 2, gy + block / 2) > half) continue;
+        if (rand() < 0.12) continue; // occasional empty lot
+        const count = 2 + Math.floor(rand() * 3);
+        for (let b = 0; b < count; b++) {
+          const bw = block * (0.2 + rand() * 0.35);
+          const bh = block * (0.2 + rand() * 0.35);
+          const bx = gx + block * 0.12 + rand() * (block - bw - block * 0.24);
+          const by = gy + block * 0.12 + rand() * (block - bh - block * 0.24);
+          const rect = document.createElementNS(svgNS, 'rect');
+          rect.setAttribute('x', bx); rect.setAttribute('y', by);
+          rect.setAttribute('width', bw); rect.setAttribute('height', bh);
+          rect.setAttribute('fill', 'rgba(68,78,72,.55)');
+          rot.appendChild(rect);
+        }
       }
     }
+    return g;
   }
+
   const globalDefs = document.createElementNS(svgNS, 'defs');
-  globalDefs.appendChild(cityTemplate);
+  YEARS.forEach((year, i) => {
+    globalDefs.appendChild(buildCityTemplate(`cityTemplate${i}`, year.exurban - 4));
+  });
   chartSvg.appendChild(globalDefs);
 
   function buildPanel(quadIdx) {
@@ -920,8 +927,9 @@
     oxbow.classList.add('panel-flood');
     inner.appendChild(oxbow);
 
-    // street/building texture: same shared template every panel, clipped to that year's
-    // exurban radius so a smaller circle just reveals less of the same underlying city.
+    // street/building texture: this year's own independently-scaled template (see
+    // buildCityTemplate), clipped to its exurban radius as a clean edge. Static -- present
+    // from frame 0, not tied to the ring reveal.
     const textureClipId = `cityClip${quadIdx}`;
     const textureClip = document.createElementNS(svgNS, 'clipPath');
     textureClip.setAttribute('id', textureClipId);
@@ -935,9 +943,8 @@
     const textureGroup = document.createElementNS(svgNS, 'g');
     textureGroup.setAttribute('clip-path', `url(#${textureClipId})`);
     textureGroup.classList.add('panel-texture');
-    textureGroup.style.animationDelay = year.start;
     const use = document.createElementNS(svgNS, 'use');
-    use.setAttribute('href', '#cityTemplate');
+    use.setAttribute('href', `#cityTemplate${quadIdx}`);
     use.setAttribute('transform', `translate(${RING_CENTER.x}, ${RING_CENTER.y})`);
     textureGroup.appendChild(use);
     inner.appendChild(textureGroup);
