@@ -867,7 +867,7 @@
 
     const wipeStyle = document.createElement('style');
     wipeStyle.textContent = `
-      #trendClipRect${sceneIdx} { animation: trendWipe${sceneIdx} .5s var(--ease-soft) forwards; animation-delay: ${sceneStart + 2.1}s; }
+      #trendClipRect${sceneIdx} { animation: trendWipe${sceneIdx} 1s var(--ease-soft) forwards; animation-delay: ${sceneStart + 2.1}s; }
       @keyframes trendWipe${sceneIdx} { from { width: 0; } to { width: ${tx2 - tx1}px; } }
     `;
     document.head.appendChild(wipeStyle);
@@ -1124,8 +1124,12 @@
   }
 
   copyNotesBtn.addEventListener('click', async () => {
-    const lines = pins.map(p => `${p.num}. [t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
-    const text = lines.length ? lines.join('\n') : 'No notes added yet.';
+    const chartTag = document.querySelector('script[data-chart-id]');
+    const chartId = (chartTag && chartTag.getAttribute('data-chart-id')) || '?';
+    const chartName = document.title.split(' — ')[0].trim();
+    const header = `${chartName} (${chartId})`;
+    const lines = pins.map(p => `${p.num}. [${chartId} · t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
+    const text = lines.length ? `${header}\n${lines.join('\n')}` : `${header}\nNo notes added yet.`;
     feedbackOut.value = text;
     autoGrow(feedbackOut);
     const original = copyNotesBtn.textContent;
