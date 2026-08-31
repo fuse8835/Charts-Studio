@@ -48,8 +48,8 @@
     --start-head: .15s;
     --dur-head: .9s;
     --start-legend: 1.0s;
-    --start-terrain: .7s;
-    --dur-terrain: .7s;
+    --start-flood: .7s;
+    --dur-flood: .9s;
     --dur-ring: .8s;
     --start-ring-1950: 2.0s;
     --start-ring-1980: 3.0s;
@@ -218,6 +218,19 @@
   /* authored city asset (Kevin's Map components/city.svg): streets + buildings, muted to sit under the rings */
   .city-street { fill: none; stroke: #7d9188; stroke-width: 3.4px; stroke-linecap: square; opacity: .5; }
   .city-building { fill: #65756e; opacity: .62; }
+
+  /* flood zone starts invisible (exactly hugging the river) and dilates outward to its full
+     authored extent before the rings arrive -- a mask whose content is the river's own path,
+     stroked with a growing width, so the reveal genuinely spreads outward from the water. */
+  .flood-reveal-path {
+    stroke-width: 6;
+    animation: floodSpread var(--dur-flood) var(--ease-soft) forwards;
+    animation-delay: var(--start-flood);
+  }
+  @keyframes floodSpread {
+    from { stroke-width: 6; }
+    to { stroke-width: 260; }
+  }
 
   .year-label {
     font-family: 'Rajdhani', sans-serif;
@@ -689,6 +702,9 @@
         <g id="terrainFull"><path fill-rule="evenodd" d="M733.03,688.61c-3.05,4.65,27.68,9.87,32.81,11.34,6.33,1.24,12.62,2.37,18.77,3.7,4.44.97,9.28,2,12.41,4.49,11.61,11.39-.39,30,27.8,32.73,9.16.96,19.07-.19,28.07-.43,11.72-.45,21.11-3.92,12.33-12.49-2.85-3.04-6.93-5.83-11.36-8.73-6.59-4-12.37-8.68-18.67-12.87-5.74-4.04-13.01-5.16-20.82-4.41-18.66,2.22-32.44-4-49.25-8.3-7.33-1.98-15.19-3.9-23.23-4.74-2.75-.26-7.17-1.1-8.81-.34l-.05.03ZM546.82,631.19c-4.2,6.51,5.3,16.75,8.74,22.81,4.63,7.56,13.58,14.71,21.97,20.64,5.23,3.72,11.57,7.16,18.43,7.92,14.71,2.38,18.49-9.46,23.21-16.68,5.49-7.8,8.19-17.05,3.62-25.07-2.1-3.67-5.05-7.37-9.57-9.58-5.63-2.66-11.55-4.68-19.07-5.22-7.71-.43-15.41-.11-23.46.02-7.75.34-19.46.05-23.76,5.03l-.1.13ZM230.45,590.63c-6.25-5.55-25.52,1.23-34.15,2.3-6.47,1.26-12.12,2.08-17.82,3.99-7.54,2.72-14.8,6.58-19.35,11.67-9.05,9.52,3.53,16.68,17.28,15.82,10.99-.31,21.61-3.34,31.36-6.91,9.73-3.61,19.57-8.67,23.23-16.26,1.8-3.27,2.52-7.66-.43-10.49l-.12-.11ZM321.41,418.4c-4.55,3.84-2.14,9.57,1.08,13.7,7.14,9.95,17.86,14.52,33.6,15.2,16.97,1.87,30.44-.1,27.52-15.05-1.24-5.89-5.28-11.66-12.96-14.48-4.52-2.13-8.89-4.17-13-6.63-4.79-2.97-9.66-6.62-16.04-4.73-4.01,1.11-7.31,3.47-10.71,5.33-3.31,1.99-6.87,4.09-9.37,6.53l-.12.13ZM388.89,305.47c-4.47,3.48-3.38,12.73-3.33,17.85,1.01,7.77-.44,17.25,9.96,20.75,6.08,2,15.62,1.68,20.94-1.01,1.66-1.25-.66-2.55-3.87-4.29-3.12-1.66-7.08-3.76-8.41-6.3-1.53-2.72,1.19-6.01,4.86-7.3,2.39-.82,4.87-.36,7.36.66,6.46,2.35,12.61,7.82,20.74,5.86,9.68-2.04,9.17-9.15,4.81-14.29-4.33-4.61-12.3-7.44-19.37-9.27-2.55-.57-5.24-.97-7.89-1.3-7.62-.58-19.11-4.33-25.68-1.43l-.12.07ZM4.58,220.47c-2.78.14-4.2.05-4.52,1.23-.15,103.53.06,497.55.02,549.6.06.35.23.6.93.77,3.88,1.01,13.61.05,19.9.41,14.75-.11,33.12,1.88,36.58-11.39,7.86-16.63,8.9-36.18,12.02-53.81,1.41-19.62,3.64-68.93,5.33-85.54,2.31-7.53,10.23-11.16,15.54-19.1,6-7.74,6.1-19.85,20.74-22.15,9.31-1.78,19.88-1.67,29.21-3.81,26.07-5.6,34.45-17.65,33.12-35.99-.79-16.4,27.79-20.06,33.37-34.59,10.62-22.47-17.31-41.9-33.21-59.5-14.96-16.05-4.1-26.88,21.26-28.98,12.45-1.62,22.18-7.35,32.8-11.68,12.37-5.59,27.16-4.49,40.69-7.15,20.6-4.11,21.25-20.78,25.93-33.02,1.98-5.78,6.13-11.57,7.45-17.37,1.54-5.55-3.42-10.02-3.68-15.38-.29-4.76,3.48-9.53,2.66-14.21-3.87-11.37-21.06-18.9-35.82-22.95-22.01-4.86-45.52-6.2-68.5-7.41-20.89-.3-46.3,7.52-47.27,24.13-.22,17.42,34.32,26.61,28.82,44.72-3.04,12.98-23.51,18.19-39.88,14.4-19.86-4.26-35.49-11.69-57.33-9.42-13.38.71-15.62-9.35-16.61-16.78-1.44-6.59-3.47-12.78-6.63-19.11-4.37-8.96-10.51-16.24-18.14-24.29-4.91-5.46-12.04-11.44-12.87-17.98.42-10.56,18.21-16.04,18.15-27.08,3.42-17.09-13.9-36.67-39.92-36.57h-.14ZM1266.93,203.22c-26.29,4.26-37.1,23.52-47.19,39.17-3.54,10.26-8.28,20.51-20.48,27.31-6.57,4.7-14.74,7.87-21.86,11.99-9.76,5.87-16.28,14.28-28.89,17.43-9.92,4.14-16.26,11.77-27,15.29-10.91,3.68-10.07,11.71-10.82,19.92-1.73,30.9-18.91,22.73,16.11,46.3,14.16,9.46,4.63,15.74,6.58,26.23.92,3.93,13.22,7.4,12.44,1.55-.84-4.78-2.37-15.06,8.68-14.83,4.61.07,10.03,1.41,14.47.35,7.54-1.87,13.01-9.02,21.37-8.82,10.66.44,10.57,7.8,4.77,12.45-18.63,18.45-8.35,17.48-40.12,26.58-6.94,2.49-12.86,7.15-17.97,11.47-5.23,4.28-14.48,8.15-14.26,14.23,2.09,5.76,15.53,6.85,21.85,3.88,12.97-6.4,23.95-8.95,25.56,6.21.22,5.56-5.28,11.51-1.25,16.68,10.63,10.74,35.98,6.29,50.23,13.11,25.06,13.94,3.77,41.37-21.22,48.01-31.95,7.06-17.73,19.75-29.26,35.76-7.2,9.46-18.62,17.66-21.34,28.57-4.74,18.54,17.53,25.85,40.42,20.75,12.83-2.8,33.1-1.49,28.67,10.99-2.28,6.94-10.64,13.64-10.05,21.15.84,8.72,10.49,15.68,11.53,24.39,1.31,12.29-11.24,24.55-4.78,36.89,6.1,12.31,22.13,9.12,35.75,5.85,11.66-1.07,17.97,6.79,25.46,12.75,9.08,6.4,16.09,18.63.54,23.15-23.84,7.01-47.93-6.72-71.49-10.14-16.37-2.65-36.75-.7-47.2,9.39-4.59,4.93-11.78,13.84-3.06,15.17,40.08.2,267.57-.05,296.37.04,10.94-23.38,2.21-357.71,3.09-389.31-5.35,5.24-12.23,13.16-21.16,16.78-25.12,10.63-52.85-2.06-61.85-19.6-17.76-36.41-41.31-55.56-95.53-32.76-55.1,23.29-40.98-1.86-29.75-28.68,3.47-11.88.58-24.53,7.48-36.06,5.58-10.64,15.38-17.58,23.65-27.01,10.54-16.22,40.43-28.47,59.16-11.08,12.35,13.39,17.76,30.58,37.26,40.34,16.32,9,39.33,13.75,53.34,24.67,12.03,10.9,14.57,28.41,23.5,40.24,7.46,12.62,4.35-10.02,4.97-16.25-.46-23.62.86-52.14-.48-73.7-1-5.33-12.6-8.48-18.19-12.59-43.11-30.71-104.83-55.78-167.77-44.24l-.25.05ZM1193.35,199.01c-3.59-2.01-8.77,1.7-11.14,3.69-3.06,2.78-4.85,7.15-6.11,10.98-1.43,4.46-2.78,9.59-9.61,10.8-5.75,1.27-25.28-1.84-14.59,5.96,7.57,4.28,17.09,8.24,27.07,7.96,11.6-.27,27.39-2.54,30.46-11.82,2.04-7.25-6.43-11.86-10.25-18.05-2.09-3.09-3.63-8.06-5.74-9.45l-.1-.07ZM1055.06,202.67c1.73,12.62,16.3,7.1,28.59,9.04,4.68.73,9.58,2.55,14.37,4.19,10.37,3.27,20.97,10.63,32.37,7.29,3.16-1.06,6.11-3.52,9.12-5.24,4.56-2.38,7.97-5.32,13.24-7.19,3.84-1.3,8.44-2.14,11.61-4.17,4.39-2.75,3.28-6.18-2.61-7.47-6.48-1.4-14.2-.35-21.08-.65-14.68-.09-20.39-2.45-24.99-11.94-2.53-5.65-8.48-9.81-12.92-14.66-2.21-2.62-3.77-6.01-5.24-7.85-1.03-1.39-2.79-3.63-2.89-.02.11,5.5,1.66,12.93-4.8,17.24-5.1,4.17-13.71,5.96-20.94,8.2-7.07,2.66-13.85,7.13-13.85,13.07v.17ZM162.16,167.68c-6.79-10.91-32.64-8.77-45.85-5.65-7.09,1.74-14.63,4.97-16.76,10.17-1.31,3.44.1,7.29,3.98,9.7,6,3.58,14.44,4.5,22.24,4.57,8.56-.01,17.33-1.06,24.53-4.18,7.18-3.1,14.7-8.27,11.93-14.46l-.07-.15ZM342.85,85.17c-8.9,5.34-6.69,14.03-6.62,21.4.34,6.86-.35,14.9,1.62,20.31,2.57,8.2,14.33,12.06,24.69,14.59,8.3,2.08,16.18,4.54,24.83,5.41,10.9,1.09,23.8-2.45,27.58-10.34,3.72-8.34,1.26-17.93-2.72-26.16-4.97-8.56-12.2-17.81-23.48-23.12-12.92-6.02-32.56-9.4-45.72-2.22l-.19.12ZM823.65,55.63c-10.66,6.24,3.17,15.66,2.61,23.03-.99,5.39-8.64,8.5-13.02,12.6-3.39,3.03-5.29,6.82-6.24,10.61-2.16,7.47-.65,16.3-1.97,24.14-1.17,8.36-4.97,15.27,8.87,18.4,7.34,1.86,16.31,3.16,23.34,4.98,5.21,1.24,10.52,1.76,14.94-.53,14.28-8.31-6.46-9.25-8.88-16.39-1.53-6.38,8.29-9.89,16.04-11.27,12.08-2.59,21.25-4.13,20.27-14.85-.13-3.25-.51-6.91,1.16-9.59,2.97-7.21,21.4-7.5,19.03-16.11-2.47-7.45-15.64-8.9-23.71-12.42-10.48-4.67-20.85-9.38-33.12-11.63-6.15-1.03-13.49-3.53-19.17-1.03l-.16.07ZM153.19,42.7c-2.2-4.02-7.09-6.28-12.75-7.37-15.34-2.83-33.35,2.51-43.75,10.65-6.39,4.86-7.71,12.27,1.37,15.94,6.04,2.36,15.05,2.8,22.22,2.54,19.24-1.14,42.05-4.15,33.02-21.59l-.1-.17ZM389.88,2.44c-7.18-3.75-17.92-2.81-25.16.39-5.24,2.19-8.49,5.4-14.75,7.03-2.97.79-6.53,1.19-9.78,1.4-13.62.51-24.8,2.29-37.01,6.27-4.68,1.48-9.22,3.62-11.54,6.94-7.25,9.65,2.09,22.16,17.15,24.07,12.36,2.04,25.21-4.07,36.31-8.37,5.87-2.31,11.78-6.22,16.29-8.68,8.73-5.26,22.08-7.79,28.62-14.86,3.95-4.09,6.42-10.82.03-14.1l-.17-.1Z"/></g>
         <g id="riverFull"><path d="M596.97,0c-10.05,34.21-5.87,67.96,11.99,95.67,11.29,18.76,29.11,35.11,42.06,45.5l1.01.8c24.22,19.14,51.66,40.83,47.75,75.52-4.28,39.75-29.89,65.81-57,93.4-41.77,42.51-84.96,86.46-51.05,186.67l.09.26.04.27c6.38,46.24-1.51,94.77-22.21,136.66-21.69,43.89-55.35,77.58-97.35,97.45-33.62,18.46-71.42,32.48-108.72,40.81h49.06c51.06-13.03,95.82-38.6,129.25-74.42,22.53-24.14,39.44-52.24,50.27-83.52,11.31-32.66,15.73-68.15,13.14-105.49l-.32-4.68,4.32,1.83c29.04,12.28,62.44,12.78,94.74,13.27,41.81.63,85.04,1.28,120.18,27.15l.09.07c20.1,16.05,28.65,40.6,36.91,64.33,5.38,15.45,10.94,31.43,19.62,44.45l.08.12.07.12c11.15,20.94,30.43,36.14,49.08,50.84,21.11,16.65,45.55,39.44,56.45,65.93h13.13c-9.56-29.22-35.31-53.85-59.34-73.23-22.59-18.21-45.94-37.03-57.1-65.51-4.81-10.12-8.59-20.81-12.25-31.16-4.27-12.09-8.69-24.59-14.76-36.13-17.21-33.94-54.99-53.44-112.31-57.96-13.2-1.2-27.24-1.33-40.83-1.45-33.25-.3-67.62-.6-97.53-15.92l-.85-.44-.42-.86c-15.83-32.48-16.84-71.98-2.68-105.7,11.35-25.92,31.98-47.18,51.94-67.74,28.79-29.67,55.98-57.69,58.53-98.82v-.11c3.93-38.68-22.02-60.39-49.49-83.36-11.15-9.32-22.67-18.96-31.76-29.69-25.54-28.77-33.31-67.77-21.07-104.92h-12.72Z"/></g>
         <g id="floodFull"><path d="M566.25,0c-.73,3.03-1.4,6-1.97,8.88-10.76,53.28,11.21,104,50.67,140.49,16.15,17.23,48.96,33.76,54.47,55.89,4.93,37.33-31.43,66.11-54.75,91.35-20.11,20.42-40.72,44.42-51.96,71.73-13.05,31.33-16.83,66.68-9.89,100.14,1.99,11.59,6.72,22.6,9.43,33.9.94,8.27,1.67,17.25,1.67,25.69,1.31,85.56-47.4,162.9-128.55,191.58-53.07,19.13-71.04,33.46-140.67,47.33.36-.06-34.27,6.02-34.27,6.02h224.53c85.62-41.87,144.98-120.89,150.54-227.71,53.21,12.16,152.91-12.27,183.81,42.09,15.09,33.61,24.54,74.1,48.82,102.76,15.94,20.59,38.91,36.85,58.88,53.08,10.82,8.46,20.4,18.07,26.52,29.78h77.19c-4.16-11.12-8.38-23.48-13.13-33.28-17.99-36.74-55.15-58-83.84-84.21-40.56-39.5-34.39-105.8-83.32-141.32-33.97-26.59-80.5-34.67-123.67-36.1-32.99-1.64-68.37,2.5-99.36-9.43-21.34-62.14,15.52-99.62,56.62-140.08,44.13-41.9,77.81-109.39,45.03-167.04-17.93-32.51-52.48-49.09-75.37-75.76-26.11-30.31-21.53-54.99-13.21-85.77h-74.23Z"/></g>
+        <mask id="floodReveal" maskUnits="userSpaceOnUse" x="-500" y="-500" width="2500" height="2500">
+          <path class="flood-reveal-path" fill="#fff" stroke="#fff" stroke-linejoin="round" stroke-linecap="round" d="M596.97,0c-10.05,34.21-5.87,67.96,11.99,95.67,11.29,18.76,29.11,35.11,42.06,45.5l1.01.8c24.22,19.14,51.66,40.83,47.75,75.52-4.28,39.75-29.89,65.81-57,93.4-41.77,42.51-84.96,86.46-51.05,186.67l.09.26.04.27c6.38,46.24-1.51,94.77-22.21,136.66-21.69,43.89-55.35,77.58-97.35,97.45-33.62,18.46-71.42,32.48-108.72,40.81h49.06c51.06-13.03,95.82-38.6,129.25-74.42,22.53-24.14,39.44-52.24,50.27-83.52,11.31-32.66,15.73-68.15,13.14-105.49l-.32-4.68,4.32,1.83c29.04,12.28,62.44,12.78,94.74,13.27,41.81.63,85.04,1.28,120.18,27.15l.09.07c20.1,16.05,28.65,40.6,36.91,64.33,5.38,15.45,10.94,31.43,19.62,44.45l.08.12.07.12c11.15,20.94,30.43,36.14,49.08,50.84,21.11,16.65,45.55,39.44,56.45,65.93h13.13c-9.56-29.22-35.31-53.85-59.34-73.23-22.59-18.21-45.94-37.03-57.1-65.51-4.81-10.12-8.59-20.81-12.25-31.16-4.27-12.09-8.69-24.59-14.76-36.13-17.21-33.94-54.99-53.44-112.31-57.96-13.2-1.2-27.24-1.33-40.83-1.45-33.25-.3-67.62-.6-97.53-15.92l-.85-.44-.42-.86c-15.83-32.48-16.84-71.98-2.68-105.7,11.35-25.92,31.98-47.18,51.94-67.74,28.79-29.67,55.98-57.69,58.53-98.82v-.11c3.93-38.68-22.02-60.39-49.49-83.36-11.15-9.32-22.67-18.96-31.76-29.69-25.54-28.77-33.31-67.77-21.07-104.92h-12.72Z"/>
+        </mask>
         <g id="cityFull">
 <polygon class="city-building" points="1005.4 214.98 1014.22 219.25 1010.39 227.17 1001.57 222.9 1005.4 214.98"/>
       <polygon class="city-building" points="1025.21 224.57 1032.23 227.96 1029.27 234.08 1022.25 230.68 1025.21 224.57"/>
@@ -1356,21 +1372,41 @@
   const MAP_TY = (panelH - MAP_NATIVE_H * MAP_SCALE) / 2;
   const MAP_TRANSFORM = `translate(0, ${MAP_TY}) scale(${MAP_SCALE})`;
 
-  // measured bounding-box center of the building/street geometry inside city.svg's own
-  // 1451.5x773 space (via getBBox on the raw asset) -- this is "downtown," and it's what the
-  // rings and the per-year city mask are centered on once mapped through MAP_TRANSFORM.
-  const CITY_CENTER_RAW = { x: 802.04, y: 362.3 };
+  // measured center of the building/street geometry inside city.svg's own 1451.5x773 space --
+  // this is "downtown," and it's what the rings and the per-year city mask are centered on
+  // once mapped through MAP_TRANSFORM. Refined from the raw axis-aligned bbox center to the
+  // center of the TIGHT bounding box in the street grid's own rotated frame (see
+  // CITY_MASK_ANGLE below), since that's the frame the rectangular city mask is drawn in.
+  const CITY_CENTER_RAW = { x: 819.46, y: 363.72 };
   const RING_CENTER = {
     x: CITY_CENTER_RAW.x * MAP_SCALE,
     y: CITY_CENTER_RAW.y * MAP_SCALE + MAP_TY
   };
 
+  // the real street grid's own rotation, measured from city.svg's street-path bearings
+  // (median ~25.8 deg) -- matches what Kevin eyeballed as ~25 deg. The city mask is a
+  // rectangle at this same angle (rather than a circle) so it reads as a plat/neighborhood
+  // boundary instead of a perfectly round crop. Half-extents are the tight bounding box of
+  // the actual building+street geometry in that rotated frame, i.e. exactly what's needed to
+  // contain the whole city with no cropping -- that full-size rectangle is what the 2040
+  // panel uses (year.exurban === EXURBAN_REF below).
+  const CITY_MASK_ANGLE = 25.8;
+  const CITY_MASK_HALF_W_RAW = 270.1;
+  const CITY_MASK_HALF_H_RAW = 284.4;
+
   const YEARS = [
-    { label: '1950', exurban: 30, suburban: 22, urban: 14, start: 'var(--start-ring-1950)' },
+    { label: '1950', exurban: 39, suburban: 29, urban: 19, start: 'var(--start-ring-1950)' },
     { label: '1980', exurban: 58, suburban: 44, urban: 28, start: 'var(--start-ring-1980)' },
     { label: '2010', exurban: 68, suburban: 52, urban: 34, start: 'var(--start-ring-2010)' },
-    { label: '2040', exurban: 78, suburban: 60, urban: 40, start: 'var(--start-ring-2040)' }
+    { label: '2040', exurban: 108, suburban: 74, urban: 40, start: 'var(--start-ring-2040)' }
   ];
+
+  // 2040's own exurban radius defines "full coverage" -- the mask rectangle at that radius
+  // exactly equals the city's real tight-bbox half-extents, and every other year's mask
+  // scales down proportionally with its own (smaller) exurban radius.
+  const EXURBAN_REF = YEARS[3].exurban;
+  const CITY_MASK_K_W = (CITY_MASK_HALF_W_RAW * MAP_SCALE) / EXURBAN_REF;
+  const CITY_MASK_K_H = (CITY_MASK_HALF_H_RAW * MAP_SCALE) / EXURBAN_REF;
 
   function buildPanel(quadIdx) {
     const { x, y } = QUADRANTS[quadIdx];
@@ -1416,6 +1452,7 @@
     floodUse.setAttribute('href', '#floodFull');
     floodUse.setAttribute('fill', 'var(--flood-200)');
     floodUse.setAttribute('opacity', '0.65');
+    floodUse.setAttribute('mask', 'url(#floodReveal)');
     floodUse.classList.add('panel-flood');
     mapLayer.appendChild(floodUse);
 
@@ -1427,10 +1464,12 @@
 
     inner.appendChild(mapLayer);
 
-    // city: the same authored city.svg for every panel. 2040 (quadIdx 3) shows it full size,
-    // unmasked (cropped only by the panel edge). 1950/1980/2010 mask it down with a circle
-    // centered on downtown, radius dictated by that year's own exurban (blue) ring -- so the
-    // city is literally only as big as the outer ring lets it be.
+    // city: the same authored city.svg for every panel, masked down with a rectangle at the
+    // street grid's own angle (CITY_MASK_ANGLE) rather than a circle -- a perfectly round
+    // crop read as artificial against the angled grid. Rectangle half-extents scale with
+    // that year's own exurban (blue) ring radius, so the city is still literally only as big
+    // as the outer ring lets it be; at 2040 (year.exurban === EXURBAN_REF) the rectangle
+    // exactly equals the city's real full extent, so nothing is cropped.
     const cityLayer = document.createElementNS(svgNS, 'g');
     cityLayer.setAttribute('transform', MAP_TRANSFORM);
     const cityUse = document.createElementNS(svgNS, 'use');
@@ -1438,24 +1477,24 @@
     cityLayer.appendChild(cityUse);
     cityLayer.classList.add('panel-texture');
 
-    if (quadIdx === 3) {
-      inner.appendChild(cityLayer);
-    } else {
-      const cityClipId = `cityClip${quadIdx}`;
-      const cityClip = document.createElementNS(svgNS, 'clipPath');
-      cityClip.setAttribute('id', cityClipId);
-      const cityClipCircle = document.createElementNS(svgNS, 'circle');
-      cityClipCircle.setAttribute('cx', RING_CENTER.x);
-      cityClipCircle.setAttribute('cy', RING_CENTER.y);
-      cityClipCircle.setAttribute('r', year.exurban - 4);
-      cityClip.appendChild(cityClipCircle);
-      defs.appendChild(cityClip);
+    const cityHalfW = CITY_MASK_K_W * year.exurban;
+    const cityHalfH = CITY_MASK_K_H * year.exurban;
+    const cityClipId = `cityClip${quadIdx}`;
+    const cityClip = document.createElementNS(svgNS, 'clipPath');
+    cityClip.setAttribute('id', cityClipId);
+    const cityClipRect = document.createElementNS(svgNS, 'rect');
+    cityClipRect.setAttribute('x', -cityHalfW);
+    cityClipRect.setAttribute('y', -cityHalfH);
+    cityClipRect.setAttribute('width', cityHalfW * 2);
+    cityClipRect.setAttribute('height', cityHalfH * 2);
+    cityClipRect.setAttribute('transform', `translate(${RING_CENTER.x}, ${RING_CENTER.y}) rotate(${CITY_MASK_ANGLE})`);
+    cityClip.appendChild(cityClipRect);
+    defs.appendChild(cityClip);
 
-      const cityMasked = document.createElementNS(svgNS, 'g');
-      cityMasked.setAttribute('clip-path', `url(#${cityClipId})`);
-      cityMasked.appendChild(cityLayer);
-      inner.appendChild(cityMasked);
-    }
+    const cityMasked = document.createElementNS(svgNS, 'g');
+    cityMasked.setAttribute('clip-path', `url(#${cityClipId})`);
+    cityMasked.appendChild(cityLayer);
+    inner.appendChild(cityMasked);
 
     ['exurban', 'suburban', 'urban'].forEach(tier => {
       const ring = document.createElementNS(svgNS, 'circle');
@@ -1516,7 +1555,7 @@
     { label: 'Backdrop', color: '#7ea0bd', start: 0, dur: 0.6 },
     { label: 'Headline', color: '#f8fbff', start: 0.15, dur: 0.9 },
     { label: 'Legend', color: '#a9c2d6', start: 1.0, dur: 0.5 },
-    { label: 'Map + river (all 4)', color: '#3ea8e0', start: 0.7, dur: 0.7 },
+    { label: 'Flood spread (all 4)', color: '#bdeef2', start: 0.7, dur: 0.9 },
     { label: '1950 rings', color: '#043fc5', start: 2.0, dur: 0.8 },
     { label: '1980 rings', color: '#e0342f', start: 3.0, dur: 0.8 },
     { label: '2010 rings', color: '#f4901f', start: 4.0, dur: 0.8 },
