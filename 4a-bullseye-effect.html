@@ -1419,14 +1419,13 @@
     { dx: 0, dy: 0 }
   ];
 
-  // mask size for 1950/1980/2010 is intentionally bigger than each year's own exurban ring --
-  // split the difference between "mask sized to match the ring" (year.exurban) and "mask sized
-  // to fully encompass the city" (EXURBAN_REF), so the city visible under/around the rings
-  // reads as noticeably more built-up without going all the way to the full-city crop. The
-  // rings themselves (radius, position) are untouched by this -- it only affects how much city
-  // shows through.
-  const CITY_MASK_REVEAL = YEARS.map(year => (year.exurban + EXURBAN_REF) / 2);
-  CITY_MASK_REVEAL[3] = EXURBAN_REF;
+  // mask size for 1950/1980/2010 is pulled IN from the ring radius (0.7x) so the city stays
+  // visibly contained inside the exurban ring rather than spilling past its edges -- 0.7 is
+  // small enough that even the mask rectangle's diagonal corners land inside the ring circle
+  // (corner distance = radius * sqrt(K_W^2 + K_H^2) * factor =~ 1.37 * radius * factor, so
+  // factor <= ~0.73 keeps every corner inside). 2040 is untouched (factor 1): it's meant to
+  // show the true full city, not a version contained within its own ring.
+  const CITY_MASK_CONTAIN = [0.7, 0.7, 0.7, 1];
 
   function buildPanel(quadIdx) {
     const { x, y } = QUADRANTS[quadIdx];
@@ -1499,8 +1498,8 @@
     cityLayer.appendChild(cityUse);
     cityLayer.classList.add('panel-texture');
 
-    const cityHalfW = CITY_MASK_K_W * CITY_MASK_REVEAL[quadIdx];
-    const cityHalfH = CITY_MASK_K_H * CITY_MASK_REVEAL[quadIdx];
+    const cityHalfW = CITY_MASK_K_W * year.exurban * CITY_MASK_CONTAIN[quadIdx];
+    const cityHalfH = CITY_MASK_K_H * year.exurban * CITY_MASK_CONTAIN[quadIdx];
     const cityClipId = `cityClip${quadIdx}`;
     const cityClip = document.createElementNS(svgNS, 'clipPath');
     cityClip.setAttribute('id', cityClipId);
