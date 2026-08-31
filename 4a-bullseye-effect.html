@@ -48,8 +48,8 @@
     --start-head: .15s;
     --dur-head: .9s;
     --start-legend: 1.0s;
-    --start-flood: .5s;
-    --dur-flood: 1.5s;
+    --start-flood: .2s;
+    --dur-flood: 1.8s;
     --dur-ring: .8s;
     --start-ring-1950: 2.0s;
     --start-ring-1980: 3.0s;
@@ -1397,7 +1397,7 @@
   const YEARS = [
     { label: '1950', exurban: 39, suburban: 29, urban: 19, start: 'var(--start-ring-1950)' },
     { label: '1980', exurban: 58, suburban: 44, urban: 28, start: 'var(--start-ring-1980)' },
-    { label: '2010', exurban: 68, suburban: 52, urban: 34, start: 'var(--start-ring-2010)' },
+    { label: '2010', exurban: 76, suburban: 55, urban: 34, start: 'var(--start-ring-2010)' },
     { label: '2040', exurban: 108, suburban: 74, urban: 40, start: 'var(--start-ring-2040)' }
   ];
 
@@ -1408,9 +1408,22 @@
   const CITY_MASK_K_W = (CITY_MASK_HALF_W_RAW * MAP_SCALE) / EXURBAN_REF;
   const CITY_MASK_K_H = (CITY_MASK_HALF_H_RAW * MAP_SCALE) / EXURBAN_REF;
 
+  // 1950/1980/2010 drift the mask (and the rings riding on top of it) left + down, toward and
+  // then across the river -- so 1950 sits closer to the water, 1980 starts picking up a couple
+  // buildings on the far bank, and 2010 has more. 2040 keeps the true, unshifted city center
+  // (it's already the full, final city, not a cropped window into it).
+  const CITY_MASK_DRIFT = [
+    { dx: -18, dy: 12 },
+    { dx: -34, dy: 20 },
+    { dx: -50, dy: 27 },
+    { dx: 0, dy: 0 }
+  ];
+
   function buildPanel(quadIdx) {
     const { x, y } = QUADRANTS[quadIdx];
     const year = YEARS[quadIdx];
+    const drift = CITY_MASK_DRIFT[quadIdx];
+    const center = { x: RING_CENTER.x + drift.dx, y: RING_CENTER.y + drift.dy };
 
     const g = document.createElementNS(svgNS, 'g');
     g.setAttribute('transform', `translate(${x}, ${y})`);
@@ -1487,7 +1500,7 @@
     cityClipRect.setAttribute('y', -cityHalfH);
     cityClipRect.setAttribute('width', cityHalfW * 2);
     cityClipRect.setAttribute('height', cityHalfH * 2);
-    cityClipRect.setAttribute('transform', `translate(${RING_CENTER.x}, ${RING_CENTER.y}) rotate(${CITY_MASK_ANGLE})`);
+    cityClipRect.setAttribute('transform', `translate(${center.x}, ${center.y}) rotate(${CITY_MASK_ANGLE})`);
     cityClip.appendChild(cityClipRect);
     defs.appendChild(cityClip);
 
@@ -1498,8 +1511,8 @@
 
     ['exurban', 'suburban', 'urban'].forEach(tier => {
       const ring = document.createElementNS(svgNS, 'circle');
-      ring.setAttribute('cx', RING_CENTER.x);
-      ring.setAttribute('cy', RING_CENTER.y);
+      ring.setAttribute('cx', center.x);
+      ring.setAttribute('cy', center.y);
       ring.setAttribute('r', year[tier]);
       ring.classList.add('bullseye-ring', `ring-${tier}`);
       ring.style.animationDelay = year.start;
@@ -1555,7 +1568,7 @@
     { label: 'Backdrop', color: '#7ea0bd', start: 0, dur: 0.6 },
     { label: 'Headline', color: '#f8fbff', start: 0.15, dur: 0.9 },
     { label: 'Legend', color: '#a9c2d6', start: 1.0, dur: 0.5 },
-    { label: 'Flood spread (all 4)', color: '#bdeef2', start: 0.5, dur: 1.5 },
+    { label: 'Flood spread (all 4)', color: '#bdeef2', start: 0.2, dur: 1.8 },
     { label: '1950 rings', color: '#043fc5', start: 2.0, dur: 0.8 },
     { label: '1980 rings', color: '#e0342f', start: 3.0, dur: 0.8 },
     { label: '2010 rings', color: '#f4901f', start: 4.0, dur: 0.8 },
