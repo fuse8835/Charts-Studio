@@ -5,7 +5,15 @@ const { spawn } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8793;
-const charts = JSON.parse(fs.readFileSync(path.join(__dirname, 'charts.json'), 'utf8'));
+const CHARTS_PATH = path.join(__dirname, 'charts.json');
+
+// Read fresh on every request instead of caching at startup -- this server stays running for
+// hours/days across many chart edits, and a stale in-memory copy silently re-renders with old
+// timing/duration values after charts.json changes (caught 2026-08-26: a duration edit meant to
+// fix a cut-off ring animation had no effect until the process was restarted).
+function getCharts() {
+  return JSON.parse(fs.readFileSync(CHARTS_PATH, 'utf8'));
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -47,7 +55,7 @@ async function renderChart(chart, send) {
   send('Launching headless Chrome...');
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   const page = await browser.newPage({
-    viewport: { width: 1920, height: 1200 },
+    viewport: { width: chart.width || 1920, height: chart.height || 1200 },
     deviceScaleFactor: 1,
   });
 
@@ -72,6 +80,26 @@ async function renderChart(chart, send) {
   }
 
   await browser.close();
+
+  // Verify every expected frame landed and isn't a zero-byte/truncated file before handing
+  // the sequence to ffmpeg. ffmpeg's image2 demuxer silently stops (or skips) at a gap in
+  // sequential numbering, which can bake a missing/corrupt frame into the encode without any
+  // error here -- and a gap partway through a ProRes file is a plausible cause of the kind of
+  // "Error retrieving frame N, substituting frame N-1" read failures Premiere logs on import.
+  const missing = [];
+  for (let i = 0; i < totalFrames; i++) {
+    const framePath = path.join(outDir, `frame_${String(i).padStart(5, '0')}.png`);
+    let size = 0;
+    try { size = fs.statSync(framePath).size; } catch { /* missing */ }
+    if (size < 1024) missing.push(i);
+  }
+  if (missing.length) {
+    throw new Error(
+      `Capture produced ${missing.length} missing/empty frame(s) out of ${totalFrames} ` +
+      `(first few: ${missing.slice(0, 10).join(', ')}) -- aborting before encoding a bad file. Re-run the render.`
+    );
+  }
+
   send(`Captured ${totalFrames} frames. Encoding ProRes 4444...`);
 
   // ProRes 4444 is the only format verified to reliably preserve alpha across every
@@ -109,12 +137,12 @@ const server = http.createServer((req, res) => {
 
   if (u.pathname === '/api/charts') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(charts));
+    return res.end(JSON.stringify(getCharts()));
   }
 
   if (u.pathname === '/api/render') {
     const id = u.searchParams.get('id');
-    const chart = charts.find((c) => c.id === id);
+    const chart = getCharts().find((c) => c.id === id);
     if (!chart) {
       res.writeHead(404);
       return res.end('unknown chart id');

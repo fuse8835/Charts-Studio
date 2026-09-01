@@ -62,5 +62,15 @@
     "html": "4a-bullseye-effect.html",
     "mov": "4a-bullseye-effect-alpha.mov",
     "duration": 7.3
+  },
+  {
+    "id": "2c",
+    "name": "Cold-Related Death Percentage",
+    "subtitle": "Split-flap counter, counting down from 63% to 06%",
+    "html": "2c-cold-death-percentage.html",
+    "mov": "2c-cold-death-percentage-alpha.mov",
+    "duration": 7.3,
+    "width": 1080,
+    "height": 1080
   }
 ]
