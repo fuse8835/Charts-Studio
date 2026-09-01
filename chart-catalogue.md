@@ -42,7 +42,8 @@ Design system (applies to all charts unless noted): dark navy background (~#032C
 - **Data values (deaths/year):** N. America: cold 173k / heat 32k · Latin America: cold 166k / heat 39k · Europe: cold 658k / heat 184k · Africa: cold 1,189k / heat 30k · Asia: cold 2,391k / heat 225k · Oceania: cold 25k / heat 9k — held internally in the `DATA` array only; **no numeric labels are rendered on the bars** (the source reference doesn't show them, so we don't either — bars communicate via height + the shared axis only).
 - **New accent color:** Heat Deaths use `#E30063` (magenta-red, pulled from the PDF's own fill value) — the one intentional deviation from the 1A/1B palette, called out per Kevin's instruction. Cold Deaths stays `--mint-400` (#04FFBA), matching 1A/1B exactly. Note: the source reference's Asia bars use odd one-off teal/rust colors — not carried over; every region uses the same two series colors.
 - **Status:** Delivered. Pacing: title + legend read alone first, pause, grid/axes settle, pause, then each region animates in as its own beat (cold bar, then heat bar 0.09s later) — Northern America, Latin America, and Europe overlap slightly with each other, then **pause**, Africa, **pause**, Asia, Oceania (no overlap on these three). Bar growth itself is slower with a pronounced ease-out (`--dur-bar: .65s`, `cubic-bezier(.16,1,.3,1)`). Per-region start times live in the `REGION_START` array in the source, specifically so they can be hand-edited to time-remap against narration.
-- **Last revised:** 2026-08-18
+- **Headline (2026-09-01):** changed from "The Lancet: more cold deaths than heat deaths everywhere" to "Average annual deaths from heat & cold, 2000-2019" per review-panel note.
+- **Last revised:** 2026-09-01
 
 ### 2B — Cold vs. Heat Death Rate Trend
 - **Subject:** Cold-death and heat-death rates as a percent of all deaths in the US & Canada, 2000-2019, shown as two trend lines each with a start-to-end delta annotation
