@@ -277,6 +277,26 @@
 
   @keyframes growBar { to { transform: scaleY(1); } }
 
+  /* "Nx" multiplier callout over Europe/Africa, landing in the existing pause after each
+     region's bars settle (same beat structure as every other region gap). */
+  .multiplier-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    fill: var(--mint-400);
+    filter: drop-shadow(0 0 10px rgba(4,255,186,.55));
+    text-anchor: middle;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: translateY(10px) scale(.85);
+    animation: multiplierIn .45s cubic-bezier(.16,1,.3,1) forwards;
+  }
+
+  @keyframes multiplierIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
   /* rotated x-axis category labels: opacity-only entrance so the CSS animation
      never touches `transform` and clobber the SVG rotate() attribute (a bug we
      hit once already with the line-chart's axis-title). */
@@ -871,6 +891,27 @@
     });
   });
 
+  // "Nx" multiplier callouts for Europe and Africa, matching the reference graphic's own
+  // printed values verbatim (3.7x / 46.5x) rather than DATA's cold/heat ratio -- Kevin's
+  // reference apparently used slightly more precise/different source figures than our
+  // Script-Chart-2A.pdf-derived DATA, and he wants those exact numbers shown. Each one lands
+  // inside the pause that already exists after that region's bars settle (same gap length
+  // used after every region), well before the next region's bars start.
+  const MULTIPLIER_REGIONS = [
+    { index: 2, start: 5.05, label: '3.7x' },   // Europe: bars land ~5.02s, Africa starts at 5.92s
+    { index: 3, start: 6.70, label: '46.5x' }   // Africa: bars land ~6.66s, Asia starts at 7.56s
+  ];
+  MULTIPLIER_REGIONS.forEach(({ index, start, label: text }) => {
+    const d = DATA[index];
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', coldX(index) + barWidth / 2);
+    label.setAttribute('y', barTopY(d.cold) - 24);
+    label.classList.add('multiplier-label');
+    label.style.animationDelay = start + 's';
+    label.textContent = text;
+    barsGroup.appendChild(label);
+  });
+
   const ruler = document.getElementById('ruler');
   const totalSec = 10.3;
   for (let s = 0; s <= totalSec; s += 0.5) {
@@ -891,6 +932,12 @@
       color: '#04ffba',
       start: REGION_START[i],
       dur: 0.74
+    })),
+    ...MULTIPLIER_REGIONS.map(({ index, start }) => ({
+      label: DATA[index].label.replace('\n', ' ') + ' Nx',
+      color: '#6dffdb',
+      start,
+      dur: 0.45
     }))
   ];
 
