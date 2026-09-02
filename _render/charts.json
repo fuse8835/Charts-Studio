@@ -72,5 +72,15 @@
     "duration": 7.3,
     "width": 1080,
     "height": 1080
+  },
+  {
+    "id": "4b",
+    "name": "Global Disaster Database",
+    "subtitle": "Two decades of major earthquakes, floods, storms, fires, droughts, and eruptions, plotted where they struck",
+    "html": "4b-global-disaster-database.html",
+    "mov": "4b-global-disaster-database-alpha.mov",
+    "duration": 30,
+    "width": 3840,
+    "height": 2160
   }
 ]
