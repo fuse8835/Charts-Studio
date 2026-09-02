@@ -51,11 +51,11 @@
     --start-flood: 1.6s;
     --dur-flood: 5.4s;
     --dur-ring: .8s;
-    --start-ring-1950: 2.0s;
-    --start-ring-1980: 3.0s;
-    --start-ring-2010: 4.0s;
-    --start-ring-2040: 5.0s;
-    --total: 7.3s;
+    --start-ring-1950: 7.3s;
+    --start-ring-1980: 7.9s;
+    --start-ring-2010: 8.5s;
+    --start-ring-2040: 9.1s;
+    --total: 10.2s;
 
     --ease-soft: cubic-bezier(.16,1,.3,1);
 
@@ -1308,7 +1308,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;7.3s &middot; 8 tracks</span>
+    <span>0s&ndash;10.2s &middot; 8 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -1564,7 +1564,7 @@
 
   // ---- dev timeline panel ----
   const ruler = document.getElementById('ruler');
-  const totalSec = 7.3;
+  const totalSec = 10.2;
   for (let s = 0; s <= totalSec; s += 0.5) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
@@ -1577,10 +1577,10 @@
     { label: 'Headline', color: '#f8fbff', start: 0.15, dur: 0.9 },
     { label: 'Legend', color: '#a9c2d6', start: 1.0, dur: 0.5 },
     { label: 'Flood spread (all 4)', color: '#bdeef2', start: 1.6, dur: 5.4 },
-    { label: '1950 rings', color: '#043fc5', start: 2.0, dur: 0.8 },
-    { label: '1980 rings', color: '#e0342f', start: 3.0, dur: 0.8 },
-    { label: '2010 rings', color: '#f4901f', start: 4.0, dur: 0.8 },
-    { label: '2040 rings', color: '#04ffba', start: 5.0, dur: 0.8 }
+    { label: '1950 rings', color: '#043fc5', start: 7.3, dur: 0.8 },
+    { label: '1980 rings', color: '#e0342f', start: 7.9, dur: 0.8 },
+    { label: '2010 rings', color: '#f4901f', start: 8.5, dur: 0.8 },
+    { label: '2040 rings', color: '#04ffba', start: 9.1, dur: 0.8 }
   ];
 
   const tracksEl = document.getElementById('tracks');
