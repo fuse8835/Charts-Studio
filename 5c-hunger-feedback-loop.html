@@ -159,6 +159,30 @@
     text-transform:uppercase;
     color:var(--paper-50);
   }
+
+  /* policy & outcome cards: icon comes out of the text row entirely, enlarged,
+     centered as its own badge straddling the card's top border -- the label
+     alone fills the row beneath it, also centered. */
+  .card.policy, .card.outcome{
+    position:relative;
+    justify-content:center;
+    align-items:flex-end;
+    text-align:center;
+    padding-bottom:14px;
+  }
+  .card.policy .icon-slot, .card.outcome .icon-slot{
+    position:absolute;
+    top:-42px;
+    left:50%;
+    transform:translateX(-50%);
+    width:84px;
+    height:84px;
+    padding:10px;
+    box-sizing:border-box;
+    background:var(--ash-900);
+    border:2px solid currentColor;
+    border-radius:50%;
+  }
   .card.final-card{
     justify-content:center;
     gap:26px;
@@ -780,11 +804,6 @@
         <stop offset="100%" stop-color="var(--mint-400)" stop-opacity="0" />
       </radialGradient>
 
-      <linearGradient id="mergeGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--mint-400)" />
-        <stop offset="100%" stop-color="var(--alarm-500)" />
-      </linearGradient>
-
       <!-- traveling comet-pulse strokes: soft at each path's own start/end,
            bright through the middle -- gradientUnits defaults to
            objectBoundingBox so this works unmodified on every connector
@@ -829,7 +848,7 @@
       <g id="climateChainWrap">
       <g class="pop leftA">
         <rect class="node-box" x="140" y="188" width="480" height="104" rx="8" />
-        <foreignObject x="140" y="188" width="480" height="104">
+        <foreignObject x="140" y="188" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-capitol"/></svg></span>
             <span class="label">Climate Policies</span>
@@ -854,8 +873,8 @@
       <path class="pulse pulse-mint pulseLB" d="M380 468 L380 516" pathLength="1" />
 
       <g class="pop leftC">
-        <rect class="node-box" x="140" y="524" width="480" height="104" rx="8" />
-        <foreignObject x="140" y="524" width="480" height="104">
+        <rect class="node-box" x="140" y="574" width="480" height="104" rx="8" />
+        <foreignObject x="140" y="574" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
             <span class="label">Higher costs to farm</span>
@@ -868,7 +887,7 @@
       <g class="chain-blue">
       <g class="pop rightA">
         <rect class="node-box" x="980" y="188" width="480" height="104" rx="8" />
-        <foreignObject x="980" y="188" width="480" height="104">
+        <foreignObject x="980" y="188" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-leaf"/></svg></span>
             <span class="label">Biofuels Policies</span>
@@ -893,8 +912,8 @@
       <path class="pulse pulse-blue pulseRB" d="M1220 468 L1220 516" pathLength="1" />
 
       <g class="pop rightC">
-        <rect class="node-box" x="980" y="524" width="480" height="104" rx="8" />
-        <foreignObject x="980" y="524" width="480" height="104">
+        <rect class="node-box" x="980" y="574" width="480" height="104" rx="8" />
+        <foreignObject x="980" y="574" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
             <span class="label">Higher food prices</span>
@@ -904,11 +923,11 @@
       </g>
 
       <!-- ===== CONVERGENCE ===== -->
-      <path class="draw mergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" stroke="var(--mint-400)" stroke-width="3" fill="none" pathLength="1" />
-      <path class="pulse pulse-mint pulseMergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" pathLength="1" />
-      <path class="draw mergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--vivid-500)" stroke-width="3" fill="none" pathLength="1" />
-      <path class="pulse pulse-blue pulseMergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" pathLength="1" />
-      <path class="draw stem" d="M800 770 L800 826" stroke="url(#mergeGrad)" stroke-width="3.5" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
+      <path class="draw mergeL" d="M380 678 L380 750 Q380 770 410 770 L800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-alarm pulseMergeL" d="M380 678 L380 750 Q380 770 410 770 L800 770" pathLength="1" />
+      <path class="draw mergeR" d="M1220 678 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-alarm pulseMergeR" d="M1220 678 L1220 750 Q1220 770 1190 770 L800 770" pathLength="1" />
+      <path class="draw stem" d="M800 770 L800 826" stroke="var(--alarm-500)" stroke-width="3.5" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
       <path class="pulse pulse-alarm pulseStem" d="M800 770 L800 826" pathLength="1" />
 
       <!-- ===== OUTCOME ===== -->
