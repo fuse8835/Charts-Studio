@@ -38,33 +38,33 @@
     --paper-050: #f8fbff;
     --midnight: #032c4e;
 
-    --dur-bg: .6s;
-    --dur-grid: .7s;
-    --dur-head: .8s;
-    --start-head: .15s;
-    /* every pause between beats below was halved from the original
-       10.5s-title-axes + 20s-lines script-derived pacing, per explicit
-       request -- animation durations themselves (dur-*) are untouched. */
-    --start-grid: 2.475s;
-    --start-axis: 2.775s;
+    /* every value below is exactly half of the prior pass (both the beat
+       durations and the pauses between them) -- a uniform 2x speed-up of the
+       whole timeline, per explicit request to halve the ~24s runtime to ~12s. */
+    --dur-bg: .3s;
+    --dur-grid: .35s;
+    --dur-head: .4s;
+    --start-head: .075s;
+    --start-grid: 1.2375s;
+    --start-axis: 1.3875s;
 
-    --dur-line-mint: 8s;
-    --start-line-mint: 6.125s;
-    --dur-line-red: 4s;
-    --start-line-red: 14.625s;
+    --dur-line-mint: 4s;
+    --start-line-mint: 3.0625s;
+    --dur-line-red: 2s;
+    --start-line-red: 7.3125s;
 
-    --dur-label: .5s;
-    --start-label-mint: 14.025s;
-    --start-label-red: 18.525s;
+    --dur-label: .25s;
+    --start-label-mint: 7.0125s;
+    --start-label-red: 9.2625s;
 
     /* the shaded gap between the two curves -- the script's own suggestion
        to "zoom into the last part showing the difference between the two" --
        fades in once both lines and labels have settled. */
-    --dur-band: 2.5s;
-    --start-band: 19.125s;
+    --dur-band: 1.25s;
+    --start-band: 9.5625s;
     --ease-soft: cubic-bezier(.16,1,.3,1);
 
-    --total: 23.375s;
+    --total: 11.6875s;
 
     color-scheme: dark;
   }
@@ -730,7 +730,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;23.4s &middot; 9 tracks</span>
+    <span>0s&ndash;11.7s &middot; 9 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -750,7 +750,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="23375" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="11688" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -881,7 +881,7 @@
   buildSeries('with', WITH, 'With climate change', 2033, 1.75);
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 23.375;
+  const totalSec = 11.6875;
   for (let s = 0; s <= totalSec; s += 1) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
@@ -890,15 +890,15 @@
   }
 
   const tracks = [
-    { label: 'Backdrop', color: '#7ea0bd', start: 0, dur: 0.6 },
-    { label: 'Headline + axis label', color: '#f8fbff', start: 0.15, dur: 0.8 },
-    { label: 'Grid', color: '#a9c2d6', start: 2.475, dur: 0.7 },
-    { label: 'Axis labels + source', color: '#a9c2d6', start: 2.775, dur: 0.7 },
-    { label: 'Without-climate-change line', color: '#04ffba', start: 6.125, dur: 8 },
-    { label: '"Without climate change" label', color: '#04ffba', start: 14.025, dur: 0.5 },
-    { label: 'With-climate-change line', color: '#e30063', start: 14.625, dur: 4 },
-    { label: '"With climate change" label', color: '#e30063', start: 18.525, dur: 0.5 },
-    { label: 'Delta band', color: '#e30063', start: 19.125, dur: 2.5 }
+    { label: 'Backdrop', color: '#7ea0bd', start: 0, dur: 0.3 },
+    { label: 'Headline + axis label', color: '#f8fbff', start: 0.075, dur: 0.4 },
+    { label: 'Grid', color: '#a9c2d6', start: 1.2375, dur: 0.35 },
+    { label: 'Axis labels + source', color: '#a9c2d6', start: 1.3875, dur: 0.35 },
+    { label: 'Without-climate-change line', color: '#04ffba', start: 3.0625, dur: 4 },
+    { label: '"Without climate change" label', color: '#04ffba', start: 7.0125, dur: 0.25 },
+    { label: 'With-climate-change line', color: '#e30063', start: 7.3125, dur: 2 },
+    { label: '"With climate change" label', color: '#e30063', start: 9.2625, dur: 0.25 },
+    { label: 'Delta band', color: '#e30063', start: 9.5625, dur: 1.25 }
   ];
 
   const tracksEl = document.getElementById('tracks');
