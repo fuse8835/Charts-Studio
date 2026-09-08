@@ -33,20 +33,22 @@
 
   .wrap { width: 100%; max-width: 900px; }
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--mist-300);
-    font-weight: 600;
+  .top-nav { display: flex; gap: 24px; margin-bottom: 28px; }
+
+  .nav-link {
+    font-weight: 700;
     font-size: 14px;
-    letter-spacing: .02em;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--mist-300);
     text-decoration: none;
-    margin-bottom: 22px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
     transition: color .15s ease;
   }
 
-  .back-link:hover, .back-link:focus-visible { color: var(--mint-400); }
+  .nav-link:hover { color: var(--paper-050); }
+  .nav-link.is-active { color: var(--mint-400); border-bottom-color: var(--mint-400); }
 
   h1 {
     font-weight: 700;
@@ -57,10 +59,21 @@
   .lede {
     color: var(--mist-300);
     font-size: 16px;
-    margin: 0 0 40px;
+    margin: 0 0 32px;
     max-width: 640px;
     line-height: 1.5;
   }
+
+  .section-label {
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--mist-400);
+    margin: 28px 0 12px;
+  }
+
+  .section-label:first-of-type { margin-top: 0; }
 
   .card {
     display: flex;
@@ -80,11 +93,15 @@
     border-radius: 12px;
     background: rgba(4,255,186,.1);
     color: var(--mint-400);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .02em;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
   }
+
+  .card-id.is-emoji { font-size: 26px; }
 
   .card-body { flex: 1; min-width: 0; }
 
@@ -98,6 +115,13 @@
     font-size: 13.5px;
     color: var(--mist-300);
     margin: 0;
+  }
+
+  .card-meta {
+    font-size: 11.5px;
+    color: var(--mist-400);
+    margin-top: 6px;
+    letter-spacing: .02em;
   }
 
   .card-actions {
@@ -127,22 +151,54 @@
 
   .btn:hover { background: rgba(255,255,255,.12); }
 
+  .btn-solid {
+    background: var(--mint-400);
+    color: var(--ash-950);
+    border-color: var(--mint-400);
+  }
+
+  .btn-solid:hover { background: #6dffdb; }
+
+  .btn:disabled { opacity: .5; cursor: default; }
+
+  .status-row {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--mist-400);
+    min-height: 16px;
+  }
+
+  .status-row.error { color: var(--heat-500); }
+
   .footer-note {
     margin-top: 32px;
     font-size: 12.5px;
     color: var(--mist-400);
     line-height: 1.6;
   }
+
+  .footer-note code {
+    background: rgba(255,255,255,.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
 </style>
 
 <div class="wrap">
-  <a class="back-link" href="index.html">&larr; Chart Studio</a>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-link">Charts</a>
+    <a href="explainers.html" class="nav-link is-active">Explainers</a>
+  </nav>
 
   <h1>Explainers</h1>
-  <p class="lede">Standalone visual pieces built with the same dark-vignette, single-accent, draw-on-reveal design language as the numbered chart series — but each one is an argument or a mechanism, not a data chart, so they live here instead of in the catalogue.</p>
+  <p class="lede">Pieces that fall outside the numbered chart series' shared axis+line/bar template -- map/annotation charts and standalone motion graphics, each its own argument or mechanism rather than a data chart.</p>
 
+  <p class="section-label">Map &amp; annotation charts</p>
+  <div id="chart-list"></div>
+
+  <p class="section-label">Motion graphics</p>
   <div class="card">
-    <div class="card-id">🌾</div>
+    <div class="card-id is-emoji">🌾</div>
     <div class="card-body">
       <p class="card-title">Hunger Feedback Loop</p>
       <p class="card-subtitle">How climate and biofuel policy each raise costs, and together worsen hunger</p>
@@ -153,6 +209,74 @@
   </div>
 
   <p class="footer-note">
-    New explainer pages go here, named without a catalogue letter/number (e.g. <code>topic-name.html</code>, not <code>5a-topic-name.html</code>) so they stay visibly separate from the chart series. Add a card above and link back to <code>index.html</code> from the page itself.
+    Map/annotation charts here still render through the same local server as the main catalogue (they're real entries in <code>_render/charts.json</code>, just excluded from <code>index.html</code>'s list). Standalone motion graphics like Hunger Feedback Loop aren't wired to that pipeline -- add a plain card under "Motion graphics" and link straight to the page. Either way, name new files without a catalogue letter/number (e.g. <code>topic-name.html</code>, not <code>5a-topic-name.html</code>) so they stay visibly separate from the chart series.
   </p>
 </div>
+
+<script>
+(async function () {
+  const listEl = document.getElementById('chart-list');
+  let charts = [];
+  try {
+    charts = await (await fetch('/api/charts')).json();
+  } catch (err) {
+    listEl.textContent = 'Could not load chart list -- is the render server running?';
+    return;
+  }
+
+  // the map/annotation charts that live here instead of the main catalogue --
+  // keep this in sync with index.html's own EXCLUDE_IDS (the two lists are
+  // each other's mirror image).
+  const INCLUDE_IDS = new Set(['4b', '4b-copy']);
+  charts = charts.filter((c) => INCLUDE_IDS.has(c.id));
+  charts.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
+
+  charts.forEach((chart) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-id">${chart.id.toUpperCase()}</div>
+      <div class="card-body">
+        <p class="card-title">${chart.name}</p>
+        <p class="card-subtitle">${chart.subtitle}</p>
+        <p class="card-meta">${chart.duration}s runtime &middot; ${chart.html} &middot; ${chart.mov}</p>
+        <div class="status-row" data-status></div>
+      </div>
+      <div class="card-actions">
+        <a class="btn" href="/${chart.html}">Open chart</a>
+        <button class="btn btn-solid" type="button" data-render>Render .mov</button>
+      </div>
+    `;
+    listEl.appendChild(card);
+
+    const renderBtn = card.querySelector('[data-render]');
+    const statusEl = card.querySelector('[data-status]');
+    let busy = false;
+
+    renderBtn.addEventListener('click', () => {
+      if (busy) return;
+      busy = true;
+      renderBtn.disabled = true;
+      statusEl.classList.remove('error');
+      statusEl.textContent = 'Starting render...';
+
+      const es = new EventSource('/api/render?id=' + encodeURIComponent(chart.id));
+      es.onmessage = (e) => { statusEl.textContent = e.data; };
+      es.addEventListener('done', (e) => {
+        statusEl.textContent = e.data;
+        if (/failed/i.test(e.data)) statusEl.classList.add('error');
+        es.close();
+        busy = false;
+        renderBtn.disabled = false;
+      });
+      es.onerror = () => {
+        statusEl.textContent = 'Render connection lost -- check the server terminal.';
+        statusEl.classList.add('error');
+        es.close();
+        busy = false;
+        renderBtn.disabled = false;
+      };
+    });
+  });
+})();
+</script>

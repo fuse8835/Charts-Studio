@@ -33,6 +33,23 @@
 
   .wrap { width: 100%; max-width: 900px; }
 
+  .top-nav { display: flex; gap: 24px; margin-bottom: 28px; }
+
+  .nav-link {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--mist-300);
+    text-decoration: none;
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    transition: color .15s ease;
+  }
+
+  .nav-link:hover { color: var(--paper-050); }
+  .nav-link.is-active { color: var(--mint-400); border-bottom-color: var(--mint-400); }
+
   h1 {
     font-weight: 700;
     font-size: clamp(28px, 4vw, 44px);
@@ -155,8 +172,13 @@
 </style>
 
 <div class="wrap">
+  <nav class="top-nav">
+    <a href="index.html" class="nav-link is-active">Charts</a>
+    <a href="explainers.html" class="nav-link">Explainers</a>
+  </nav>
+
   <h1>Chart Studio</h1>
-  <p class="lede">All charts in the Fraser Institute climate-mortality series, in the order they were built. Open a chart to preview, scrub, and annotate it, or render its final ProRes 4444 alpha <code>.mov</code> directly from here. Looking for a piece that isn't a data chart? See <a href="explainers.html" style="color:var(--mint-400)">Explainers &rarr;</a></p>
+  <p class="lede">All charts in the Fraser Institute climate-mortality series that share this same data-chart styling and template, in the order they were built. Open a chart to preview, scrub, and annotate it, or render its final ProRes 4444 alpha <code>.mov</code> directly from here.</p>
 
   <div id="list"></div>
 
@@ -175,6 +197,13 @@
     listEl.textContent = 'Could not load chart list -- is the render server running?';
     return;
   }
+
+  // 4B and 4B-copy are map/annotation pieces, not the same axis+line/bar
+  // template every other chart here shares -- they live on the Explainers
+  // page instead, alongside motion graphics that fall outside this framework
+  // entirely. Still fully renderable from there through this same server.
+  const EXCLUDE_IDS = new Set(['4b', '4b-copy']);
+  charts = charts.filter((c) => !EXCLUDE_IDS.has(c.id));
 
   // always list in numeric/letter order (1a,1b,2a,2b,2c,...) regardless of
   // charts.json's own insertion order -- a chart added later (e.g. 2C) used
