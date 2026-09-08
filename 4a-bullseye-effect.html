@@ -1308,7 +1308,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;10.2s &middot; 8 tracks</span>
+    <span>0s&ndash;10.2s &middot; 9 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -1532,7 +1532,7 @@
     label.setAttribute('y', 34);
     label.setAttribute('font-size', Math.round(panelH * 0.15));
     label.classList.add('year-label');
-    label.style.animationDelay = year.start;
+    label.style.animationDelay = 'var(--start-flood)';
     label.textContent = year.label;
     g.appendChild(label);
 
@@ -1577,6 +1577,7 @@
     { label: 'Headline', color: '#f8fbff', start: 0.15, dur: 0.9 },
     { label: 'Legend', color: '#a9c2d6', start: 1.0, dur: 0.5 },
     { label: 'Flood spread (all 4)', color: '#bdeef2', start: 1.6, dur: 5.4 },
+    { label: 'Year labels (all 4)', color: '#a9c2d6', start: 1.6, dur: 0.4 },
     { label: '1950 rings', color: '#043fc5', start: 7.3, dur: 0.8 },
     { label: '1980 rings', color: '#e0342f', start: 7.9, dur: 0.8 },
     { label: '2010 rings', color: '#f4901f', start: 8.5, dur: 0.8 },
