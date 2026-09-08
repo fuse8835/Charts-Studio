@@ -9,12 +9,57 @@
     --mint-400:#04ffba;
     --mint-glow:rgba(4,255,186,.30);
     --vivid-500:#3d7bff;
+    --vivid-glow:rgba(61,123,255,.35);
     --paper-100:#eef3fa;
     --paper-50:#f8fbff;
     --mist-400:#7ea0bd;
     --mist-300:#a9c2d6;
     --alarm-500:#ff5a4e;
     --alarm-glow:rgba(255,90,78,.38);
+
+    /* ---- choreography: climate chain reveals solo & centered, slides left,
+       then biofuels chain reveals on the right, matching the script's own
+       sentence order (climate cost chain, then biofuels cost chain, then
+       "both make hunger worse") ---- */
+    --t-title:.05s;
+    --t-subtitle:.35s;
+    --t-divider:.7s;
+    --d-divider:.5s;
+
+    --d-pop:.5s;
+    --d-arrow:.42s;
+
+    --t-leftA:1.3s;
+    --t-arrowLA:1.95s;
+    --t-leftB:2.52s;
+    --t-arrowLB:3.17s;
+    --t-leftC:3.74s;
+
+    --t-slide:4.5s;
+    --d-slide:.7s;
+
+    --t-rightA:5.3s;
+    --t-arrowRA:5.95s;
+    --t-rightB:6.52s;
+    --t-arrowRB:7.17s;
+    --t-rightC:7.74s;
+
+    --d-merge:.5s;
+    --t-mergeL:8.5s;
+    --t-mergeR:8.6s;
+    --t-stem:9.25s;
+    --d-stem:.35s;
+
+    --t-final:9.75s;
+    --d-final:.6s;
+    --t-glow:10.41s;
+
+    --total:11.71s;
+
+    /* climate chain's final x=140..620 (center 380) vs canvas center 800 --
+       420px is exactly the offset that re-centers it on the canvas for its
+       solo reveal, before it slides back to its real position. */
+    --climate-center-offset:420px;
   }
 
   *{box-sizing:border-box;}
@@ -44,7 +89,7 @@
     container-type:inline-size;
     position:relative;
     width:100%;
-    aspect-ratio:8/5;
+    aspect-ratio:1600/1120;
     border-radius:18px;
     overflow:hidden;
     background:
@@ -146,11 +191,34 @@
     stroke-width:2;
   }
 
+  /* biofuels chain gets its own color identity (vivid blue) so the two
+     causal chains read as visually distinct paths, not just distinct text */
+  .chain-blue .icon-slot{ color:var(--vivid-500); }
+  .chain-blue .node-box{ fill:rgba(61,123,255,.06); stroke:rgba(61,123,255,.4); }
+  .chain-blue .node-box.mechanism-box{ fill:rgba(61,123,255,.07); }
+
   /* ---- base (pre-animation) states ---- */
   .anim{opacity:0;}
   .pop{opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.8);}
   .draw{opacity:0; stroke-dasharray:1; stroke-dashoffset:1;}
-  .dot{opacity:0;}
+
+  /* climate chain reveals solo & centered first, then slides to its real
+     position -- base state (before the slide animation starts) is centered. */
+  #climateChainWrap{ transform:translateX(var(--climate-center-offset)); }
+
+  /* traveling "comet" pulse: a thicker, glowing duplicate of each connector
+     path that sweeps from end to end right as the connector draws in, in
+     place of a plain traveling dot. pathLength="1" normalizes every path to
+     the same 0..1 units regardless of its real on-canvas length. */
+  .pulse{
+    fill:none;
+    stroke-dasharray:.16 2;
+    stroke-dashoffset:.16;
+    opacity:0;
+  }
+  .pulse.pulse-mint{ stroke:url(#pulseMint); stroke-width:6; filter:drop-shadow(0 0 5px var(--mint-glow)); }
+  .pulse.pulse-blue{ stroke:url(#pulseBlue); stroke-width:6; filter:drop-shadow(0 0 5px var(--vivid-glow)); }
+  .pulse.pulse-alarm{ stroke:url(#pulseAlarm); stroke-width:7; filter:drop-shadow(0 0 6px var(--alarm-glow)); }
 
   /* ---- keyframes ---- */
   @keyframes fadeUp{
@@ -172,10 +240,14 @@
     0%{opacity:1; stroke-dashoffset:1;}
     to{opacity:1; stroke-dashoffset:0;}
   }
-  @keyframes dotRun{
-    0%{offset-distance:0%; opacity:1;}
+  @keyframes cometRun{
+    0%{opacity:1; stroke-dashoffset:.16;}
     92%{opacity:1;}
-    100%{offset-distance:100%; opacity:0;}
+    100%{opacity:0; stroke-dashoffset:-1.16;}
+  }
+  @keyframes climateSlide{
+    from{transform:translateX(var(--climate-center-offset));}
+    to{transform:translateX(0);}
   }
   @keyframes pulseGlow{
     0%,100%{filter:drop-shadow(0 0 6px var(--alarm-glow));}
@@ -187,32 +259,39 @@
   }
 
   /* ---- play state: wire up every element's real animation ---- */
-  .scene.play .title{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) .05s both;}
-  .scene.play .subtitle{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) .35s both;}
-  .scene.play .divider{animation:drawLine .5s cubic-bezier(.65,0,.35,1) .7s forwards;}
+  .scene.play .title{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) var(--t-title) both;}
+  .scene.play .subtitle{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) var(--t-subtitle) both;}
+  .scene.play .divider{animation:drawLine var(--d-divider) cubic-bezier(.65,0,.35,1) var(--t-divider) forwards;}
 
-  .scene.play .leftA{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 1.1s both;}
-  .scene.play .arrowLA{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 1.75s forwards;}
-  .scene.play .dotLA{animation:dotRun .42s linear 1.75s forwards;}
-  .scene.play .leftB{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 2.32s both;}
-  .scene.play .arrowLB{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 2.97s forwards;}
-  .scene.play .dotLB{animation:dotRun .42s linear 2.97s forwards;}
-  .scene.play .leftC{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 3.54s both;}
+  /* climate chain -- reveals solo, centered on the canvas */
+  .scene.play .leftA{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftA) both;}
+  .scene.play .arrowLA{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowLA) forwards;}
+  .scene.play .pulseLA{animation:cometRun var(--d-arrow) linear var(--t-arrowLA) forwards;}
+  .scene.play .leftB{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftB) both;}
+  .scene.play .arrowLB{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowLB) forwards;}
+  .scene.play .pulseLB{animation:cometRun var(--d-arrow) linear var(--t-arrowLB) forwards;}
+  .scene.play .leftC{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftC) both;}
 
-  .scene.play .rightA{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 1.35s both;}
-  .scene.play .arrowRA{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 2s forwards;}
-  .scene.play .dotRA{animation:dotRun .42s linear 2s forwards;}
-  .scene.play .rightB{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 2.57s both;}
-  .scene.play .arrowRB{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 3.22s forwards;}
-  .scene.play .dotRB{animation:dotRun .42s linear 3.22s forwards;}
-  .scene.play .rightC{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 3.79s both;}
+  /* climate chain slides from centered to its real left-side position */
+  .scene.play #climateChainWrap{animation:climateSlide var(--d-slide) cubic-bezier(.65,0,.35,1) var(--t-slide) forwards;}
 
-  .scene.play .mergeL{animation:drawLine .5s cubic-bezier(.65,0,.35,1) 4.44s forwards;}
-  .scene.play .mergeR{animation:drawLine .5s cubic-bezier(.65,0,.35,1) 4.54s forwards;}
-  .scene.play .stem{animation:drawLine .35s cubic-bezier(.65,0,.35,1) 5.19s forwards;}
-  .scene.play .dotStem{animation:dotRun .35s linear 5.19s forwards;}
+  /* biofuels chain -- reveals on the right, once the climate chain has settled left */
+  .scene.play .rightA{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightA) both;}
+  .scene.play .arrowRA{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowRA) forwards;}
+  .scene.play .pulseRA{animation:cometRun var(--d-arrow) linear var(--t-arrowRA) forwards;}
+  .scene.play .rightB{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightB) both;}
+  .scene.play .arrowRB{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowRB) forwards;}
+  .scene.play .pulseRB{animation:cometRun var(--d-arrow) linear var(--t-arrowRB) forwards;}
+  .scene.play .rightC{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightC) both;}
 
-  .scene.play .finalGroup.glow{animation:popInStrong .6s cubic-bezier(.34,1.56,.64,1) 5.69s both, pulseGlow 2.6s ease-in-out 6.35s infinite;}
+  .scene.play .mergeL{animation:drawLine var(--d-merge) cubic-bezier(.65,0,.35,1) var(--t-mergeL) forwards;}
+  .scene.play .pulseMergeL{animation:cometRun var(--d-merge) linear var(--t-mergeL) forwards;}
+  .scene.play .mergeR{animation:drawLine var(--d-merge) cubic-bezier(.65,0,.35,1) var(--t-mergeR) forwards;}
+  .scene.play .pulseMergeR{animation:cometRun var(--d-merge) linear var(--t-mergeR) forwards;}
+  .scene.play .stem{animation:drawLine var(--d-stem) cubic-bezier(.65,0,.35,1) var(--t-stem) forwards;}
+  .scene.play .pulseStem{animation:cometRun var(--d-stem) linear var(--t-stem) forwards;}
+
+  .scene.play .finalGroup.glow{animation:popInStrong var(--d-final) cubic-bezier(.34,1.56,.64,1) var(--t-final) both, pulseGlow 2.6s ease-in-out var(--t-glow) infinite;}
   .scene.play .bgBreathe{animation:breathe 7s ease-in-out infinite;}
 
   /* ---- replay control ---- */
@@ -368,7 +447,7 @@
     background:var(--paper-50);
     box-shadow:0 0 6px rgba(238,244,242,.8);
     left:172px;
-    animation:scrub var(--total-sec, 7.65s) linear forwards;
+    animation:scrub var(--total-sec, 11.71s) linear forwards;
   }
   @keyframes scrub{
     from{ transform:translateX(0); }
@@ -630,7 +709,7 @@
 
 <div class="stage-wrap">
  <div class="frame" id="frame">
-  <svg class="stage" viewBox="0 0 1600 1000" role="img" aria-labelledby="svgTitle svgDesc">
+  <svg class="stage" viewBox="0 0 1600 1120" role="img" aria-labelledby="svgTitle svgDesc">
     <title id="svgTitle">Policies make hunger worse</title>
     <desc id="svgDesc">Climate policies raise fertilizer and fuel costs, and biofuel policies raise competition for farmland; both raise costs and food prices, together producing more hunger.</desc>
 
@@ -689,6 +768,9 @@
       <marker id="arrowMint" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0 0 L10 5 L0 10 Z" fill="var(--mint-400)" />
       </marker>
+      <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 Z" fill="var(--vivid-500)" />
+      </marker>
       <marker id="arrowAlarm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0 0 L10 5 L0 10 Z" fill="var(--alarm-500)" />
       </marker>
@@ -702,8 +784,31 @@
         <stop offset="0%" stop-color="var(--mint-400)" />
         <stop offset="100%" stop-color="var(--alarm-500)" />
       </linearGradient>
+
+      <!-- traveling comet-pulse strokes: soft at each path's own start/end,
+           bright through the middle -- gradientUnits defaults to
+           objectBoundingBox so this works unmodified on every connector
+           regardless of its actual on-canvas position or length. -->
+      <linearGradient id="pulseMint" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--mint-400)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--mint-400)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--mint-400)" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="pulseBlue" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--vivid-500)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--vivid-500)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--vivid-500)" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="pulseAlarm" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--alarm-500)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--alarm-500)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--alarm-500)" stop-opacity="0" />
+      </linearGradient>
     </defs>
 
+    <!-- +60/+60 top/bottom padding: the scene draws at its original coordinates,
+         just uniformly shifted down within a taller viewBox (1000 -> 1120). -->
+    <g transform="translate(0,60)">
     <g class="scene play" id="scene">
 
       <!-- ambient halo -->
@@ -720,7 +825,8 @@
       </text>
       <line class="draw divider" x1="730" y1="130" x2="870" y2="130" stroke="var(--mint-400)" stroke-width="2" pathLength="1" />
 
-      <!-- ===== LEFT CHAIN : CLIMATE ===== -->
+      <!-- ===== LEFT CHAIN : CLIMATE (reveals solo & centered, then slides left) ===== -->
+      <g id="climateChainWrap">
       <g class="pop leftA">
         <rect class="node-box" x="140" y="188" width="480" height="104" rx="8" />
         <foreignObject x="140" y="188" width="480" height="104">
@@ -731,8 +837,8 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowLA" d="M380 292 L380 340" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
-      <circle class="dot dotLA" r="5" fill="var(--mint-400)" style="offset-path:path('M380 292 L380 340');" />
+      <path class="draw arrowLA" d="M380 292 L380 340" stroke="var(--mint-400)" stroke-width="3" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <path class="pulse pulse-mint pulseLA" d="M380 292 L380 340" pathLength="1" />
 
       <g class="pop leftB">
         <rect class="node-box mechanism-box" x="140" y="348" width="480" height="120" rx="8" />
@@ -744,8 +850,8 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowLB" d="M380 468 L380 516" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
-      <circle class="dot dotLB" r="5" fill="var(--mint-400)" style="offset-path:path('M380 468 L380 516');" />
+      <path class="draw arrowLB" d="M380 468 L380 516" stroke="var(--mint-400)" stroke-width="3" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <path class="pulse pulse-mint pulseLB" d="M380 468 L380 516" pathLength="1" />
 
       <g class="pop leftC">
         <rect class="node-box" x="140" y="524" width="480" height="104" rx="8" />
@@ -756,8 +862,10 @@
           </div>
         </foreignObject>
       </g>
+      </g>
 
-      <!-- ===== RIGHT CHAIN : BIOFUELS ===== -->
+      <!-- ===== RIGHT CHAIN : BIOFUELS (reveals once the climate chain has slid left) ===== -->
+      <g class="chain-blue">
       <g class="pop rightA">
         <rect class="node-box" x="980" y="188" width="480" height="104" rx="8" />
         <foreignObject x="980" y="188" width="480" height="104">
@@ -768,8 +876,8 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowRA" d="M1220 292 L1220 340" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
-      <circle class="dot dotRA" r="5" fill="var(--mint-400)" style="offset-path:path('M1220 292 L1220 340');" />
+      <path class="draw arrowRA" d="M1220 292 L1220 340" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" marker-end="url(#arrowBlue)" fill="none" />
+      <path class="pulse pulse-blue pulseRA" d="M1220 292 L1220 340" pathLength="1" />
 
       <g class="pop rightB">
         <rect class="node-box mechanism-box" x="980" y="348" width="480" height="120" rx="8" />
@@ -781,8 +889,8 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowRB" d="M1220 468 L1220 516" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
-      <circle class="dot dotRB" r="5" fill="var(--mint-400)" style="offset-path:path('M1220 468 L1220 516');" />
+      <path class="draw arrowRB" d="M1220 468 L1220 516" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" marker-end="url(#arrowBlue)" fill="none" />
+      <path class="pulse pulse-blue pulseRB" d="M1220 468 L1220 516" pathLength="1" />
 
       <g class="pop rightC">
         <rect class="node-box" x="980" y="524" width="480" height="104" rx="8" />
@@ -793,12 +901,15 @@
           </div>
         </foreignObject>
       </g>
+      </g>
 
       <!-- ===== CONVERGENCE ===== -->
-      <path class="draw mergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" stroke="var(--mint-400)" stroke-width="2.5" fill="none" pathLength="1" />
-      <path class="draw mergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--mint-400)" stroke-width="2.5" fill="none" pathLength="1" />
-      <path class="draw stem" d="M800 770 L800 826" stroke="url(#mergeGrad)" stroke-width="3" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
-      <circle class="dot dotStem" r="6" fill="var(--alarm-500)" style="offset-path:path('M800 770 L800 826');" />
+      <path class="draw mergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" stroke="var(--mint-400)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-mint pulseMergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" pathLength="1" />
+      <path class="draw mergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--vivid-500)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-blue pulseMergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" pathLength="1" />
+      <path class="draw stem" d="M800 770 L800 826" stroke="url(#mergeGrad)" stroke-width="3.5" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
+      <path class="pulse pulse-alarm pulseStem" d="M800 770 L800 826" pathLength="1" />
 
       <!-- ===== OUTCOME ===== -->
       <g class="pop finalGroup glow">
@@ -811,6 +922,7 @@
         </foreignObject>
       </g>
 
+    </g>
     </g>
   </svg>
 
@@ -829,7 +941,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;7.65s &middot; 18 tracks</span>
+    <span>0s&ndash;11.71s &middot; 19 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -849,7 +961,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="7650" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="11710" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -858,7 +970,7 @@
   <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
-<p class="caption">A causal-chain infographic, not a data chart &mdash; two independent policy chains (climate, biofuels) each pop in and connect via drawn arrows with a traveling dot, then converge into one glowing outcome card. Built as native CSS/Web Animations gated behind the <b>.scene.play</b> class so it's fully seekable. Append <b>?export</b> to the URL for a capture-ready version with the dev chrome hidden.</p>
+<p class="caption">A causal-chain infographic, not a data chart &mdash; matches the script's own sentence order: the <b>climate</b> chain (mint) reveals solo and centered first, slides left to make room, then the <b>biofuels</b> chain (blue) reveals on the right, and both converge into one glowing outcome card via a traveling comet-pulse on each connector. Built as native CSS/Web Animations gated behind the <b>.scene.play</b> class so it's fully seekable. Append <b>?export</b> to the URL for a capture-ready version with the dev chrome hidden.</p>
 
 <p class="sr-only">
   Diagram: Climate policies lead to higher costs for fertilizer and gas for tractors, which leads to higher costs to farm.
@@ -868,7 +980,7 @@
 
 <script>
 (function(){
-  const totalSec = 7.65;
+  const totalSec = 11.71;
 
   // ---- ruler ticks ----
   const ruler = document.getElementById('ruler');
@@ -885,20 +997,21 @@
     { label: 'Title', color: '#7ea0bd', start: 0.05, dur: 0.7 },
     { label: 'Subtitle', color: '#7ea0bd', start: 0.35, dur: 0.7 },
     { label: 'Divider', color: '#7ea0bd', start: 0.7, dur: 0.5 },
-    { label: 'Climate: policy card', color: '#04ffba', start: 1.1, dur: 0.5 },
-    { label: 'Biofuels: policy card', color: '#3d7bff', start: 1.35, dur: 0.5 },
-    { label: 'Climate: arrow to costs', color: '#04ffba', start: 1.75, dur: 0.42 },
-    { label: 'Biofuels: arrow to land competition', color: '#3d7bff', start: 2, dur: 0.42 },
-    { label: 'Climate: higher fertilizer/gas costs', color: '#04ffba', start: 2.32, dur: 0.5 },
-    { label: 'Biofuels: more land competition', color: '#3d7bff', start: 2.57, dur: 0.5 },
-    { label: 'Climate: arrow to outcome', color: '#04ffba', start: 2.97, dur: 0.42 },
-    { label: 'Biofuels: arrow to outcome', color: '#3d7bff', start: 3.22, dur: 0.42 },
-    { label: 'Climate: higher costs to farm', color: '#04ffba', start: 3.54, dur: 0.5 },
-    { label: 'Biofuels: higher food prices', color: '#3d7bff', start: 3.79, dur: 0.5 },
-    { label: 'Convergence paths merge', color: '#ff5a4e', start: 4.44, dur: 0.6 },
-    { label: 'Stem to outcome', color: '#ff5a4e', start: 5.19, dur: 0.35 },
-    { label: 'Outcome card pop-in', color: '#ff5a4e', start: 5.69, dur: 0.6 },
-    { label: 'Outcome glow pulse (loops)', color: '#ff5a4e', start: 6.35, dur: totalSec - 6.35 }
+    { label: 'Climate: policy card (centered)', color: '#04ffba', start: 1.3, dur: 0.5 },
+    { label: 'Climate: arrow to costs', color: '#04ffba', start: 1.95, dur: 0.42 },
+    { label: 'Climate: higher fertilizer/gas costs', color: '#04ffba', start: 2.52, dur: 0.5 },
+    { label: 'Climate: arrow to outcome', color: '#04ffba', start: 3.17, dur: 0.42 },
+    { label: 'Climate: higher costs to farm', color: '#04ffba', start: 3.74, dur: 0.5 },
+    { label: 'Climate chain slides left', color: '#7ea0bd', start: 4.5, dur: 0.7 },
+    { label: 'Biofuels: policy card', color: '#3d7bff', start: 5.3, dur: 0.5 },
+    { label: 'Biofuels: arrow to land competition', color: '#3d7bff', start: 5.95, dur: 0.42 },
+    { label: 'Biofuels: more land competition', color: '#3d7bff', start: 6.52, dur: 0.5 },
+    { label: 'Biofuels: arrow to outcome', color: '#3d7bff', start: 7.17, dur: 0.42 },
+    { label: 'Biofuels: higher food prices', color: '#3d7bff', start: 7.74, dur: 0.5 },
+    { label: 'Convergence paths merge', color: '#ff5a4e', start: 8.5, dur: 0.6 },
+    { label: 'Stem to outcome', color: '#ff5a4e', start: 9.25, dur: 0.35 },
+    { label: 'Outcome card pop-in', color: '#ff5a4e', start: 9.75, dur: 0.6 },
+    { label: 'Outcome glow pulse (loops)', color: '#ff5a4e', start: 10.41, dur: totalSec - 10.41 }
   ];
 
   const tracksEl = document.getElementById('tracks');
