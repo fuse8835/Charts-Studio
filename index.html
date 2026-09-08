@@ -198,11 +198,10 @@
     return;
   }
 
-  // 4B and 4B-copy are map/annotation pieces, not the same axis+line/bar
-  // template every other chart here shares -- they live on the Explainers
-  // page instead, alongside motion graphics that fall outside this framework
-  // entirely. Still fully renderable from there through this same server.
-  const EXCLUDE_IDS = new Set(['4b', '4b-copy']);
+  // 4B, 4B-copy, and 5C aren't the same axis+line/bar template every other
+  // chart here shares -- they live on the Explainers page instead. Still
+  // fully renderable from there through this same server.
+  const EXCLUDE_IDS = new Set(['4b', '4b-copy', '5c']);
   charts = charts.filter((c) => !EXCLUDE_IDS.has(c.id));
 
   // always list in numeric/letter order (1a,1b,2a,2b,2c,...) regardless of

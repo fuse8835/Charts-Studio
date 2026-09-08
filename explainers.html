@@ -64,17 +64,6 @@
     line-height: 1.5;
   }
 
-  .section-label {
-    font-weight: 700;
-    font-size: 12.5px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--mist-400);
-    margin: 28px 0 12px;
-  }
-
-  .section-label:first-of-type { margin-top: 0; }
-
   .card {
     display: flex;
     align-items: center;
@@ -100,8 +89,6 @@
     align-items: center;
     justify-content: center;
   }
-
-  .card-id.is-emoji { font-size: 26px; }
 
   .card-body { flex: 1; min-width: 0; }
 
@@ -193,23 +180,10 @@
   <h1>Explainers</h1>
   <p class="lede">Pieces that fall outside the numbered chart series' shared axis+line/bar template -- map/annotation charts and standalone motion graphics, each its own argument or mechanism rather than a data chart.</p>
 
-  <p class="section-label">Map &amp; annotation charts</p>
   <div id="chart-list"></div>
 
-  <p class="section-label">Motion graphics</p>
-  <div class="card">
-    <div class="card-id is-emoji">🌾</div>
-    <div class="card-body">
-      <p class="card-title">Hunger Feedback Loop</p>
-      <p class="card-subtitle">How climate and biofuel policy each raise costs, and together worsen hunger</p>
-    </div>
-    <div class="card-actions">
-      <a class="btn" href="hunger-policy-loop.html">Open</a>
-    </div>
-  </div>
-
   <p class="footer-note">
-    Map/annotation charts here still render through the same local server as the main catalogue (they're real entries in <code>_render/charts.json</code>, just excluded from <code>index.html</code>'s list). Standalone motion graphics like Hunger Feedback Loop aren't wired to that pipeline -- add a plain card under "Motion graphics" and link straight to the page. Either way, name new files without a catalogue letter/number (e.g. <code>topic-name.html</code>, not <code>5a-topic-name.html</code>) so they stay visibly separate from the chart series.
+    Everything here is a real entry in <code>_render/charts.json</code> -- same render pipeline as the main catalogue, just excluded from <code>index.html</code>'s list because it doesn't fit the shared axis+line/bar template. A standalone motion graphic with no natural chart id can still be added as a plain static card linking straight to its page; anything that gets its own id (like 5C) shows up here automatically through the dynamic list below instead.
   </p>
 </div>
 
@@ -224,10 +198,10 @@
     return;
   }
 
-  // the map/annotation charts that live here instead of the main catalogue --
-  // keep this in sync with index.html's own EXCLUDE_IDS (the two lists are
-  // each other's mirror image).
-  const INCLUDE_IDS = new Set(['4b', '4b-copy']);
+  // the charts that live here instead of the main catalogue -- keep this in
+  // sync with index.html's own EXCLUDE_IDS (the two lists are each other's
+  // mirror image).
+  const INCLUDE_IDS = new Set(['4b', '4b-copy', '5c']);
   charts = charts.filter((c) => INCLUDE_IDS.has(c.id));
   charts.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 

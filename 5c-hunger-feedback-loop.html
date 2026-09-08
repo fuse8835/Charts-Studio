@@ -21,28 +21,40 @@
 
   html,body{
     margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    background:
-      radial-gradient(ellipse 90% 70% at 50% 38%, var(--ash-900) 0%, var(--ash-950) 55%, var(--ash-975) 100%);
+    background:var(--ash-950);
     color:var(--paper-100);
     font-family:'Rajdhani', 'Segoe UI', Arial, sans-serif;
+  }
+
+  body{
     display:flex;
+    flex-direction:column;
     align-items:center;
-    justify-content:center;
-    overflow:hidden;
+    gap:28px;
+    padding:40px 20px 60px;
+    min-height:100vh;
   }
 
   .stage-wrap{
     width:100%;
     max-width:min(94vw, 1400px);
-    aspect-ratio:8/5;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
   }
+
+  .frame{
+    container-type:inline-size;
+    position:relative;
+    width:100%;
+    aspect-ratio:8/5;
+    border-radius:18px;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 38%, var(--ash-900) 0%, var(--ash-950) 55%, var(--ash-975) 100%);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.04) inset;
+    opacity:0;
+    animation:frameIn .3s ease-out forwards;
+  }
+
+  @keyframes frameIn{ to{ opacity:1; } }
 
   svg.stage{
     width:100%;
@@ -260,11 +272,364 @@
     .scene.play .finalGroup.glow{animation-name:popInStrong !important;}
     .scene.play .bgBreathe{animation:none !important; opacity:.7;}
   }
+
+  /* export-mode: dev-only chrome must never appear in the rendered .mov -- the
+     scene's own background stays as authored (full-bleed graphic, not a floating
+     card over other footage, so no alpha-transparency here). */
+  body.export-mode{
+    padding:0;
+    min-height:0;
+    align-items:stretch;
+  }
+  /* render-client.js injects a second .replay-classed button (+ status text) into
+     #frame for triggering/tracking headless renders -- it must disappear during
+     ?export capture so it never gets baked into the rendered .mov. */
+  body.export-mode .replay{ display:none !important; }
+  body.export-mode .back-link,
+  body.export-mode .replay-btn,
+  body.export-mode .timeline-panel,
+  body.export-mode .review-panel,
+  body.export-mode .pins-layer,
+  body.export-mode .caption{ display:none !important; }
+  body.export-mode .stage-wrap{ max-width:none; }
+  body.export-mode .frame{ border-radius:0; box-shadow:none; }
+
+  /* ---- layer timeline panel ---- */
+  .timeline-panel{
+    position:relative;
+    width:100%;
+    background:var(--ash-900);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:18px 20px 16px;
+  }
+  .timeline-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:12px;
+  }
+  .timeline-head h2{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.01em;
+    color:var(--paper-50);
+    margin:0;
+  }
+  .timeline-head span{
+    font-size:10.5px;
+    color:var(--mist-400);
+    letter-spacing:.04em;
+  }
+  .ruler{
+    position:relative;
+    height:16px;
+    margin-left:172px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+    margin-bottom:6px;
+  }
+  .ruler span{
+    position:absolute;
+    bottom:2px;
+    font-size:9.5px;
+    color:var(--mist-400);
+    transform:translateX(-50%);
+  }
+  .track-row{
+    display:flex;
+    align-items:center;
+    height:26px;
+  }
+  .track-label{
+    width:172px;
+    flex:none;
+    font-size:10.5px;
+    color:var(--mist-300);
+    padding-right:10px;
+  }
+  .track-lane{
+    position:relative;
+    flex:1;
+    height:100%;
+  }
+  .track-bar{
+    position:absolute;
+    top:6px;
+    height:12px;
+    border-radius:5px;
+    opacity:.9;
+  }
+  .playhead{
+    position:absolute;
+    top:-4px;
+    bottom:0;
+    width:1px;
+    background:var(--paper-50);
+    box-shadow:0 0 6px rgba(238,244,242,.8);
+    left:172px;
+    animation:scrub var(--total-sec, 7.65s) linear forwards;
+  }
+  @keyframes scrub{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(calc(100% - 0px)); }
+  }
+
+  /* ---- pins: numbered markers dropped on the frame for review ---- */
+  .pins-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:40;
+  }
+  #frame.pin-mode{ cursor:crosshair; }
+  .pin{
+    position:absolute;
+    width:26px;
+    height:26px;
+    margin-left:-13px;
+    margin-top:-13px;
+    border-radius:50%;
+    background:var(--vivid-500);
+    border:2px solid var(--paper-50);
+    color:var(--paper-50);
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.5);
+    pointer-events:auto;
+    cursor:pointer;
+  }
+  .pin.is-active{ background:var(--mint-400); color:var(--ash-950); }
+
+  /* ---- review & annotate panel ---- */
+  .review-panel{
+    background:var(--ash-900);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:18px 20px 20px;
+  }
+  .review-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .review-head h2{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:var(--paper-50);
+    margin:0;
+  }
+  .review-actions{ display:flex; gap:8px; }
+  .pill-btn{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    letter-spacing:.02em;
+    color:var(--paper-100);
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;
+    padding:7px 14px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .pill-btn:hover{ background:rgba(255,255,255,.12); }
+  .pill-btn.is-active{ background:var(--vivid-500); border-color:var(--vivid-500); color:#fff; }
+  .pill-btn-solid{
+    background:var(--mint-400);
+    border-color:var(--mint-400);
+    color:var(--ash-950);
+  }
+  .pill-btn-solid:hover{ background:#6dffdb; }
+  .review-hint{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:12px;
+    line-height:1.6;
+    color:var(--mist-400);
+    margin:0 0 16px;
+  }
+  .review-hint b{ color:var(--mist-300); }
+  .scrub-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .icon-btn{
+    flex:none;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--paper-100);
+    cursor:pointer;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .icon-btn:hover{ background:rgba(255,255,255,.12); }
+  .scrubber{
+    flex:1;
+    -webkit-appearance:none;
+    appearance:none;
+    height:4px;
+    border-radius:2px;
+    background:rgba(255,255,255,.14);
+    outline:none;
+  }
+  .scrubber::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:15px;
+    height:15px;
+    border-radius:50%;
+    background:var(--mint-400);
+    box-shadow:0 0 6px rgba(4,255,186,.6);
+    cursor:pointer;
+  }
+  .scrubber::-moz-range-thumb{
+    width:15px;
+    height:15px;
+    border:none;
+    border-radius:50%;
+    background:var(--mint-400);
+    box-shadow:0 0 6px rgba(4,255,186,.6);
+    cursor:pointer;
+  }
+  .scrub-time{
+    flex:none;
+    width:46px;
+    text-align:right;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    color:var(--mist-300);
+    font-variant-numeric:tabular-nums;
+  }
+  .notes-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .notes-list:empty::before{
+    content:"No notes yet \2014 click + Add note, then click the frame above.";
+    display:block;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:12px;
+    color:var(--mist-400);
+    padding:10px 0;
+  }
+  .note-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:10px;
+    padding:8px 10px;
+  }
+  .note-num{
+    flex:none;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--vivid-500);
+    color:#fff;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:2px;
+  }
+  .note-time{
+    flex:none;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:600;
+    font-size:12px;
+    color:var(--mint-400);
+    background:rgba(4,255,186,.1);
+    border-radius:6px;
+    padding:4px 7px;
+    margin-top:1px;
+    cursor:pointer;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .note-time:hover{ background:rgba(4,255,186,.2); }
+  .note-text{
+    flex:1;
+    min-width:0;
+    resize:vertical;
+    background:transparent;
+    border:none;
+    color:var(--paper-100);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:13px;
+    line-height:1.5;
+    padding:3px 0;
+  }
+  .note-text:focus{ outline:none; }
+  .note-text::placeholder{ color:var(--mist-400); }
+  .note-del{
+    flex:none;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:transparent;
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--mist-300);
+    cursor:pointer;
+    font-size:12px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .note-del:hover{ background:rgba(255,80,80,.18); border-color:rgba(255,80,80,.4); color:#fff; }
+  .feedback-out{
+    width:100%;
+    margin-top:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:8px;
+    color:var(--mist-300);
+    font-family:ui-monospace,monospace;
+    font-size:11.5px;
+    line-height:1.5;
+    padding:8px 10px;
+    resize:vertical;
+  }
+
+  .caption{
+    max-width:640px;
+    text-align:center;
+    font-size:12px;
+    line-height:1.6;
+    color:var(--mist-400);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  .caption b{ color:var(--mist-300); }
 </style>
 
-<a class="back-link" href="index.html">&larr; Chart Studio</a>
+<a class="back-link" href="explainers.html">&larr; Chart Studio</a>
 
 <div class="stage-wrap">
+ <div class="frame" id="frame">
   <svg class="stage" viewBox="0 0 1600 1000" role="img" aria-labelledby="svgTitle svgDesc">
     <title id="svgTitle">Policies make hunger worse</title>
     <desc id="svgDesc">Climate policies raise fertilizer and fuel costs, and biofuel policies raise competition for farmland; both raise costs and food prices, together producing more hunger.</desc>
@@ -456,7 +821,44 @@
     </svg>
     Replay
   </button>
+
+  <div class="pins-layer" id="pinsLayer"></div>
+ </div>
 </div>
+
+<div class="stage-wrap timeline-panel">
+  <div class="timeline-head">
+    <h2>Layer &amp; keyframe map</h2>
+    <span>0s&ndash;7.65s &middot; 18 tracks</span>
+  </div>
+  <div class="ruler" id="ruler"></div>
+  <div id="tracks"></div>
+  <div class="playhead" id="playhead"></div>
+</div>
+
+<div class="stage-wrap review-panel">
+  <div class="review-head">
+    <h2>Review &amp; annotate</h2>
+    <div class="review-actions">
+      <button id="addPinBtn" class="pill-btn" type="button">+ Add note</button>
+      <button id="copyNotesBtn" class="pill-btn pill-btn-solid" type="button">Copy feedback</button>
+    </div>
+  </div>
+
+  <p class="review-hint">Scrub to the moment you want to talk about, click <b>+ Add note</b>, then click on the frame above to drop a numbered pin. Write your note, then hit <b>Copy feedback</b> and paste the result back into chat.</p>
+
+  <div class="scrub-row">
+    <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
+    <input type="range" id="scrubber" class="scrubber" min="0" max="7650" step="10" value="0">
+    <span id="scrubTime" class="scrub-time">0.0s</span>
+  </div>
+
+  <ol id="notesList" class="notes-list"></ol>
+
+  <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
+</div>
+
+<p class="caption">A causal-chain infographic, not a data chart &mdash; two independent policy chains (climate, biofuels) each pop in and connect via drawn arrows with a traveling dot, then converge into one glowing outcome card. Built as native CSS/Web Animations gated behind the <b>.scene.play</b> class so it's fully seekable. Append <b>?export</b> to the URL for a capture-ready version with the dev chrome hidden.</p>
 
 <p class="sr-only">
   Diagram: Climate policies lead to higher costs for fertilizer and gas for tractors, which leads to higher costs to farm.
@@ -465,15 +867,282 @@
 </p>
 
 <script>
-  (function(){
-    var btn = document.getElementById('replayBtn');
-    var scene = document.getElementById('scene');
-    btn.addEventListener('click', function(){
-      scene.classList.remove('play');
-      void scene.getBBox();
-      requestAnimationFrame(function(){
-        scene.classList.add('play');
-      });
-    });
+(function(){
+  const totalSec = 7.65;
+
+  // ---- ruler ticks ----
+  const ruler = document.getElementById('ruler');
+  for (let s = 0; s <= totalSec; s += 1) {
+    const tick = document.createElement('span');
+    tick.style.left = (s / totalSec * 100) + '%';
+    tick.textContent = s % 2 === 0 ? s + 's' : '';
+    ruler.appendChild(tick);
+  }
+
+  // ---- layer timeline map ----
+  const tracks = [
+    { label: 'Ambient halo (loops)', color: '#04ffba', start: 0, dur: totalSec },
+    { label: 'Title', color: '#7ea0bd', start: 0.05, dur: 0.7 },
+    { label: 'Subtitle', color: '#7ea0bd', start: 0.35, dur: 0.7 },
+    { label: 'Divider', color: '#7ea0bd', start: 0.7, dur: 0.5 },
+    { label: 'Climate: policy card', color: '#04ffba', start: 1.1, dur: 0.5 },
+    { label: 'Biofuels: policy card', color: '#3d7bff', start: 1.35, dur: 0.5 },
+    { label: 'Climate: arrow to costs', color: '#04ffba', start: 1.75, dur: 0.42 },
+    { label: 'Biofuels: arrow to land competition', color: '#3d7bff', start: 2, dur: 0.42 },
+    { label: 'Climate: higher fertilizer/gas costs', color: '#04ffba', start: 2.32, dur: 0.5 },
+    { label: 'Biofuels: more land competition', color: '#3d7bff', start: 2.57, dur: 0.5 },
+    { label: 'Climate: arrow to outcome', color: '#04ffba', start: 2.97, dur: 0.42 },
+    { label: 'Biofuels: arrow to outcome', color: '#3d7bff', start: 3.22, dur: 0.42 },
+    { label: 'Climate: higher costs to farm', color: '#04ffba', start: 3.54, dur: 0.5 },
+    { label: 'Biofuels: higher food prices', color: '#3d7bff', start: 3.79, dur: 0.5 },
+    { label: 'Convergence paths merge', color: '#ff5a4e', start: 4.44, dur: 0.6 },
+    { label: 'Stem to outcome', color: '#ff5a4e', start: 5.19, dur: 0.35 },
+    { label: 'Outcome card pop-in', color: '#ff5a4e', start: 5.69, dur: 0.6 },
+    { label: 'Outcome glow pulse (loops)', color: '#ff5a4e', start: 6.35, dur: totalSec - 6.35 }
+  ];
+
+  const tracksEl = document.getElementById('tracks');
+  tracksEl.innerHTML = '';
+  tracks.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    const label = document.createElement('div');
+    label.className = 'track-label';
+    label.textContent = t.label;
+    const lane = document.createElement('div');
+    lane.className = 'track-lane';
+    const bar = document.createElement('div');
+    bar.className = 'track-bar';
+    bar.style.left = (t.start / totalSec * 100) + '%';
+    bar.style.width = (t.dur / totalSec * 100) + '%';
+    bar.style.background = t.color;
+    lane.appendChild(bar);
+    row.appendChild(label);
+    row.appendChild(lane);
+    tracksEl.appendChild(row);
+  });
+
+  // ---- replay ----
+  const frame = document.getElementById('frame');
+  const scene = document.getElementById('scene');
+  const playhead = document.getElementById('playhead');
+  const replayBtn = document.getElementById('replayBtn');
+
+  function replay() {
+    scene.classList.remove('play');
+    void scene.getBBox();
+    requestAnimationFrame(() => { scene.classList.add('play'); });
+    playhead.style.animation = 'none';
+    void playhead.offsetWidth;
+    playhead.style.animation = `scrub ${totalSec}s linear forwards`;
+  }
+
+  replayBtn.addEventListener('click', replay);
+
+  // ---- review & annotate: scrubber ----
+  const scrubber = document.getElementById('scrubber');
+  const scrubTimeEl = document.getElementById('scrubTime');
+  const scrubPlayBtn = document.getElementById('scrubPlayBtn');
+  const totalMs = Math.round(totalSec * 1000);
+  scrubber.max = totalMs;
+
+  let isScrubbing = false;
+  let isPlaying = true;
+
+  function pauseAllAnimations() { document.getAnimations().forEach(a => a.pause()); }
+  function playAllAnimations() { document.getAnimations().forEach(a => a.play()); }
+
+  function setScrubTime(ms) {
+    document.getAnimations().forEach(a => { a.currentTime = ms; });
+    scrubber.value = ms;
+    scrubTimeEl.textContent = (ms / 1000).toFixed(1) + 's';
+  }
+
+  scrubber.addEventListener('pointerdown', () => {
+    isScrubbing = true;
+    isPlaying = false;
+    pauseAllAnimations();
+    scrubPlayBtn.innerHTML = '&#9654;';
+  });
+  scrubber.addEventListener('input', () => setScrubTime(Number(scrubber.value)));
+  scrubber.addEventListener('pointerup', () => { isScrubbing = false; });
+
+  scrubPlayBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      isPlaying = false;
+      pauseAllAnimations();
+      scrubPlayBtn.innerHTML = '&#9654;';
+    } else {
+      isPlaying = true;
+      if (Number(scrubber.value) >= totalMs - 20) {
+        replay();
+        setScrubTime(0);
+      }
+      playAllAnimations();
+      scrubPlayBtn.innerHTML = '&#10074;&#10074;';
+    }
+  });
+
+  (function trackPlayhead() {
+    function tick() {
+      if (isPlaying && !isScrubbing) {
+        const ref = frame.getAnimations()[0];
+        const t = Math.min(ref ? ref.currentTime || 0 : 0, totalMs);
+        scrubber.value = t;
+        scrubTimeEl.textContent = (t / 1000).toFixed(1) + 's';
+        if (t >= totalMs - 20) {
+          isPlaying = false;
+          scrubPlayBtn.innerHTML = '&#9654;';
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
   })();
+
+  // ---- review & annotate: pins + notes ----
+  const pinsLayer = document.getElementById('pinsLayer');
+  const notesList = document.getElementById('notesList');
+  const addPinBtn = document.getElementById('addPinBtn');
+  const copyNotesBtn = document.getElementById('copyNotesBtn');
+  const feedbackOut = document.getElementById('feedbackOut');
+
+  let pinMode = false;
+  let pinSeq = 0;
+  const pins = [];
+
+  addPinBtn.addEventListener('click', () => {
+    pinMode = !pinMode;
+    addPinBtn.classList.toggle('is-active', pinMode);
+    frame.classList.toggle('pin-mode', pinMode);
+  });
+
+  frame.addEventListener('click', (e) => {
+    if (!pinMode) return;
+    if (e.target.closest('.replay-btn') || e.target.closest('.pin')) return;
+    const rect = frame.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    pinSeq += 1;
+    const pin = { id: pinSeq, num: pinSeq, xPct, yPct, timeMs: Number(scrubber.value), text: '' };
+    pins.push(pin);
+    renderPins();
+    renderNotes();
+    pinMode = false;
+    addPinBtn.classList.remove('is-active');
+    frame.classList.remove('pin-mode');
+    requestAnimationFrame(() => {
+      const ta = notesList.querySelector(`.note-text[data-id="${pin.id}"]`);
+      if (ta) ta.focus();
+    });
+  });
+
+  function renumberPins() { pins.forEach((p, i) => { p.num = i + 1; }); }
+
+  function highlightPin(id) {
+    const idx = pins.findIndex(p => p.id === id);
+    Array.from(pinsLayer.children).forEach((el, i) => el.classList.toggle('is-active', i === idx));
+  }
+
+  function renderPins() {
+    pinsLayer.innerHTML = '';
+    pins.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'pin';
+      el.style.left = p.xPct + '%';
+      el.style.top = p.yPct + '%';
+      el.textContent = p.num;
+      el.title = 't=' + (p.timeMs / 1000).toFixed(1) + 's';
+      el.addEventListener('click', () => { setScrubTime(p.timeMs); highlightPin(p.id); });
+      pinsLayer.appendChild(el);
+    });
+  }
+
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  function renderNotes() {
+    notesList.innerHTML = '';
+    pins.forEach(p => {
+      const li = document.createElement('li');
+      li.className = 'note-row';
+
+      const num = document.createElement('div');
+      num.className = 'note-num';
+      num.textContent = p.num;
+
+      const time = document.createElement('button');
+      time.type = 'button';
+      time.className = 'note-time';
+      time.textContent = 't=' + (p.timeMs / 1000).toFixed(1) + 's';
+      time.addEventListener('click', () => { setScrubTime(p.timeMs); highlightPin(p.id); });
+
+      const textEl = document.createElement('textarea');
+      textEl.className = 'note-text';
+      textEl.rows = 1;
+      textEl.placeholder = 'What should change here?';
+      textEl.value = p.text;
+      textEl.dataset.id = p.id;
+      textEl.addEventListener('input', () => { p.text = textEl.value; autoGrow(textEl); });
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'note-del';
+      del.innerHTML = '&times;';
+      del.setAttribute('aria-label', 'Delete note');
+      del.addEventListener('click', () => {
+        const i = pins.findIndex(x => x.id === p.id);
+        if (i >= 0) pins.splice(i, 1);
+        renumberPins();
+        renderPins();
+        renderNotes();
+      });
+
+      li.appendChild(num);
+      li.appendChild(time);
+      li.appendChild(textEl);
+      li.appendChild(del);
+      notesList.appendChild(li);
+      autoGrow(textEl);
+    });
+  }
+
+  function regionLabel(xPct, yPct) {
+    const h = xPct < 33 ? 'left' : xPct < 67 ? 'center' : 'right';
+    const v = yPct < 33 ? 'top' : yPct < 67 ? 'middle' : 'bottom';
+    if (h === 'center' && v === 'middle') return 'center';
+    if (v === 'middle') return h;
+    if (h === 'center') return v;
+    return `${v}-${h}`;
+  }
+
+  copyNotesBtn.addEventListener('click', async () => {
+    const chartTag = document.querySelector('script[data-chart-id]');
+    const chartId = (chartTag && chartTag.getAttribute('data-chart-id')) || '?';
+    const chartName = document.title.split(' — ')[0].trim();
+    const header = `${chartName} (${chartId})`;
+    const lines = pins.map(p => `${p.num}. [${chartId} · t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
+    const text = lines.length ? `${header}\n${lines.join('\n')}` : `${header}\nNo notes added yet.`;
+    feedbackOut.value = text;
+    autoGrow(feedbackOut);
+    const original = copyNotesBtn.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      copyNotesBtn.textContent = 'Copied!';
+    } catch (err) {
+      feedbackOut.focus();
+      feedbackOut.select();
+      copyNotesBtn.textContent = 'Select below ↓';
+    }
+    setTimeout(() => { copyNotesBtn.textContent = original; }, 1600);
+  });
+})();
+
+if (new URLSearchParams(location.search).has('export')) {
+  document.documentElement.classList.add('export-mode');
+  document.body.classList.add('export-mode');
+}
 </script>
+<script src="render-client.js" data-chart-id="5c"></script>
