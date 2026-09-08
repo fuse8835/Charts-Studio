@@ -203,29 +203,32 @@
 
   /* ---- node containers ---- */
   .node-box{
-    fill:rgba(4,255,186,.045);
-    stroke:rgba(126,160,214,.4);
+    fill:rgba(4,255,186,.05);
+    stroke:rgba(126,160,214,.35);
     stroke-width:1.5;
+    filter:drop-shadow(0 10px 28px rgba(0,0,0,.35));
   }
   .node-box.mechanism-box{
-    fill:rgba(126,160,214,.05);
+    fill:rgba(126,160,214,.06);
   }
   .node-box.final-box{
-    fill:rgba(255,90,78,.08);
+    fill:rgba(255,90,78,.09);
     stroke:var(--alarm-500);
     stroke-width:2;
+    filter:drop-shadow(0 12px 32px rgba(255,90,78,.18)) drop-shadow(0 10px 28px rgba(0,0,0,.4));
   }
 
   /* biofuels chain gets its own color identity (vivid blue) so the two
      causal chains read as visually distinct paths, not just distinct text */
   .chain-blue .icon-slot{ color:var(--vivid-500); }
-  .chain-blue .node-box{ fill:rgba(61,123,255,.06); stroke:rgba(61,123,255,.4); }
-  .chain-blue .node-box.mechanism-box{ fill:rgba(61,123,255,.07); }
+  .chain-blue .node-box{ fill:rgba(61,123,255,.07); stroke:rgba(61,123,255,.4); }
+  .chain-blue .node-box.mechanism-box{ fill:rgba(61,123,255,.08); }
 
   /* ---- base (pre-animation) states ---- */
   .anim{opacity:0;}
   .pop{opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.8);}
-  .draw{opacity:0; stroke-dasharray:1; stroke-dashoffset:1;}
+  .draw{opacity:0; stroke-dasharray:1; stroke-dashoffset:1; stroke-linecap:round; stroke-linejoin:round;}
+  .tip{opacity:0; fill:none; stroke-linecap:round; stroke-linejoin:round;}
 
   /* climate chain reveals solo & centered first, then slides to its real
      position -- base state (before the slide animation starts) is centered. */
@@ -304,6 +307,10 @@
     0%,100%{opacity:.5;}
     50%{opacity:.9;}
   }
+  @keyframes fadeTip{
+    from{opacity:0;}
+    to{opacity:1;}
+  }
 
   /* ---- play state: wire up every element's real animation ---- */
   .scene.play .title{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) var(--t-title) both;}
@@ -314,9 +321,11 @@
   .scene.play .leftA{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftA) both;}
   .scene.play .arrowLA{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowLA) forwards;}
   .scene.play .pulseLA{animation:cometRun var(--d-arrow) linear var(--t-arrowLA) forwards;}
+  .scene.play .tipLA{animation:fadeTip .12s linear calc(var(--t-arrowLA) + var(--d-arrow)) forwards;}
   .scene.play .leftB{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftB) both;}
   .scene.play .arrowLB{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowLB) forwards;}
   .scene.play .pulseLB{animation:cometRun var(--d-arrow) linear var(--t-arrowLB) forwards;}
+  .scene.play .tipLB{animation:fadeTip .12s linear calc(var(--t-arrowLB) + var(--d-arrow)) forwards;}
   .scene.play .leftC{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-leftC) both;}
 
   /* climate chain slides from centered to its real left-side position */
@@ -327,9 +336,11 @@
   .scene.play .rightA{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightA) both;}
   .scene.play .arrowRA{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowRA) forwards;}
   .scene.play .pulseRA{animation:cometRun var(--d-arrow) linear var(--t-arrowRA) forwards;}
+  .scene.play .tipRA{animation:fadeTip .12s linear calc(var(--t-arrowRA) + var(--d-arrow)) forwards;}
   .scene.play .rightB{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightB) both;}
   .scene.play .arrowRB{animation:drawLine var(--d-arrow) cubic-bezier(.65,0,.35,1) var(--t-arrowRB) forwards;}
   .scene.play .pulseRB{animation:cometRun var(--d-arrow) linear var(--t-arrowRB) forwards;}
+  .scene.play .tipRB{animation:fadeTip .12s linear calc(var(--t-arrowRB) + var(--d-arrow)) forwards;}
   .scene.play .rightC{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightC) both;}
 
   .scene.play .mergeL{animation:drawLine var(--d-merge) cubic-bezier(.65,0,.35,1) var(--t-mergeL) forwards;}
@@ -338,9 +349,12 @@
   .scene.play .pulseMergeR{animation:cometRun var(--d-merge) linear var(--t-mergeR) forwards;}
   .scene.play .stem{animation:drawLine var(--d-stem) cubic-bezier(.65,0,.35,1) var(--t-stem) forwards;}
   .scene.play .pulseStem{animation:cometRun var(--d-stem) linear var(--t-stem) forwards;}
+  .scene.play .tipStem{animation:fadeTip .12s linear calc(var(--t-stem) + var(--d-stem)) forwards;}
 
   .scene.play .finalGroup.glow{animation:popInStrong var(--d-final) cubic-bezier(.34,1.56,.64,1) var(--t-final) both, pulseGlow 2.6s ease-in-out var(--t-glow) infinite;}
   .scene.play .bgBreathe{animation:breathe 7s ease-in-out infinite;}
+  .bgBreatheAlarm{opacity:0;}
+  .scene.play .bgBreatheAlarm{animation:fadeUp .8s ease-out var(--t-final) both, breathe 7s ease-in-out var(--t-final) infinite;}
 
   /* ---- replay control ---- */
   .replay-btn{
@@ -398,6 +412,7 @@
     .scene.play *{animation-duration:.01s !important; animation-delay:0s !important; animation-iteration-count:1 !important;}
     .scene.play .finalGroup.glow{animation-name:popInStrong !important;}
     .scene.play .bgBreathe{animation:none !important; opacity:.7;}
+    .scene.play .bgBreatheAlarm{animation:none !important; opacity:.6;}
   }
 
   /* export-mode: dev-only chrome must never appear in the rendered .mov -- the
@@ -897,19 +912,14 @@
         </g>
       </g>
 
-      <marker id="arrowMint" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0 0 L10 5 L0 10 Z" fill="var(--mint-400)" />
-      </marker>
-      <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0 0 L10 5 L0 10 Z" fill="var(--vivid-500)" />
-      </marker>
-      <marker id="arrowAlarm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0 0 L10 5 L0 10 Z" fill="var(--alarm-500)" />
-      </marker>
 
       <radialGradient id="haloMint" cx="50%" cy="50%" r="50%">
         <stop offset="0%" stop-color="var(--mint-400)" stop-opacity=".25" />
         <stop offset="100%" stop-color="var(--mint-400)" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="haloAlarm" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--alarm-500)" stop-opacity=".16" />
+        <stop offset="100%" stop-color="var(--alarm-500)" stop-opacity="0" />
       </radialGradient>
 
       <!-- traveling comet-pulse strokes: soft at each path's own start/end,
@@ -964,8 +974,9 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowLA" d="M380 292 L380 340" stroke="var(--mint-400)" stroke-width="3" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <path class="draw arrowLA" d="M380 292 L380 340" stroke="var(--mint-400)" stroke-width="3" pathLength="1" fill="none" />
       <path class="pulse pulse-mint pulseLA" d="M380 292 L380 340" pathLength="1" />
+      <path class="tip tipLA" d="M372 330 L380 340 L388 330" stroke="var(--mint-400)" stroke-width="3" />
 
       <g class="pop leftB">
         <rect class="node-box mechanism-box" x="140" y="348" width="480" height="120" rx="8" />
@@ -977,8 +988,9 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowLB" d="M380 468 L380 516" stroke="var(--mint-400)" stroke-width="3" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <path class="draw arrowLB" d="M380 468 L380 516" stroke="var(--mint-400)" stroke-width="3" pathLength="1" fill="none" />
       <path class="pulse pulse-mint pulseLB" d="M380 468 L380 516" pathLength="1" />
+      <path class="tip tipLB" d="M372 506 L380 516 L388 506" stroke="var(--mint-400)" stroke-width="3" />
 
       <g class="pop leftC">
         <foreignObject x="140" y="574" width="480" height="104" overflow="visible">
@@ -1002,8 +1014,9 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowRA" d="M1220 292 L1220 340" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" marker-end="url(#arrowBlue)" fill="none" />
+      <path class="draw arrowRA" d="M1220 292 L1220 340" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" fill="none" />
       <path class="pulse pulse-blue pulseRA" d="M1220 292 L1220 340" pathLength="1" />
+      <path class="tip tipRA" d="M1212 330 L1220 340 L1228 330" stroke="var(--vivid-500)" stroke-width="3" />
 
       <g class="pop rightB">
         <rect class="node-box mechanism-box" x="980" y="348" width="480" height="120" rx="8" />
@@ -1015,8 +1028,9 @@
         </foreignObject>
       </g>
 
-      <path class="draw arrowRB" d="M1220 468 L1220 516" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" marker-end="url(#arrowBlue)" fill="none" />
+      <path class="draw arrowRB" d="M1220 468 L1220 516" stroke="var(--vivid-500)" stroke-width="3" pathLength="1" fill="none" />
       <path class="pulse pulse-blue pulseRB" d="M1220 468 L1220 516" pathLength="1" />
+      <path class="tip tipRB" d="M1212 506 L1220 516 L1228 506" stroke="var(--vivid-500)" stroke-width="3" />
 
       <g class="pop rightC">
         <foreignObject x="980" y="574" width="480" height="104" overflow="visible">
@@ -1029,12 +1043,16 @@
       </g>
 
       <!-- ===== CONVERGENCE ===== -->
-      <path class="draw mergeL" d="M380 678 L380 750 Q380 770 410 770 L800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
-      <path class="pulse pulse-alarm pulseMergeL" d="M380 678 L380 750 Q380 770 410 770 L800 770" pathLength="1" />
-      <path class="draw mergeR" d="M1220 678 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
-      <path class="pulse pulse-alarm pulseMergeR" d="M1220 678 L1220 750 Q1220 770 1190 770 L800 770" pathLength="1" />
-      <path class="draw stem" d="M800 770 L800 826" stroke="var(--alarm-500)" stroke-width="3.5" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
+      <path class="draw mergeL" d="M380 678 C380 745 480 770 800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-alarm pulseMergeL" d="M380 678 C380 745 480 770 800 770" pathLength="1" />
+      <path class="draw mergeR" d="M1220 678 C1220 745 1120 770 800 770" stroke="var(--alarm-500)" stroke-width="3" fill="none" pathLength="1" />
+      <path class="pulse pulse-alarm pulseMergeR" d="M1220 678 C1220 745 1120 770 800 770" pathLength="1" />
+      <path class="draw stem" d="M800 770 L800 826" stroke="var(--alarm-500)" stroke-width="3.5" fill="none" pathLength="1" />
       <path class="pulse pulse-alarm pulseStem" d="M800 770 L800 826" pathLength="1" />
+      <path class="tip tipStem" d="M792 816 L800 826 L808 816" stroke="var(--alarm-500)" stroke-width="3.5" />
+
+      <!-- ambient halo, echoes the header's mint halo for top-to-bottom balance -->
+      <circle class="bgBreatheAlarm" cx="800" cy="897" r="300" fill="url(#haloAlarm)" />
 
       <!-- ===== OUTCOME ===== -->
       <g class="pop finalGroup glow">
