@@ -419,8 +419,9 @@
      card over other footage, so no alpha-transparency here). */
   body.export-mode{
     padding:0;
+    height:100vh;
     min-height:0;
-    align-items:stretch;
+    justify-content:center;
   }
   /* render-client.js injects a second .replay-classed button (+ status text) into
      #frame for triggering/tracking headless renders -- it must disappear during
@@ -432,8 +433,25 @@
   body.export-mode .review-panel,
   body.export-mode .pins-layer,
   body.export-mode .caption{ display:none !important; }
-  body.export-mode .stage-wrap{ max-width:none; }
-  body.export-mode .frame{ border-radius:0; box-shadow:none; }
+  /* height-constrained + auto width (not width:100%) so the frame's own
+     10:7 aspect-ratio always fits inside whatever canvas charts.json asks
+     for, even one with a different ratio (e.g. 16:9 UHD) -- centered via
+     flex, letting the body's own background show as pillarbox bars
+     instead of clipping the bottom or stretching/distorting the scene. */
+  body.export-mode .stage-wrap{
+    max-width:none;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  body.export-mode .frame{
+    width:auto;
+    height:100%;
+    max-width:100%;
+    border-radius:0;
+    box-shadow:none;
+  }
 
   /* ---- layer timeline panel ---- */
   .timeline-panel{
