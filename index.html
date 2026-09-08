@@ -176,6 +176,11 @@
     return;
   }
 
+  // always list in numeric/letter order (1a,1b,2a,2b,2c,...) regardless of
+  // charts.json's own insertion order -- a chart added later (e.g. 2C) used
+  // to appear appended at the end instead of sorted into place.
+  charts.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
+
   charts.forEach((chart) => {
     const card = document.createElement('div');
     card.className = 'card';

@@ -32,6 +32,16 @@
     "duration": 12.5
   },
   {
+    "id": "2c",
+    "name": "Cold-Related Death Percentage",
+    "subtitle": "Split-flap counter, counting down from 63% to 06%",
+    "html": "2c-cold-death-percentage.html",
+    "mov": "2c-cold-death-percentage-alpha.mov",
+    "duration": 7.3,
+    "width": 1080,
+    "height": 1080
+  },
+  {
     "id": "3a",
     "name": "Globally Burned Area",
     "subtitle": "Share of Earth's land burned by wildfire, 2000-2025",
@@ -64,16 +74,6 @@
     "duration": 10.2
   },
   {
-    "id": "2c",
-    "name": "Cold-Related Death Percentage",
-    "subtitle": "Split-flap counter, counting down from 63% to 06%",
-    "html": "2c-cold-death-percentage.html",
-    "mov": "2c-cold-death-percentage-alpha.mov",
-    "duration": 7.3,
-    "width": 1080,
-    "height": 1080
-  },
-  {
     "id": "4b",
     "name": "Global Disaster Database",
     "subtitle": "Two decades of major earthquakes, floods, storms, fires, droughts, and eruptions, plotted where they struck",
@@ -82,5 +82,31 @@
     "duration": 30,
     "width": 3840,
     "height": 2160
+  },
+  {
+    "id": "4b-copy",
+    "name": "Global Disaster Database (copy)",
+    "subtitle": "2 events featured, the rest flood in randomly, then a fast tour of 14",
+    "html": "4b-global-disaster-database-copy.html",
+    "mov": "4b-global-disaster-database-copy-alpha.mov",
+    "duration": 36,
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "id": "5a",
+    "name": "Crop Yields in Canada by Decade",
+    "subtitle": "Five-line trend chart, 1910-2020 -- barley, canola, corn, oats, wheat",
+    "html": "5a-crop-yields.html",
+    "mov": "5a-crop-yields-alpha.mov",
+    "duration": 26
+  },
+  {
+    "id": "5b",
+    "name": "Child Mortality Due to Malnutrition",
+    "subtitle": "With and without climate change, 1990-2050 -- WHO/GBD projection",
+    "html": "5b-child-mortality.html",
+    "mov": "5b-child-mortality-alpha.mov",
+    "duration": 23.375
   }
 ]
