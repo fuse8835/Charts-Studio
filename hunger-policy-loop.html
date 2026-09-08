@@ -1,0 +1,479 @@
+<title>Hunger Feedback Loop</title>
+<meta name="description" content="Animated causal-chain graphic: climate and biofuel policy raise farm costs and food prices, worsening hunger." />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap">
+<style>
+  :root{
+    --ash-950:#05131f;
+    --ash-900:#0a2032;
+    --ash-975:#01060c;
+    --mint-400:#04ffba;
+    --mint-glow:rgba(4,255,186,.30);
+    --vivid-500:#3d7bff;
+    --paper-100:#eef3fa;
+    --paper-50:#f8fbff;
+    --mist-400:#7ea0bd;
+    --mist-300:#a9c2d6;
+    --alarm-500:#ff5a4e;
+    --alarm-glow:rgba(255,90,78,.38);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 38%, var(--ash-900) 0%, var(--ash-950) 55%, var(--ash-975) 100%);
+    color:var(--paper-100);
+    font-family:'Rajdhani', 'Segoe UI', Arial, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  .stage-wrap{
+    width:100%;
+    max-width:min(94vw, 1400px);
+    aspect-ratio:8/5;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  svg.stage{
+    width:100%;
+    height:100%;
+    display:block;
+    overflow:visible;
+  }
+
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
+
+  /* ---- foreignObject card content ---- */
+  .card{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:0 26px;
+    font-family:inherit;
+  }
+  .card .icon-slot{
+    flex:0 0 auto;
+    width:58px;
+    height:58px;
+    color:var(--mint-400);
+  }
+  .card .icon-slot svg{width:100%;height:100%;display:block;}
+  .card .label{
+    flex:1 1 auto;
+    min-width:0;
+    line-height:1.18;
+  }
+  .card.policy .label{
+    font-weight:700;
+    font-size:27px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--paper-50);
+  }
+  .card.mechanism .label{
+    font-weight:600;
+    font-size:23px;
+    color:var(--mist-300);
+  }
+  .card.outcome .label{
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    color:var(--paper-50);
+  }
+  .card.final-card{
+    justify-content:center;
+    gap:26px;
+  }
+  .card.final-card .icon-slot{
+    width:72px;height:72px;
+    color:var(--alarm-500);
+  }
+  .card.final-card .label{
+    flex:0 0 auto;
+    font-weight:700;
+    font-size:44px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--alarm-500);
+  }
+
+  /* ---- node containers ---- */
+  .node-box{
+    fill:rgba(4,255,186,.045);
+    stroke:rgba(126,160,214,.4);
+    stroke-width:1.5;
+  }
+  .node-box.mechanism-box{
+    fill:rgba(126,160,214,.05);
+  }
+  .node-box.final-box{
+    fill:rgba(255,90,78,.08);
+    stroke:var(--alarm-500);
+    stroke-width:2;
+  }
+
+  /* ---- base (pre-animation) states ---- */
+  .anim{opacity:0;}
+  .pop{opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.8);}
+  .draw{opacity:0; stroke-dasharray:1; stroke-dashoffset:1;}
+  .dot{opacity:0;}
+
+  /* ---- keyframes ---- */
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(16px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes popIn{
+    0%{opacity:0; transform:scale(.8);}
+    58%{opacity:1; transform:scale(1.05);}
+    100%{opacity:1; transform:scale(1);}
+  }
+  @keyframes popInStrong{
+    0%{opacity:0; transform:scale(.72);}
+    50%{opacity:1; transform:scale(1.09);}
+    76%{transform:scale(.965);}
+    100%{opacity:1; transform:scale(1);}
+  }
+  @keyframes drawLine{
+    0%{opacity:1; stroke-dashoffset:1;}
+    to{opacity:1; stroke-dashoffset:0;}
+  }
+  @keyframes dotRun{
+    0%{offset-distance:0%; opacity:1;}
+    92%{opacity:1;}
+    100%{offset-distance:100%; opacity:0;}
+  }
+  @keyframes pulseGlow{
+    0%,100%{filter:drop-shadow(0 0 6px var(--alarm-glow));}
+    50%{filter:drop-shadow(0 0 22px var(--alarm-glow));}
+  }
+  @keyframes breathe{
+    0%,100%{opacity:.5;}
+    50%{opacity:.9;}
+  }
+
+  /* ---- play state: wire up every element's real animation ---- */
+  .scene.play .title{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) .05s both;}
+  .scene.play .subtitle{animation:fadeUp .7s cubic-bezier(.2,.7,.3,1) .35s both;}
+  .scene.play .divider{animation:drawLine .5s cubic-bezier(.65,0,.35,1) .7s forwards;}
+
+  .scene.play .leftA{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 1.1s both;}
+  .scene.play .arrowLA{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 1.75s forwards;}
+  .scene.play .dotLA{animation:dotRun .42s linear 1.75s forwards;}
+  .scene.play .leftB{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 2.32s both;}
+  .scene.play .arrowLB{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 2.97s forwards;}
+  .scene.play .dotLB{animation:dotRun .42s linear 2.97s forwards;}
+  .scene.play .leftC{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 3.54s both;}
+
+  .scene.play .rightA{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 1.35s both;}
+  .scene.play .arrowRA{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 2s forwards;}
+  .scene.play .dotRA{animation:dotRun .42s linear 2s forwards;}
+  .scene.play .rightB{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 2.57s both;}
+  .scene.play .arrowRB{animation:drawLine .42s cubic-bezier(.65,0,.35,1) 3.22s forwards;}
+  .scene.play .dotRB{animation:dotRun .42s linear 3.22s forwards;}
+  .scene.play .rightC{animation:popIn .5s cubic-bezier(.34,1.56,.64,1) 3.79s both;}
+
+  .scene.play .mergeL{animation:drawLine .5s cubic-bezier(.65,0,.35,1) 4.44s forwards;}
+  .scene.play .mergeR{animation:drawLine .5s cubic-bezier(.65,0,.35,1) 4.54s forwards;}
+  .scene.play .stem{animation:drawLine .35s cubic-bezier(.65,0,.35,1) 5.19s forwards;}
+  .scene.play .dotStem{animation:dotRun .35s linear 5.19s forwards;}
+
+  .scene.play .finalGroup.glow{animation:popInStrong .6s cubic-bezier(.34,1.56,.64,1) 5.69s both, pulseGlow 2.6s ease-in-out 6.35s infinite;}
+  .scene.play .bgBreathe{animation:breathe 7s ease-in-out infinite;}
+
+  /* ---- replay control ---- */
+  .replay-btn{
+    position:absolute;
+    right:2%;
+    bottom:2%;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(5,19,31,.55);
+    border:1px solid rgba(126,160,214,.4);
+    color:var(--mist-300);
+    font-family:'Rajdhani','Segoe UI',Arial,sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .replay-btn:hover,.replay-btn:focus-visible{
+    color:var(--mint-400);
+    border-color:var(--mint-400);
+    outline:none;
+  }
+  .replay-btn:focus-visible{
+    box-shadow:0 0 0 2px var(--vivid-500);
+  }
+  .replay-btn svg{width:15px;height:15px;flex:0 0 auto;}
+
+  .back-link{
+    position:absolute;
+    left:2%;
+    top:2%;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--mist-300);
+    font-family:'Rajdhani','Segoe UI',Arial,sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.6px;
+    text-decoration:none;
+    padding:8px 4px;
+    transition:color .15s ease;
+  }
+  .back-link:hover,.back-link:focus-visible{
+    color:var(--mint-400);
+    outline:none;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene.play *{animation-duration:.01s !important; animation-delay:0s !important; animation-iteration-count:1 !important;}
+    .scene.play .finalGroup.glow{animation-name:popInStrong !important;}
+    .scene.play .bgBreathe{animation:none !important; opacity:.7;}
+  }
+</style>
+
+<a class="back-link" href="index.html">&larr; Chart Studio</a>
+
+<div class="stage-wrap">
+  <svg class="stage" viewBox="0 0 1600 1000" role="img" aria-labelledby="svgTitle svgDesc">
+    <title id="svgTitle">Policies make hunger worse</title>
+    <desc id="svgDesc">Climate policies raise fertilizer and fuel costs, and biofuel policies raise competition for farmland; both raise costs and food prices, together producing more hunger.</desc>
+
+    <defs>
+      <!-- icons -->
+      <g id="ic-capitol" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 24 L32 8 L58 24" />
+        <line x1="6" y1="24" x2="58" y2="24" />
+        <line x1="12" y1="30" x2="12" y2="50" />
+        <line x1="24" y1="30" x2="24" y2="50" />
+        <line x1="40" y1="30" x2="40" y2="50" />
+        <line x1="52" y1="30" x2="52" y2="50" />
+        <line x1="4" y1="56" x2="60" y2="56" />
+      </g>
+
+      <g id="ic-leaf" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 52 C10 26, 30 6, 54 6 C54 30, 38 50, 12 52 Z" />
+        <path d="M14 50 C26 36, 36 26, 52 10" />
+      </g>
+
+      <g id="ic-tractor" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 34 L8 20 L24 20 L30 34" />
+        <line x1="30" y1="12" x2="30" y2="34" />
+        <line x1="30" y1="14" x2="42" y2="14" />
+        <circle cx="16" cy="46" r="9" />
+        <circle cx="46" cy="46" r="13" />
+        <line x1="25" y1="34" x2="35" y2="34" />
+      </g>
+
+      <g id="ic-pumpcrop" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="8" y="18" width="20" height="38" rx="3" />
+        <line x1="8" y1="30" x2="28" y2="30" />
+        <path d="M28 26 C40 26, 40 20, 40 20 L40 44 C40 48, 44 48, 44 44 L44 30" />
+        <line x1="40" y1="20" x2="34" y2="14" />
+        <line x1="36" y1="56" x2="60" y2="56" />
+        <line x1="42" y1="56" x2="42" y2="46" />
+        <line x1="50" y1="56" x2="50" y2="42" />
+        <line x1="58" y1="56" x2="58" y2="48" />
+      </g>
+
+      <g id="ic-arrowup" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="32" cy="32" r="27" />
+        <line x1="32" y1="42" x2="32" y2="20" />
+        <path d="M22 30 L32 20 L42 30" />
+      </g>
+
+      <g id="ic-plate" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="36" cy="32" r="22" />
+        <path d="M28 38 Q36 30 44 38" />
+        <line x1="29" y1="25" x2="29" y2="25.5" />
+        <line x1="43" y1="25" x2="43" y2="25.5" />
+        <path d="M8 10 L8 26 M4 10 L4 22 M12 10 L12 22 M4 22 Q4 28 8 28 L8 54" />
+        <path d="M64 10 C64 10 68 14 68 22 C68 28 64 30 64 30 L64 54" />
+      </g>
+
+      <marker id="arrowMint" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 Z" fill="var(--mint-400)" />
+      </marker>
+      <marker id="arrowAlarm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 Z" fill="var(--alarm-500)" />
+      </marker>
+
+      <radialGradient id="haloMint" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--mint-400)" stop-opacity=".25" />
+        <stop offset="100%" stop-color="var(--mint-400)" stop-opacity="0" />
+      </radialGradient>
+
+      <linearGradient id="mergeGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--mint-400)" />
+        <stop offset="100%" stop-color="var(--alarm-500)" />
+      </linearGradient>
+    </defs>
+
+    <g class="scene play" id="scene">
+
+      <!-- ambient halo -->
+      <circle class="bgBreathe" cx="800" cy="90" r="360" fill="url(#haloMint)" />
+
+      <!-- header -->
+      <text class="anim title" x="800" y="72" text-anchor="middle"
+        font-weight="700" font-size="54" letter-spacing="1" fill="var(--paper-50)">
+        POLICIES MAKE HUNGER WORSE
+      </text>
+      <text class="anim subtitle" x="800" y="108" text-anchor="middle"
+        font-weight="500" font-size="19" letter-spacing="3" fill="var(--mist-400)">
+        TWO POLICY PATHS, ONE OUTCOME
+      </text>
+      <line class="draw divider" x1="730" y1="130" x2="870" y2="130" stroke="var(--mint-400)" stroke-width="2" pathLength="1" />
+
+      <!-- ===== LEFT CHAIN : CLIMATE ===== -->
+      <g class="pop leftA">
+        <rect class="node-box" x="140" y="188" width="480" height="104" rx="8" />
+        <foreignObject x="140" y="188" width="480" height="104">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-capitol"/></svg></span>
+            <span class="label">Climate Policies</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <path class="draw arrowLA" d="M380 292 L380 340" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <circle class="dot dotLA" r="5" fill="var(--mint-400)" style="offset-path:path('M380 292 L380 340');" />
+
+      <g class="pop leftB">
+        <rect class="node-box mechanism-box" x="140" y="348" width="480" height="120" rx="8" />
+        <foreignObject x="140" y="348" width="480" height="120">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card mechanism">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-tractor"/></svg></span>
+            <span class="label">Higher costs for fertilizer and gas (for tractors)</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <path class="draw arrowLB" d="M380 468 L380 516" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <circle class="dot dotLB" r="5" fill="var(--mint-400)" style="offset-path:path('M380 468 L380 516');" />
+
+      <g class="pop leftC">
+        <rect class="node-box" x="140" y="524" width="480" height="104" rx="8" />
+        <foreignObject x="140" y="524" width="480" height="104">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
+            <span class="label">Higher costs to farm</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <!-- ===== RIGHT CHAIN : BIOFUELS ===== -->
+      <g class="pop rightA">
+        <rect class="node-box" x="980" y="188" width="480" height="104" rx="8" />
+        <foreignObject x="980" y="188" width="480" height="104">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-leaf"/></svg></span>
+            <span class="label">Biofuels Policies</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <path class="draw arrowRA" d="M1220 292 L1220 340" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <circle class="dot dotRA" r="5" fill="var(--mint-400)" style="offset-path:path('M1220 292 L1220 340');" />
+
+      <g class="pop rightB">
+        <rect class="node-box mechanism-box" x="980" y="348" width="480" height="120" rx="8" />
+        <foreignObject x="980" y="348" width="480" height="120">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card mechanism">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-pumpcrop"/></svg></span>
+            <span class="label">More competition for land</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <path class="draw arrowRB" d="M1220 468 L1220 516" stroke="var(--mint-400)" stroke-width="2.5" pathLength="1" marker-end="url(#arrowMint)" fill="none" />
+      <circle class="dot dotRB" r="5" fill="var(--mint-400)" style="offset-path:path('M1220 468 L1220 516');" />
+
+      <g class="pop rightC">
+        <rect class="node-box" x="980" y="524" width="480" height="104" rx="8" />
+        <foreignObject x="980" y="524" width="480" height="104">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
+            <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
+            <span class="label">Higher food prices</span>
+          </div>
+        </foreignObject>
+      </g>
+
+      <!-- ===== CONVERGENCE ===== -->
+      <path class="draw mergeL" d="M380 628 L380 750 Q380 770 410 770 L800 770" stroke="var(--mint-400)" stroke-width="2.5" fill="none" pathLength="1" />
+      <path class="draw mergeR" d="M1220 628 L1220 750 Q1220 770 1190 770 L800 770" stroke="var(--mint-400)" stroke-width="2.5" fill="none" pathLength="1" />
+      <path class="draw stem" d="M800 770 L800 826" stroke="url(#mergeGrad)" stroke-width="3" fill="none" pathLength="1" marker-end="url(#arrowAlarm)" />
+      <circle class="dot dotStem" r="6" fill="var(--alarm-500)" style="offset-path:path('M800 770 L800 826');" />
+
+      <!-- ===== OUTCOME ===== -->
+      <g class="pop finalGroup glow">
+        <rect class="node-box final-box" x="490" y="834" width="620" height="126" rx="10" />
+        <foreignObject x="490" y="834" width="620" height="126">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card final-card">
+            <span class="icon-slot"><svg viewBox="0 0 76 64"><use href="#ic-plate"/></svg></span>
+            <span class="label">More Hunger</span>
+          </div>
+        </foreignObject>
+      </g>
+
+    </g>
+  </svg>
+
+  <button class="replay-btn" id="replayBtn" type="button" aria-label="Replay animation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="1 4 1 10 7 10"></polyline>
+      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+    </svg>
+    Replay
+  </button>
+</div>
+
+<p class="sr-only">
+  Diagram: Climate policies lead to higher costs for fertilizer and gas for tractors, which leads to higher costs to farm.
+  Separately, biofuels policies lead to more competition for land, which leads to higher food prices.
+  Both chains combine to produce more hunger.
+</p>
+
+<script>
+  (function(){
+    var btn = document.getElementById('replayBtn');
+    var scene = document.getElementById('scene');
+    btn.addEventListener('click', function(){
+      scene.classList.remove('play');
+      void scene.getBBox();
+      requestAnimationFrame(function(){
+        scene.classList.add('play');
+      });
+    });
+  })();
+</script>
