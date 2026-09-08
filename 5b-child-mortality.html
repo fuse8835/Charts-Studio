@@ -48,23 +48,54 @@
     --start-grid: 1.2375s;
     --start-axis: 1.3875s;
 
+    /* the without-climate-change line's budget is split into 5 sub-beats:
+       draw to 2026, a pause (now longer, to give the 2026 callout room to
+       fade slowly), the axis "zoom out" from 1990-2030 to 1990-2050 (ticks
+       slide left, 2040/2050 fade in, the already-drawn segment compresses to
+       match), a short settle, then the line finishes drawing to 2050.
+       Kevin asked to slow the callout's and the series labels' fades and
+       explicitly said not to worry about keeping the total runtime the same
+       -- every absolute time below was recomputed from scratch with more
+       breathing room, rather than squeezed back into the old total. */
     --dur-line-mint: 4s;
     --start-line-mint: 3.0625s;
-    --dur-line-red: 2s;
-    --start-line-red: 7.3125s;
+    --dur-mint-part1: 2s;
+    --dur-mint-pause: 1.2s;
+    --dur-zoom: 1s;
+    --start-zoom: calc(var(--start-line-mint) + var(--dur-mint-part1) + var(--dur-mint-pause));
+    --start-mint-part2: calc(var(--start-zoom) + var(--dur-zoom) + .2s);
+    --dur-mint-part2: 1.2s;
 
-    --dur-label: .25s;
-    --start-label-mint: 7.0125s;
-    --start-label-red: 9.2625s;
+    /* the "2026" callout (leader line + circle) lives entirely inside the
+       pause -- appears once the line reaches 2026, holds, then fades out
+       (now slowly, see .badge2026Pulse's keyframe split below) just before
+       --start-zoom so it's fully gone before any scaling starts (never
+       needs to move/compress with the line itself). */
+    --start-badge2026: calc(var(--start-line-mint) + var(--dur-mint-part1) + .15s);
+    --dur-badge2026: calc(var(--start-zoom) - var(--start-badge2026));
+
+    --dur-line-red: 2s;
+    --start-line-red: 9.2625s;
+
+    --dur-label: .6s;
+    --start-label-mint: 8.7625s;
+    --start-label-red: 11.3625s;
 
     /* the shaded gap between the two curves -- the script's own suggestion
        to "zoom into the last part showing the difference between the two" --
        fades in once both lines and labels have settled. */
     --dur-band: 1.25s;
-    --start-band: 9.5625s;
+    --start-band: 12.3625s;
     --ease-soft: cubic-bezier(.16,1,.3,1);
 
-    --total: 11.6875s;
+    /* the opening view shows only 1990-2030 (40 years) filling the same plot
+       width the final 1990-2050 (60 years) does -- 60/40 = 1.5x. --pad-left
+       must match PAD.left in the script below (the plot's left edge, i.e.
+       year 1990, which is the fixed anchor point for the zoom). */
+    --zoom-factor: 1.5;
+    --pad-left: 170px;
+
+    --total: 14.0125s;
 
     color-scheme: dark;
   }
@@ -259,8 +290,86 @@
     animation-fill-mode: forwards;
   }
 
-  .line-path.without { stroke: var(--mint-400); filter: drop-shadow(0 0 6px rgba(4,255,186,.4)); animation-duration: var(--dur-line-mint); animation-delay: var(--start-line-mint); }
+  /* the without-line's draw is split into two keyframe animations targeting
+     the same property (stroke-dashoffset) with non-overlapping delays -- the
+     "from" value of the 2nd exactly matches the "to" value of the 1st (set
+     dynamically in JS once the real path length is known), so there's no
+     visual jump across the pause/zoom that sits between them. */
+  .line-path.without {
+    stroke: var(--mint-400);
+    filter: drop-shadow(0 0 6px rgba(4,255,186,.4));
+    animation-name: drawMintPart1, drawMintPart2;
+    animation-duration: var(--dur-mint-part1), var(--dur-mint-part2);
+    animation-delay: var(--start-line-mint), var(--start-mint-part2);
+    animation-timing-function: var(--ease-soft), var(--ease-soft);
+    animation-fill-mode: forwards, forwards;
+  }
   .line-path.with { stroke: var(--heat-500); filter: drop-shadow(0 0 6px rgba(227,0,99,.45)); animation-duration: var(--dur-line-red); animation-delay: var(--start-line-red); }
+
+  /* wraps only the mint <path> (not text) so the brief scaleX doesn't distort
+     any glyphs -- anchored at the plot's left edge (year 1990, which never
+     moves) so scaling out reveals more of the x-axis to the right, exactly
+     like the axis ticks sliding into their final positions below. */
+  #mintZoomWrap {
+    transform-box: view-box;
+    transform-origin: var(--pad-left) 0px;
+    animation: mintZoomOut var(--dur-zoom) var(--ease-soft) both;
+    animation-delay: var(--start-zoom);
+  }
+  @keyframes mintZoomOut {
+    from { transform: scaleX(var(--zoom-factor)); }
+    to { transform: scaleX(1); }
+  }
+
+  /* x-axis ticks for 1990-2030: already visible (faded in during the normal
+     axis-settle beat) at an inflated "zoomed in" position filling the whole
+     plot width -- slides left into its final compact position during the
+     same zoom-out beat as the line. */
+  .tick-label.x-slide {
+    animation-name: fadeUp, slideToFinal;
+    animation-duration: .5s, var(--dur-zoom);
+    animation-delay: calc(var(--start-axis) + var(--stagger, 0s)), var(--start-zoom);
+    animation-timing-function: ease-out, var(--ease-soft);
+    animation-fill-mode: forwards, both;
+  }
+  @keyframes slideToFinal {
+    from { transform: translateX(var(--slide-offset)); }
+    to { transform: translateX(0); }
+  }
+
+  /* 2040/2050: don't exist yet in the opening zoomed-in view -- fade in at
+     their already-final x position once the axis has room for them. */
+  .tick-label.x-new {
+    animation: fadeUp .5s ease-out forwards;
+    animation-delay: calc(var(--start-zoom) + var(--stagger, 0s));
+  }
+
+  /* "2026" callout marking where the line pauses -- same leader-line +
+     circle convention as 5A's canola badge. Deliberately *not* inside
+     #mintZoomWrap: it fully fades out before --start-zoom begins, so it
+     never needs to move/compress with the line, and its text is never at
+     risk of the brief scaleX distortion that wrapper applies. */
+  .badge2026-line, .badge2026-circle, .badge2026-text {
+    opacity: 0;
+    animation: badge2026Pulse linear both;
+    animation-duration: var(--dur-badge2026);
+    animation-delay: var(--start-badge2026);
+  }
+  @keyframes badge2026Pulse {
+    0% { opacity: 0; }
+    35% { opacity: 1; }
+    65% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .badge2026-line { stroke: var(--mint-400); stroke-width: 2; }
+  .badge2026-circle { fill: rgba(5,19,31,.85); stroke: var(--mint-400); stroke-width: 2; }
+  .badge2026-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    fill: var(--mint-400);
+    text-anchor: middle;
+  }
 
   /* fixed px, not a cqw clamp() -- created dynamically via JS at page load,
      same container-query timing race documented on 5A's value-label. */
@@ -730,7 +839,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;11.7s &middot; 9 tracks</span>
+    <span>0s&ndash;14.0s &middot; 12 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -750,7 +859,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="11688" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="14013" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -828,6 +937,14 @@
     axisYGroup.appendChild(label);
   });
 
+  // the chart opens zoomed into 1990-2030 (matching the mint line's initial
+  // partial draw), then "zooms out" to the full 1990-2050 range once the line
+  // pauses at 2026 -- ZOOM_YEAR_MAX is the boundary between ticks that are
+  // already on screen (and slide left into their final spot) and ticks that
+  // don't exist yet (and simply fade in once there's room for them).
+  const ZOOM_YEAR_MAX = 2030;
+  const ZOOM_FACTOR = 1.5; // keep in sync with --zoom-factor in CSS
+
   const axisXGroup = document.getElementById('axisXGroup');
   const YEARS = [1990, 2000, 2010, 2020, 2030, 2040, 2050];
   YEARS.forEach((yr, i) => {
@@ -836,7 +953,14 @@
     label.setAttribute('y', PAD.top + plotH + 42);
     label.setAttribute('text-anchor', 'middle');
     label.classList.add('tick-label');
-    label.style.animationDelay = `calc(var(--start-axis) + ${i * 0.03}s)`;
+    label.style.setProperty('--stagger', `${i * 0.03}s`);
+    if (yr <= ZOOM_YEAR_MAX) {
+      label.classList.add('x-slide');
+      const offset = (ZOOM_FACTOR - 1) * (x(yr) - PAD.left);
+      label.style.setProperty('--slide-offset', `${offset}px`);
+    } else {
+      label.classList.add('x-new');
+    }
     label.textContent = yr;
     axisXGroup.appendChild(label);
   });
@@ -855,6 +979,21 @@
   const seriesLabelGroup = document.getElementById('seriesLabelGroup');
   const svgNS = 'http://www.w3.org/2000/svg';
 
+  // the year the without-line pauses at (zoomed in) before the axis expands
+  // and it continues on to 2050.
+  const ZOOM_PAUSE_YEAR = 2026;
+
+  function pointAtYear(data, year) {
+    for (let i = 0; i < data.length - 1; i++) {
+      const [y0, v0] = data[i], [y1, v1] = data[i + 1];
+      if (year >= y0 && year <= y1) {
+        const f = (year - y0) / (y1 - y0);
+        return [year, v0 + f * (v1 - v0)];
+      }
+    }
+    return data[data.length - 1];
+  }
+
   function buildSeries(key, data, labelText, labelYear, labelVal) {
     const pts = data.map(([yr, v]) => [x(yr), y(v)]);
     const lineD = toPolylinePath(pts);
@@ -862,12 +1001,79 @@
     const path = document.createElementNS(svgNS, 'path');
     path.setAttribute('d', lineD);
     path.classList.add('line-path', key);
-    linesGroup.appendChild(path);
 
-    const len = path.getTotalLength();
-    const lenStyle = document.createElement('style');
-    lenStyle.textContent = `.line-path.${key}{stroke-dasharray:${len};stroke-dashoffset:${len};}`;
-    document.head.appendChild(lenStyle);
+    if (key === 'without') {
+      // wrap only the path (not any text) in a group that gets the brief
+      // scaleX "zoom out" -- keeps axis/series-label text undistorted.
+      const zoomWrap = document.createElementNS(svgNS, 'g');
+      zoomWrap.id = 'mintZoomWrap';
+      zoomWrap.appendChild(path);
+      linesGroup.appendChild(zoomWrap);
+
+      const len = path.getTotalLength();
+
+      // measure how far along the path year=2026 sits by building the same
+      // polyline up to (and including) an interpolated point at that year,
+      // then measuring *that* sub-path -- gives an exact pixel length rather
+      // than guessing a time/percentage fraction.
+      const pauseIdx = data.findIndex(([yr]) => yr > ZOOM_PAUSE_YEAR);
+      const subPts = pts.slice(0, pauseIdx).concat([
+        [x(ZOOM_PAUSE_YEAR), y(pointAtYear(data, ZOOM_PAUSE_YEAR)[1])]
+      ]);
+      const measurePath = document.createElementNS(svgNS, 'path');
+      measurePath.setAttribute('d', toPolylinePath(subPts));
+      measurePath.style.display = 'none';
+      document.body.appendChild(measurePath);
+      const pauseLen = measurePath.getTotalLength();
+      measurePath.remove();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .line-path.without{stroke-dasharray:${len};stroke-dashoffset:${len};}
+        @keyframes drawMintPart1{from{stroke-dashoffset:${len};}to{stroke-dashoffset:${len - pauseLen};}}
+        @keyframes drawMintPart2{from{stroke-dashoffset:${len - pauseLen};}to{stroke-dashoffset:0;}}
+      `;
+      document.head.appendChild(style);
+
+      // "2026" callout -- leader line + circle, matching 5A's badge
+      // convention. Built at the same (2026, interpolated-value) point
+      // already computed above for the pause length, in the line's own
+      // *wide-scale* coordinates -- fine since it's only ever visible before
+      // the zoom starts, never needing to move with the compressing line.
+      const [badgeXWide, badgeY] = subPts[subPts.length - 1];
+      // the badge is only ever visible before --start-zoom, during which the
+      // line's wrapper sits at its constant "from" scaleX(1.5) (not yet
+      // animating) -- so its x needs the same zoomed-in stretch applied,
+      // matching the *visible* (stretched) position of the line's tip, not
+      // its plain final-scale coordinate.
+      const badgeX = PAD.left + ZOOM_FACTOR * (badgeXWide - PAD.left);
+      const badgeDrop = 38, badgeR = 28;
+      const badgeCx = badgeX, badgeCy = badgeY - badgeDrop - badgeR;
+
+      const badgeLine = document.createElementNS(svgNS, 'line');
+      badgeLine.setAttribute('x1', badgeX); badgeLine.setAttribute('y1', badgeY - 10);
+      badgeLine.setAttribute('x2', badgeCx); badgeLine.setAttribute('y2', badgeCy + badgeR);
+      badgeLine.classList.add('badge2026-line');
+      linesGroup.appendChild(badgeLine);
+
+      const badgeCircle = document.createElementNS(svgNS, 'circle');
+      badgeCircle.setAttribute('cx', badgeCx); badgeCircle.setAttribute('cy', badgeCy); badgeCircle.setAttribute('r', badgeR);
+      badgeCircle.classList.add('badge2026-circle');
+      linesGroup.appendChild(badgeCircle);
+
+      const badgeText = document.createElementNS(svgNS, 'text');
+      badgeText.setAttribute('x', badgeCx); badgeText.setAttribute('y', badgeCy + 2);
+      badgeText.setAttribute('dominant-baseline', 'middle');
+      badgeText.classList.add('badge2026-text');
+      badgeText.textContent = '2026';
+      linesGroup.appendChild(badgeText);
+    } else {
+      linesGroup.appendChild(path);
+      const len = path.getTotalLength();
+      const lenStyle = document.createElement('style');
+      lenStyle.textContent = `.line-path.${key}{stroke-dasharray:${len};stroke-dashoffset:${len};}`;
+      document.head.appendChild(lenStyle);
+    }
 
     const label = document.createElementNS(svgNS, 'text');
     label.setAttribute('x', x(labelYear));
@@ -881,7 +1087,7 @@
   buildSeries('with', WITH, 'With climate change', 2033, 1.75);
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 11.6875;
+  const totalSec = 14.0125;
   for (let s = 0; s <= totalSec; s += 1) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
@@ -894,11 +1100,14 @@
     { label: 'Headline + axis label', color: '#f8fbff', start: 0.075, dur: 0.4 },
     { label: 'Grid', color: '#a9c2d6', start: 1.2375, dur: 0.35 },
     { label: 'Axis labels + source', color: '#a9c2d6', start: 1.3875, dur: 0.35 },
-    { label: 'Without-climate-change line', color: '#04ffba', start: 3.0625, dur: 4 },
-    { label: '"Without climate change" label', color: '#04ffba', start: 7.0125, dur: 0.25 },
-    { label: 'With-climate-change line', color: '#e30063', start: 7.3125, dur: 2 },
-    { label: '"With climate change" label', color: '#e30063', start: 9.2625, dur: 0.25 },
-    { label: 'Delta band', color: '#e30063', start: 9.5625, dur: 1.25 }
+    { label: 'Without-line: draw to 2026', color: '#04ffba', start: 3.0625, dur: 2 },
+    { label: '"2026" callout', color: '#04ffba', start: 5.2125, dur: 1.05 },
+    { label: 'Axis zoom-out + line compress', color: '#a9c2d6', start: 6.2625, dur: 1 },
+    { label: 'Without-line: 2026 to 2050', color: '#04ffba', start: 7.4625, dur: 1.2 },
+    { label: '"Without climate change" label', color: '#04ffba', start: 8.7625, dur: 0.6 },
+    { label: 'With-climate-change line', color: '#e30063', start: 9.2625, dur: 2 },
+    { label: '"With climate change" label', color: '#e30063', start: 11.3625, dur: 0.6 },
+    { label: 'Delta band', color: '#e30063', start: 12.3625, dur: 1.25 }
   ];
 
   const tracksEl = document.getElementById('tracks');
