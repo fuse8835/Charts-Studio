@@ -60,6 +60,9 @@
        420px is exactly the offset that re-centers it on the canvas for its
        solo reveal, before it slides back to its real position. */
     --climate-center-offset:420px;
+    /* zoomed-in scale while the climate chain reveals solo, before it
+       shrinks back to 1 in the same motion as the slide-left. */
+    --climate-zoom:1.4;
   }
 
   *{box-sizing:border-box;}
@@ -228,7 +231,22 @@
 
   /* climate chain reveals solo & centered first, then slides to its real
      position -- base state (before the slide animation starts) is centered. */
-  #climateChainWrap{ transform:translateX(var(--climate-center-offset)); }
+  #climateChainWrap{ transform-box:view-box; transform:translateX(var(--climate-center-offset)); }
+
+  /* ...and while it's solo, it's zoomed in -- shrinks back to 1 in the same
+     motion as the slide. transform-origin x=380 is the chain's own horizontal
+     center (midpoint of its final 140..620 box). y=146 is anchored at the very
+     top of the chain's content (the policy card's badge, which overhangs 42px
+     above the card) rather than the chain's vertical center -- anchoring there
+     means the zoom only ever grows the chain DOWNWARD from that fixed point,
+     so it can't push up into the title/subtitle above it regardless of how
+     large --climate-zoom gets; there's ample slack below before anything else
+     (the merge lines, invisible at this point in the timeline anyway). */
+  #climateChainZoom{
+    transform-box:view-box;
+    transform-origin:380px 146px;
+    transform:scale(var(--climate-zoom));
+  }
 
   /* traveling "comet" pulse: a thicker, glowing duplicate of each connector
      path that sweeps from end to end right as the connector draws in, in
@@ -273,6 +291,10 @@
     from{transform:translateX(var(--climate-center-offset));}
     to{transform:translateX(0);}
   }
+  @keyframes climateZoomOut{
+    from{transform:scale(var(--climate-zoom));}
+    to{transform:scale(1);}
+  }
   @keyframes pulseGlow{
     0%,100%{filter:drop-shadow(0 0 6px var(--alarm-glow));}
     50%{filter:drop-shadow(0 0 22px var(--alarm-glow));}
@@ -298,6 +320,7 @@
 
   /* climate chain slides from centered to its real left-side position */
   .scene.play #climateChainWrap{animation:climateSlide var(--d-slide) cubic-bezier(.65,0,.35,1) var(--t-slide) forwards;}
+  .scene.play #climateChainZoom{animation:climateZoomOut var(--d-slide) cubic-bezier(.65,0,.35,1) var(--t-slide) forwards;}
 
   /* biofuels chain -- reveals on the right, once the climate chain has settled left */
   .scene.play .rightA{animation:popIn var(--d-pop) cubic-bezier(.34,1.56,.64,1) var(--t-rightA) both;}
@@ -844,10 +867,10 @@
       </text>
       <line class="draw divider" x1="730" y1="130" x2="870" y2="130" stroke="var(--mint-400)" stroke-width="2" pathLength="1" />
 
-      <!-- ===== LEFT CHAIN : CLIMATE (reveals solo & centered, then slides left) ===== -->
+      <!-- ===== LEFT CHAIN : CLIMATE (reveals solo, zoomed in & centered, then shrinks + slides left) ===== -->
       <g id="climateChainWrap">
+      <g id="climateChainZoom">
       <g class="pop leftA">
-        <rect class="node-box" x="140" y="188" width="480" height="104" rx="8" />
         <foreignObject x="140" y="188" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-capitol"/></svg></span>
@@ -873,7 +896,6 @@
       <path class="pulse pulse-mint pulseLB" d="M380 468 L380 516" pathLength="1" />
 
       <g class="pop leftC">
-        <rect class="node-box" x="140" y="574" width="480" height="104" rx="8" />
         <foreignObject x="140" y="574" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
@@ -882,11 +904,11 @@
         </foreignObject>
       </g>
       </g>
+      </g>
 
       <!-- ===== RIGHT CHAIN : BIOFUELS (reveals once the climate chain has slid left) ===== -->
       <g class="chain-blue">
       <g class="pop rightA">
-        <rect class="node-box" x="980" y="188" width="480" height="104" rx="8" />
         <foreignObject x="980" y="188" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card policy">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-leaf"/></svg></span>
@@ -912,7 +934,6 @@
       <path class="pulse pulse-blue pulseRB" d="M1220 468 L1220 516" pathLength="1" />
 
       <g class="pop rightC">
-        <rect class="node-box" x="980" y="574" width="480" height="104" rx="8" />
         <foreignObject x="980" y="574" width="480" height="104" overflow="visible">
           <div xmlns="http://www.w3.org/1999/xhtml" class="card outcome">
             <span class="icon-slot"><svg viewBox="0 0 64 64"><use href="#ic-arrowup"/></svg></span>
@@ -989,7 +1010,7 @@
   <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
-<p class="caption">A causal-chain infographic, not a data chart &mdash; matches the script's own sentence order: the <b>climate</b> chain (mint) reveals solo and centered first, slides left to make room, then the <b>biofuels</b> chain (blue) reveals on the right, and both converge into one glowing outcome card via a traveling comet-pulse on each connector. Built as native CSS/Web Animations gated behind the <b>.scene.play</b> class so it's fully seekable. Append <b>?export</b> to the URL for a capture-ready version with the dev chrome hidden.</p>
+<p class="caption">A causal-chain infographic, not a data chart &mdash; matches the script's own sentence order: the <b>climate</b> chain (mint) reveals solo, zoomed in and centered first, then shrinks and slides left to make room, then the <b>biofuels</b> chain (blue) reveals on the right, and both converge into one glowing outcome card via a traveling comet-pulse on each connector. Built as native CSS/Web Animations gated behind the <b>.scene.play</b> class so it's fully seekable. Append <b>?export</b> to the URL for a capture-ready version with the dev chrome hidden.</p>
 
 <p class="sr-only">
   Diagram: Climate policies lead to higher costs for fertilizer and gas for tractors, which leads to higher costs to farm.
@@ -1021,7 +1042,7 @@
     { label: 'Climate: higher fertilizer/gas costs', color: '#04ffba', start: 2.52, dur: 0.5 },
     { label: 'Climate: arrow to outcome', color: '#04ffba', start: 3.17, dur: 0.42 },
     { label: 'Climate: higher costs to farm', color: '#04ffba', start: 3.74, dur: 0.5 },
-    { label: 'Climate chain slides left', color: '#7ea0bd', start: 4.5, dur: 0.7 },
+    { label: 'Climate chain zooms out + slides left', color: '#7ea0bd', start: 4.5, dur: 0.7 },
     { label: 'Biofuels: policy card', color: '#3d7bff', start: 5.3, dur: 0.5 },
     { label: 'Biofuels: arrow to land competition', color: '#3d7bff', start: 5.95, dur: 0.42 },
     { label: 'Biofuels: more land competition', color: '#3d7bff', start: 6.52, dur: 0.5 },
