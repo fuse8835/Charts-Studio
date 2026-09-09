@@ -45,7 +45,7 @@
     --start-axis: 2.2s;
     --start-head: .15s;
     --dur-bar: .55s;
-    --total: 8.83s;
+    --total: 13.9s;
 
     color-scheme: dark;
   }
@@ -710,7 +710,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;8.83s &middot; 14 tracks</span>
+    <span>0s&ndash;13.9s &middot; 14 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -730,7 +730,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="8830" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="13900" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -764,7 +764,7 @@
   ];
 
   const W = 1200, H = 750;
-  const PAD = { top: 280, right: 70, bottom: 130, left: 170 };
+  const PAD = { top: 185, right: 70, bottom: 130, left: 170 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
   const maxVal = 800;
@@ -778,18 +778,21 @@
   const barTopY = v => PAD.top + plotH - (v / maxVal) * plotH;
 
   // Two beats matching the script's own two sentences: the 5 low-emission
-  // provinces (hydro/nuclear) reveal together first, a pause for the
-  // narration's "however" turn, then the 5 high-emission provinces
-  // (oil/gas/coal). Within each beat, bars stagger slightly (0.12s) so
-  // they read as a fast cascade, not one flat pop -- matching the rest of
-  // the series' per-item stagger convention (e.g. 2A's REGION_START).
+  // provinces (hydro/nuclear) reveal first, a pause for the narration's
+  // "however" turn, then the 5 high-emission provinces (oil/gas/coal).
+  // Within each beat, each province is its own fully sequential step --
+  // bar grows, THEN its value label appears, THEN a small pause, THEN the
+  // next bar starts -- rather than overlapping bars with only a slight
+  // offset. ITEM_STEP is DUR_BAR (the bar's own grow time) plus a small
+  // fixed pause, so no two bars are ever growing at once.
   const DUR_BAR = 0.55; // must match --dur-bar in CSS
-  const GROUP_STAGGER = 0.12;
-  const GROUP_START = [3.1, 5.3]; // [low-emission group, high-emission group]
+  const ITEM_PAUSE = 0.15;
+  const ITEM_STEP = DUR_BAR + ITEM_PAUSE;
+  const GROUP_START = [3.1, 7.9]; // [low-emission group, high-emission group]
   function barDelay(i) {
     const group = i < 5 ? 0 : 1;
     const indexInGroup = i < 5 ? i : i - 5;
-    return GROUP_START[group] + indexInGroup * GROUP_STAGGER;
+    return GROUP_START[group] + indexInGroup * ITEM_STEP;
   }
 
   const gridGroup = document.getElementById('gridGroup');
@@ -851,7 +854,7 @@
   });
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 8.83;
+  const totalSec = 13.9;
   for (let s = 0; s <= totalSec; s += 0.5) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
