@@ -126,5 +126,13 @@
     "html": "7a-co2-electricity.html",
     "mov": "7a-co2-electricity-alpha.mov",
     "duration": 13.9
+  },
+  {
+    "id": "7b",
+    "name": "Share of Battery Electric Car Inventory",
+    "subtitle": "With and without regulation, United States, 2020-2050",
+    "html": "7b-ev-inventory-share.html",
+    "mov": "7b-ev-inventory-share-alpha.mov",
+    "duration": 8.9
   }
 ]
