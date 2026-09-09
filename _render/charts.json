@@ -118,5 +118,13 @@
     "duration": 11.71,
     "width": 1920,
     "height": 1344
+  },
+  {
+    "id": "7a",
+    "name": "CO2 Emitted per Unit of Electricity",
+    "subtitle": "Grams of CO2e per kWh, by province, 2025",
+    "html": "7a-co2-electricity.html",
+    "mov": "7a-co2-electricity-alpha.mov",
+    "duration": 8.83
   }
 ]
