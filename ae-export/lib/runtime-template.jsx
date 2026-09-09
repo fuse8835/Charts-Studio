@@ -217,7 +217,10 @@ function createTextLayer(comp, spec) {
   tl.name = spec.name;
 
   var textProp = tl.property('Source Text');
-  var td = textProp.value;
+  // boxText is read-only on a TextDocument pulled from an existing property's
+  // .value — AE only allows setting it on a freshly-constructed TextDocument,
+  // so build one from scratch here rather than mutating what addText() gave us.
+  var td = new TextDocument(initialText);
   setFont(td);
   td.fontSize = spec.fontSize;
   td.applyFill = true;
