@@ -32,7 +32,6 @@
     --mint-300: #6dffdb;
     --heat-500: #e30063;
     --heat-300: #ff4d94;
-    --red-500: #e0342a;
     --mist-400: #7ea0bd;
     --mist-300: #a9c2d6;
     --paper-100: #eef3fa;
@@ -237,9 +236,17 @@
   .area-band {
     clip-path: url(#areaWipeClip);
   }
-  .band-fossil { fill: var(--mint-400); }
-  .band-electric { fill: var(--vivid-300); }
-  .band-hybrid { fill: var(--red-500); }
+  /* fossil gets the same soft gradient-fade treatment as 1A's original area
+     chart (mint at moderate opacity fading to transparent) instead of a
+     solid block -- gradientUnits defaults to objectBoundingBox, so this
+     still fades correctly top-to-bottom of the band's own bounding box
+     even though the band's top edge is a curve, not a flat line. */
+  .band-fossil { fill: url(#fossilGradient); }
+  /* electric/hybrid: solid color at reduced opacity rather than a gradient,
+     per Kevin's steer -- gradient is still an easy follow-up if this reads
+     too flat. */
+  .band-electric { fill: var(--vivid-500); fill-opacity: .65; }
+  .band-hybrid { fill: var(--heat-500); fill-opacity: .65; }
 
   #areaWipeRect {
     animation: areaWipe var(--dur-wipe) linear forwards;
@@ -249,11 +256,13 @@
 
   /* in-area labels, one per band, landing right as the wipe finishes --
      positioned inside their own colored region like the reference image,
-     not a separate legend. */
+     not a separate legend. Smaller and lighter than the first pass, and
+     right-aligned as a column instead of centered. */
   .band-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 30px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 600;
+    text-anchor: end;
     opacity: 0;
     transform: translateY(8px);
     animation: fadeUp var(--dur-label) cubic-bezier(.16,1,.3,1) forwards;
@@ -705,6 +714,11 @@
         <clipPath id="areaWipeClip">
           <rect id="areaWipeRect" x="0" y="0" width="0" height="750"/>
         </clipPath>
+        <!-- same gradient-fade treatment as 1A's original area chart -->
+        <linearGradient id="fossilGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#04ffba" stop-opacity=".30"/>
+          <stop offset="100%" stop-color="#04ffba" stop-opacity="0"/>
+        </linearGradient>
       </defs>
       <g id="gridGroup"></g>
       <g id="axisYGroup"></g>
@@ -871,10 +885,11 @@
 
   // in-area labels, positioned inside each band using the LAST year's own
   // thickness (where the bands are most separated and easiest to read),
-  // right-anchored a little in from the right edge like the reference.
+  // right-aligned as a column near the right edge (text-anchor:end is set
+  // in CSS -- x is the same for all 3 so they line up on one edge).
   const labelsGroup = document.getElementById('labelsGroup');
   const last = DATA[DATA.length - 1];
-  const labelX = PAD.left + plotW * 0.86;
+  const labelX = W - PAD.right - 20;
   const LABELS = [
     { text: 'Fossil fuel cars 66%', cls: 'fossil', midVal: last.fossil / 2 },
     { text: 'Electric cars 24%', cls: 'electric', midVal: last.fossil + last.electric / 2 },
@@ -884,7 +899,6 @@
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', labelX);
     label.setAttribute('y', y(l.midVal) + 10);
-    label.setAttribute('text-anchor', 'middle');
     label.classList.add('band-label', l.cls);
     label.style.animationDelay = `calc(var(--start-labels) + ${i} * var(--label-stagger))`;
     label.textContent = l.text;
