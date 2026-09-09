@@ -245,8 +245,8 @@
   /* electric/hybrid: solid color at reduced opacity rather than a gradient,
      per Kevin's steer -- gradient is still an easy follow-up if this reads
      too flat. */
-  .band-electric { fill: var(--vivid-500); fill-opacity: .65; }
-  .band-hybrid { fill: var(--heat-500); fill-opacity: .65; }
+  .band-electric { fill: url(#electricGradient); }
+  .band-hybrid { fill: url(#hybridGradient); }
 
   #areaWipeRect {
     animation: areaWipe var(--dur-wipe) linear forwards;
@@ -718,6 +718,14 @@
         <linearGradient id="fossilGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stop-color="#04ffba" stop-opacity=".30"/>
           <stop offset="100%" stop-color="#04ffba" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="electricGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#043fc5" stop-opacity=".65"/>
+          <stop offset="100%" stop-color="#043fc5" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="hybridGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e30063" stop-opacity=".65"/>
+          <stop offset="100%" stop-color="#e30063" stop-opacity="0"/>
         </linearGradient>
       </defs>
       <g id="gridGroup"></g>
