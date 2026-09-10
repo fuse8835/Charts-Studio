@@ -44,11 +44,14 @@
     --start-grid: 2.0s;
     --start-axis: 2.2s;
     --start-head: .15s;
-    --start-wipe: 2.4s;
-    --dur-wipe: 3.2s;
-    --start-labels: 5.6s;
+    --dur-wipe: 1.1s;
+    --start-wipe-1: 2.4s;
+    --start-wipe-2: 4.2s;
+    --start-wipe-3: 6.0s;
     --dur-label: .5s;
-    --label-stagger: .15s;
+    --start-label-1: 3.5s;
+    --start-label-2: 5.3s;
+    --start-label-3: 7.1s;
     --total: 8.9s;
 
     color-scheme: dark;
@@ -230,27 +233,36 @@
   }
 
 
-  /* the 3 stacked bands share one clip-path (a rect growing left to right)
-     so they all reveal together as one "watch the trend unfold over time"
-     wipe, instead of each layer drawing in separately. */
-  .area-band {
-    clip-path: url(#areaWipeClip);
-  }
+  /* each band gets its own clip-path (a rect growing left to right) so the
+     3 zones reveal one at a time -- fossil wipes in, its label lands, then
+     electric wipes in, its label lands, then hybrid -- instead of all 3
+     sweeping in together. */
+  #bandFossil { clip-path: url(#fossilWipeClip); }
+  #bandElectric { clip-path: url(#electricWipeClip); }
+  #bandHybrid { clip-path: url(#hybridWipeClip); }
+
   /* fossil gets the same soft gradient-fade treatment as 1A's original area
      chart (mint at moderate opacity fading to transparent) instead of a
      solid block -- gradientUnits defaults to objectBoundingBox, so this
      still fades correctly top-to-bottom of the band's own bounding box
      even though the band's top edge is a curve, not a flat line. */
   .band-fossil { fill: url(#fossilGradient); }
-  /* electric/hybrid: solid color at reduced opacity rather than a gradient,
-     per Kevin's steer -- gradient is still an easy follow-up if this reads
-     too flat. */
+  /* electric/hybrid: same top-to-bottom gradient-fade treatment as fossil,
+     just tinted to each band's own color. */
   .band-electric { fill: url(#electricGradient); }
   .band-hybrid { fill: url(#hybridGradient); }
 
-  #areaWipeRect {
+  #fossilWipeRect {
     animation: areaWipe var(--dur-wipe) linear forwards;
-    animation-delay: var(--start-wipe);
+    animation-delay: var(--start-wipe-1);
+  }
+  #electricWipeRect {
+    animation: areaWipe var(--dur-wipe) linear forwards;
+    animation-delay: var(--start-wipe-2);
+  }
+  #hybridWipeRect {
+    animation: areaWipe var(--dur-wipe) linear forwards;
+    animation-delay: var(--start-wipe-3);
   }
   @keyframes areaWipe { from { width: 0; } to { width: 1200px; } }
 
@@ -711,8 +723,14 @@
 
     <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" preserveAspectRatio="none">
       <defs>
-        <clipPath id="areaWipeClip">
-          <rect id="areaWipeRect" x="0" y="0" width="0" height="750"/>
+        <clipPath id="fossilWipeClip">
+          <rect id="fossilWipeRect" x="0" y="0" width="0" height="750"/>
+        </clipPath>
+        <clipPath id="electricWipeClip">
+          <rect id="electricWipeRect" x="0" y="0" width="0" height="750"/>
+        </clipPath>
+        <clipPath id="hybridWipeClip">
+          <rect id="hybridWipeRect" x="0" y="0" width="0" height="750"/>
         </clipPath>
         <!-- same gradient-fade treatment as 1A's original area chart -->
         <linearGradient id="fossilGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -742,7 +760,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;8.9s &middot; 8 tracks</span>
+    <span>0s&ndash;8.9s &middot; 10 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -771,7 +789,7 @@
   <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
-<p class="caption">A single-act animated stacked-area chart, built as separate layers &mdash; backdrop, grid, headline, 3 stacked bands &mdash; the same structure you'd key in Jitter or After Effects. All 3 bands (fossil fuel, electric, hybrid plug-in) reveal together via one left-to-right wipe, then each band's label fades in. Reconstructed from a reference image, not a source vector -- swap the <b>DATA</b> array for exact figures once available. Append <b>?export</b> to the URL for a transparent-background version ready to capture with alpha for Premiere.</p>
+<p class="caption">A single-act animated stacked-area chart, built as separate layers &mdash; backdrop, grid, headline, 3 stacked bands &mdash; the same structure you'd key in Jitter or After Effects. Each of the 3 zones (fossil fuel, electric, hybrid plug-in) wipes in left-to-right in its own turn, with its label landing right after, before the next zone begins. Reconstructed from a reference image, not a source vector -- swap the <b>DATA</b> array for exact figures once available. Append <b>?export</b> to the URL for a transparent-background version ready to capture with alpha for Premiere.</p>
 
 <script>
 (function(){
@@ -899,16 +917,16 @@
   const last = DATA[DATA.length - 1];
   const labelX = W - PAD.right - 20;
   const LABELS = [
-    { text: 'Fossil fuel cars 66%', cls: 'fossil', midVal: last.fossil / 2, dx: 0, dy: 0 },
-    { text: 'Electric cars 24%', cls: 'electric', midVal: last.fossil + last.electric / 2, dx: 0, dy: 0 },
-    { text: 'Hybrid plug-in 9%', cls: 'hybrid', midVal: last.fossil + last.electric + last.hybrid / 2, dx: 1, dy: -3 }
+    { text: 'Fossil fuel cars 66%', cls: 'fossil', midVal: last.fossil / 2, dx: 0, dy: 0, start: 'var(--start-label-1)' },
+    { text: 'Electric cars 24%', cls: 'electric', midVal: last.fossil + last.electric / 2, dx: 0, dy: 0, start: 'var(--start-label-2)' },
+    { text: 'Hybrid plug-in 9%', cls: 'hybrid', midVal: last.fossil + last.electric + last.hybrid / 2, dx: 1, dy: -3, start: 'var(--start-label-3)' }
   ];
-  LABELS.forEach((l, i) => {
+  LABELS.forEach((l) => {
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', labelX + l.dx);
     label.setAttribute('y', y(l.midVal) + 10 + l.dy);
     label.classList.add('band-label', l.cls);
-    label.style.animationDelay = `calc(var(--start-labels) + ${i} * var(--label-stagger))`;
+    label.style.animationDelay = l.start;
     label.textContent = l.text;
     labelsGroup.appendChild(label);
   });
@@ -927,10 +945,12 @@
     { label: 'Headline', color: '#f8fbff', start: 0.15, dur: 0.8 },
     { label: 'Grid', color: '#a9c2d6', start: 2.0, dur: 0.7 },
     { label: 'Axis labels', color: '#a9c2d6', start: 2.2, dur: 0.7 },
-    { label: 'All 3 bands wipe in together', color: '#04ffba', start: 2.4, dur: 3.2 },
-    { label: '"Fossil fuel cars 66%" label', color: '#04ffba', start: 5.6, dur: 0.5 },
-    { label: '"Electric cars 24%" label', color: '#4d74e0', start: 5.75, dur: 0.5 },
-    { label: '"Hybrid plug-in 9%" label', color: '#e0342a', start: 5.9, dur: 0.5 }
+    { label: 'Fossil band wipes in', color: '#04ffba', start: 2.4, dur: 1.1 },
+    { label: '"Fossil fuel cars 66%" label', color: '#04ffba', start: 3.5, dur: 0.5 },
+    { label: 'Electric band wipes in', color: '#043fc5', start: 4.2, dur: 1.1 },
+    { label: '"Electric cars 24%" label', color: '#043fc5', start: 5.3, dur: 0.5 },
+    { label: 'Hybrid band wipes in', color: '#e30063', start: 6.0, dur: 1.1 },
+    { label: '"Hybrid plug-in 9%" label', color: '#e30063', start: 7.1, dur: 0.5 }
   ];
 
   const tracksEl = document.getElementById('tracks');
