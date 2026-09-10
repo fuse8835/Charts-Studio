@@ -235,6 +235,21 @@ function text1(re, label) {
   return must(re, src, label)[1].replace(/&ndash;/g, '–').replace(/&mdash;/g, '—').trim();
 }
 
+// The two duo-cap captions (hero, then ring) used to be extracted by
+// pattern-matching whatever markup happened to follow each one in the
+// source — fragile, and it silently overran into the wrong div's content
+// (leaking a literal "</div>" into the captured text) as soon as the real
+// markup's nesting didn't match what the regex assumed. Grabbing every
+// ".duo-cap" div directly, in document order, is both simpler and correct:
+// the source always puts the hero caption first, ring caption second.
+const duoCapDivs = [...src.matchAll(/<div class="duo-cap">([\s\S]*?)<\/div>/g)];
+if (duoCapDivs.length < 2) {
+  throw new Error('Expected 2 ".duo-cap" captions (hero, ring) in source HTML, found ' + duoCapDivs.length);
+}
+function duoCapText(m) {
+  return m[1].replace(/&ndash;/g, '–').replace(/&mdash;/g, '—').replace(/<br>/g, '\r').trim();
+}
+
 const COPY = {
   headline: text1(/<h1 class="headline">([\s\S]*?)<\/h1>/, 'act-1 headline'),
   axisTitle: text1(/<div class="axis-title">([^<]*)<\/div>/, 'axis title'),
@@ -242,10 +257,8 @@ const COPY = {
   headline2: text1(/<h1 class="headline-2">([\s\S]*?)<\/h1>/, 'act-2 headline'),
   heroLessThan: text1(/<div class="hero-less-than">([^<]*)<\/div>/, 'hero "less than" label'),
   heroFinal: text1(/<span class="hero-final">([^<]*)<\/span>/, 'hero final value'),
-  duoCapHero: text1(/<div class="duo-cap">([\s\S]*?)<\/div>\s*<\/div>\s*<div class="duo-col duo-col-ring"/, 'hero caption')
-    .replace(/<br>/g, '\r'),
-  duoCapRing: text1(/<div class="duo-cap">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<div class="pins-layer"/, 'ring caption')
-    .replace(/<br>/g, '\r'),
+  duoCapHero: duoCapText(duoCapDivs[0]),
+  duoCapRing: duoCapText(duoCapDivs[1]),
 };
 
 const heroFinalCount = parseInt(
@@ -459,6 +472,31 @@ function riseInKeyframes(t0, dur) {
   };
 }
 
+// Box (paragraph) text's Anchor Point / position behavior turned out to be
+// unreliable across AE versions (two separate fix attempts still put the
+// headline off-canvas) — point text's positioning is proven correct
+// everywhere else in this file, so headlines are wrapped into explicit
+// lines ourselves and rendered as point text instead of fighting AE's box
+// text anchor semantics further. A rough chars-per-line estimate is fine
+// here since line breaks are approximate by design — hand-tune in AE if a
+// break lands awkwardly.
+function wrapText(text, maxCharsPerLine) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  words.forEach((word) => {
+    const candidate = line ? line + ' ' + word : word;
+    if (candidate.length > maxCharsPerLine && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.join('\r');
+}
+
 // -- background --
 layers.push({
   kind: 'solid',
@@ -486,6 +524,7 @@ layers.push({
   name: 'Axis title',
   text: COPY.axisTitle,
   fontSize: 26,
+  fontWeight: 600,
   color: COLORS.mist300,
   position: [PAD.left * 0.16 + 40, H * 0.56],
   rotation: -90,
@@ -497,11 +536,11 @@ layers.push({
 layers.push({
   kind: 'text',
   name: 'Headline (act 1)',
-  text: COPY.headline,
+  text: wrapText(COPY.headline, 40),
   fontSize: 46,
+  fontWeight: 700,
   color: COLORS.paper050,
-  position: [W * 0.06, H * 0.06],
-  box: [W * 0.88, H * 0.32],
+  position: [W * 0.06, H * 0.06 + 46 * 0.75],
   justification: 'left',
   parent: 'scene1Null',
   ...riseInKeyframes(T.startHead, T.durHead),
@@ -512,6 +551,7 @@ layers.push({
   name: 'Source note',
   text: COPY.sourceNote,
   fontSize: 14,
+  fontWeight: 500,
   color: COLORS.mistFaint,
   position: [W * 0.94, H * 0.96],
   justification: 'right',
@@ -537,6 +577,7 @@ steps.forEach((v, i) => {
     name: 'Tick label Y ' + v.toLocaleString('en-US'),
     text: v.toLocaleString('en-US'),
     fontSize: 22,
+    fontWeight: 500,
     color: COLORS.mist300,
     position: [PAD.left - 24, gy + 4],
     justification: 'right',
@@ -567,6 +608,7 @@ DATA.forEach((d, i) => {
     name: 'Tick label X ' + d.year,
     text: String(d.year),
     fontSize: 22,
+    fontWeight: 500,
     color: COLORS.mist300,
     position: [gx, PAD.top + plotH + 55],
     justification: 'center',
@@ -660,11 +702,11 @@ layers.push({
 layers.push({
   kind: 'text',
   name: 'Headline (act 2)',
-  text: COPY.headline2,
+  text: wrapText(COPY.headline2, 40),
   fontSize: 46,
+  fontWeight: 700,
   color: COLORS.paper050,
-  position: [W * 0.06, H * 0.06],
-  box: [W * 0.88, H * 0.32],
+  position: [W * 0.06, H * 0.06 + 46 * 0.75],
   justification: 'left',
   ...riseInKeyframes(T.startHeadline2, T.durHeadline2),
 });
@@ -680,6 +722,7 @@ layers.push({
   name: 'Hero — "Less than"',
   text: COPY.heroLessThan,
   fontSize: 20,
+  fontWeight: 600,
   color: COLORS.mist300,
   position: [W * 0.30, H * 0.44],
   justification: 'center',
@@ -702,12 +745,14 @@ layers.push({
     name: 'Hero — counting number',
     textKeyframes: textKf,
     fontSize: 96,
+    fontWeight: 700,
     color: COLORS.mint400,
     position: [W * 0.30, H * 0.60],
     justification: 'center',
     parent: 'duoHeroNull',
     opacity: [
-      { t: T.startHero, v: 100 },
+      { t: T.startHero, v: 0 },
+      { t: T.startHero + 0.15, v: 100 },
       { t: T.startHero + T.durHeroCount, v: 100 },
       { t: T.startHero + T.durHeroCount + 0.3, v: 0 },
     ],
@@ -719,6 +764,7 @@ layers.push({
   name: 'Hero — final value',
   text: COPY.heroFinal,
   fontSize: 96,
+  fontWeight: 700,
   color: COLORS.mint400,
   position: [W * 0.30, H * 0.60],
   justification: 'center',
@@ -734,10 +780,12 @@ layers.push({
   name: 'Hero caption',
   text: COPY.duoCapHero,
   fontSize: 16,
+  fontWeight: 600,
   color: COLORS.mist300,
   position: [W * 0.30, H * 0.74],
   justification: 'center',
   parent: 'duoHeroNull',
+  ...fadeUpKeyframes(T.startHero, 0.4),
 });
 
 layers.push({ kind: 'null', name: 'DUO — ring column', id: 'duoRingNull' });
@@ -753,6 +801,7 @@ layers.push({
   ellipseRing: { r: ringRadius },
   position: [W * 0.68, H * 0.58],
   stroke: { color: COLORS.mistFaint, width: 10, opacity: 20 },
+  opacity: [{ t: T.startRing, v: 0 }, { t: T.startRing + 0.4, v: 100 }],
 });
 
 layers.push({
@@ -764,6 +813,7 @@ layers.push({
   rotation: -90,
   stroke: { color: COLORS.mint400, width: 10, opacity: 100 },
   trimPath: { t0: T.startRing, t1: T.startRing + T.durRing, from: 0, to: ringPctTarget },
+  opacity: [{ t: T.startRing, v: 0 }, { t: T.startRing + 0.4, v: 100 }],
 });
 
 {
@@ -779,10 +829,12 @@ layers.push({
     name: 'Ring — percent counter',
     textKeyframes: textKf,
     fontSize: 96,
+    fontWeight: 700,
     color: COLORS.paper050,
     position: [W * 0.68, H * 0.58],
     justification: 'center',
     parent: 'duoRingNull',
+    opacity: [{ t: T.startRing, v: 0 }, { t: T.startRing + 0.4, v: 100 }],
   });
 }
 
@@ -791,10 +843,36 @@ layers.push({
   name: 'Ring caption',
   text: COPY.duoCapRing,
   fontSize: 16,
+  fontWeight: 600,
   color: COLORS.mist300,
   position: [W * 0.68, H * 0.74],
   justification: 'center',
   parent: 'duoRingNull',
+  ...fadeUpKeyframes(T.startRing, 0.4),
+});
+
+// ---------------------------------------------------------------------------
+// 8b. Scene 1 exit fade. AE layer parenting only inherits transform
+// (position/rotation/scale/anchor) — NOT opacity. The "SCENE 1 (controls
+// exit collapse)" null's own opacity ramp-down (see the nullAnim block
+// above) never reaches its children, so every Scene 1 layer would
+// otherwise sit at its own default 100% opacity for the entire comp,
+// permanently overlapping Scene 2 once it starts. Give every Scene 1
+// layer its own fade-out across the same collapse window the null uses,
+// appended onto whatever opacity keyframes (entrance fade, pop-in, etc.)
+// it already has — order doesn't matter, setValueAtTime just places each
+// keyframe at its own time regardless of call order.
+// ---------------------------------------------------------------------------
+const scene1ExitT0 = T.startScene2;
+const scene1ExitT1 = T.startScene2 + T.durCollapse;
+layers.forEach((spec) => {
+  if (spec.parent !== 'scene1Null') return;
+  if (spec.kind !== 'shape' && spec.kind !== 'text') return;
+  const existing = Array.isArray(spec.opacity) ? spec.opacity : [];
+  spec.opacity = existing.concat([
+    { t: scene1ExitT0, v: 100 },
+    { t: scene1ExitT1, v: 0 },
+  ]);
 });
 
 // ---------------------------------------------------------------------------

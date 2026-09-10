@@ -16,17 +16,34 @@ function justificationFor(name) {
   return ParagraphJustification.LEFT_JUSTIFY;
 }
 
-function setFont(td) {
+// Rajdhani has no Regular (400) weight — the family only ships Light(300),
+// Medium(500), SemiBold(600), Bold(700). Every spec's fontWeight is one of
+// those (pulled from the source chart's own CSS), so map it to the matching
+// installed style name rather than guessing "Regular" as a fallback.
+var RAJDHANI_STYLE_BY_WEIGHT = { 300: 'Light', 500: 'Medium', 600: 'SemiBold', 700: 'Bold' };
+
+function setFont(td, weight) {
+  var style = RAJDHANI_STYLE_BY_WEIGHT[weight] || 'Medium';
   try {
     td.fontFamily = 'Rajdhani';
+    td.fontStyle = style;
+    return;
   } catch (eFontFamily) {
+    // fontFamily/fontStyle isn't settable on this AE version's TextDocument
+    // — fall through to the legacy `font` property, which needs an exact
+    // PostScript name (not the family display name) to resolve.
+  }
+  var psNames = ['Rajdhani-' + style, 'Rajdhani-Medium', 'Rajdhani'];
+  for (var i = 0; i < psNames.length; i++) {
     try {
-      td.font = 'Rajdhani';
+      td.font = psNames[i];
+      return;
     } catch (eFont) {
-      // font not resolvable by name on this machine; AE will fall back to
-      // its default and the human doing the hand-tune pass should reapply it.
+      // try the next PostScript name candidate
     }
   }
+  // Nothing resolved on this machine; AE keeps its own default font and
+  // the hand-tune pass in After Effects should reapply Rajdhani manually.
 }
 
 // -- generic transform helpers ----------------------------------------------
@@ -213,21 +230,37 @@ function createShapeLayer(comp, spec) {
 
 function createTextLayer(comp, spec) {
   var initialText = spec.text !== undefined ? spec.text : (spec.textKeyframes ? spec.textKeyframes[0].v : '');
-  var tl = comp.layers.addText(initialText);
+  // boxText can't be turned on after the fact — AE only creates paragraph
+  // (box) text via LayerCollection.addBoxText() at creation time; trying to
+  // set .boxText = true on a point-text layer's TextDocument later throws
+  // "readOnly attribute". Point text keeps using addText() as before.
+  var tl = spec.box ? comp.layers.addBoxText(spec.box, initialText) : comp.layers.addText(initialText);
   tl.name = spec.name;
 
+  if (spec.box) {
+    // addBoxText() defaults the layer's Anchor Point to the box's own
+    // center, not its top-left corner — so a Position spec written assuming
+    // "position = top-left of the box" (as every other layer in this file
+    // assumes) lands the box way off from where it was meant to sit. Anchor
+    // at [0,0] so Position maps directly to the box's top-left corner.
+    tl.property('Anchor Point').setValue([0, 0]);
+  }
+
+  // Mutate the layer-associated TextDocument (textProp.value), not a fresh
+  // new TextDocument() — an unassociated document fails "not associated
+  // with a layer" on setValue() for every layer, not just box-text ones.
   var textProp = tl.property('Source Text');
-  // boxText is read-only on a TextDocument pulled from an existing property's
-  // .value — AE only allows setting it on a freshly-constructed TextDocument,
-  // so build one from scratch here rather than mutating what addText() gave us.
-  var td = new TextDocument(initialText);
-  setFont(td);
+  var td = textProp.value;
+  setFont(td, spec.fontWeight);
   td.fontSize = spec.fontSize;
+  // Freshly-created text (box text especially) defaults to 0 leading in
+  // AE's scripting API, which stacks every wrapped line exactly on top of
+  // the last one instead of spacing them out. Always set it explicitly.
+  td.leading = spec.fontSize * 1.2;
   td.applyFill = true;
   td.fillColor = spec.color;
   td.justification = justificationFor(spec.justification || 'left');
   if (spec.box) {
-    td.boxText = true;
     td.boxTextPos = [0, 0];
     td.boxTextSize = spec.box;
   }
