@@ -201,7 +201,7 @@
   // the charts that live here instead of the main catalogue -- keep this in
   // sync with index.html's own EXCLUDE_IDS (the two lists are each other's
   // mirror image).
-  const INCLUDE_IDS = new Set(['4b', '4b-copy', '5c']);
+  const INCLUDE_IDS = new Set(['4b', '4b-copy', '5c', 'battery-storage']);
   charts = charts.filter((c) => INCLUDE_IDS.has(c.id));
   charts.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }));
 

@@ -150,5 +150,13 @@
     "html": "7c-ev-stock-regulation.html",
     "mov": "7c-ev-stock-regulation-alpha.mov",
     "duration": 10.9
+  },
+  {
+    "id": "battery-storage",
+    "name": "Global Battery Storage",
+    "subtitle": "Battery storage still covers only minutes of world electricity demand, 2024 vs. 2050",
+    "html": "battery-storage.html",
+    "mov": "battery-storage-alpha.mov",
+    "duration": 8.0
   }
 ]
