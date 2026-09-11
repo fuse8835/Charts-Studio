@@ -136,13 +136,13 @@
 
   .axis-title {
     position: absolute;
-    left: calc(1.6% + 40px);
-    top: 56%;
+    left: calc(1.18% + 40px);
+    top: 51.87%;
     transform-origin: center;
     white-space: nowrap;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    font-size: clamp(16px, 2.2cqw, 85px);
+    font-size: clamp(14px, 1.9cqw, 70px);
     letter-spacing: .01em;
     color: var(--mist-300);
     opacity: 0;
@@ -157,8 +157,8 @@
 
   .headline {
     position: absolute;
-    top: 6%;
-    left: 6%;
+    top: 1.87%;
+    left: 5.58%;
     right: 6%;
     max-width: 78%;
     font-family: 'Rajdhani', sans-serif;
@@ -196,7 +196,7 @@
   .x-axis-title {
     position: absolute;
     left: 50%;
-    bottom: 1.6%;
+    bottom: 8.13%;
     transform: translateX(-50%);
     white-space: nowrap;
     font-family: 'Rajdhani', sans-serif;
@@ -263,7 +263,7 @@
 
   .dot-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     fill: var(--mist-300);
     opacity: 0;
@@ -277,32 +277,56 @@
     to { opacity: 1; transform: translateX(0); }
   }
 
-  /* the 3 script call-outs (Denmark, Germany, Canada): a second keyframe
-     animation (comma-appended alongside the base pop-in, each with its own
-     animation-delay set inline in JS) grows the dot and shifts both dot +
-     label to the heat accent color -- forwards fill-mode holds the lit
-     state once reached, since the narration builds on each country in turn
-     rather than flashing and reverting. */
-  .dot.dot-hl {
-    animation-name: dotPop, dotHighlight;
-    animation-duration: var(--dur-pop), var(--dur-hl);
-    animation-timing-function: cubic-bezier(.34,1.56,.64,1), cubic-bezier(.34,1.56,.64,1);
-    animation-fill-mode: forwards, forwards;
+  /* Once the highlight sequence starts, every dot/label not currently in
+     the spotlight settles into a dimmed "muted" state for the rest of the
+     timeline (a plain brightness drop, ~30% -- filter only, so it layers
+     cleanly alongside the pop-in/pulse animations without fighting them
+     over the same CSS properties). Applied via a second comma-appended
+     animation with its own delay set inline in JS -- immediately for the
+     55 background countries, or delayed until just after a highlighted
+     country's own pulse finishes. */
+  @keyframes dotMute { from { filter: brightness(1); } to { filter: brightness(.7); } }
+  @keyframes labelMute { from { filter: brightness(1); } to { filter: brightness(.7); } }
+
+  /* The 3 script call-outs (Denmark, Germany, Canada): a fixed-length pulse
+     -- grow, hold, settle back to normal mint -- timed only by its own
+     start delay (set inline in JS per country). Ends already back at
+     normal color/scale, so the delayed dotMute above can take over cleanly
+     right after with no visual seam. */
+  @keyframes dotPulseHL {
+    0% { fill: var(--mint-400); transform: scale(1); }
+    37.5% { fill: var(--heat-500); transform: scale(1.7); }
+    62.5% { fill: var(--heat-500); transform: scale(1.7); }
+    100% { fill: var(--mint-400); transform: scale(1); }
   }
-  @keyframes dotHighlight {
-    from { fill: var(--mint-400); transform: scale(1); }
-    to { fill: var(--heat-500); transform: scale(1.7); }
+
+  /* The label pulses in step with its own dot: fades to pure white and
+     grows 2x, holds a full second, then settles back -- timed to the same
+     1.6s window as dotPulseHL (25% grow / a genuine 1s hold / 12.5% shrink)
+     so the two feel synced. transform-origin is set inline per-element to
+     the DOT's own coordinate (not the label's own box), so growth expands
+     outward from the dot rather than from the label's own corner -- see
+     the `transform-box: view-box` override below. */
+  .dot-label.pulse-anchor {
+    transform-box: view-box;
   }
-  .dot-label.label-hl {
-    animation-name: labelPop, labelHighlight;
-    animation-duration: .35s, var(--dur-hl);
-    animation-timing-function: ease-out, ease;
-    animation-fill-mode: forwards, forwards;
+  @keyframes labelPulseHL {
+    0% { fill: var(--mist-300); transform: scale(1); }
+    25% { fill: var(--paper-050); transform: scale(2); }
+    87.5% { fill: var(--paper-050); transform: scale(2); }
+    100% { fill: var(--mist-300); transform: scale(1); }
   }
-  @keyframes labelHighlight {
-    from { fill: var(--mist-300); font-size: 16px; font-weight: 500; }
-    to { fill: var(--heat-300); font-size: 21px; font-weight: 700; }
+
+  /* thin connector drawn only for labels the decluttering pass actually
+     had to shift, so it's still clear which dot a moved label belongs to */
+  .leader-line {
+    stroke: var(--mist-400);
+    stroke-opacity: .55;
+    stroke-width: 1;
+    opacity: 0;
+    animation: fadeOnly .35s ease-out forwards;
   }
+  @keyframes fadeOnly { to { opacity: 1; } }
 
   .replay {
     position: absolute;
@@ -729,13 +753,14 @@
     <div class="axis-title">Electricity price per kWh, industry and household</div>
     <h1 class="headline">No Low Electricity Rates for Industry and Households in Countries with Abundant Solar and Wind Power</h1>
     <div class="source-note">Source: IEA.org energy prices data set, via Fraser Institute</div>
-    <div class="x-axis-title">Percent solar and wind in electricity</div>
+    <div class="x-axis-title" id="xAxisTitle">Percent solar and wind in electricity</div>
 
     <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" preserveAspectRatio="none">
       <g id="gridGroup"></g>
       <g id="axisYGroup"></g>
       <g id="axisXGroup"></g>
       <g id="dotsGroup"></g>
+      <g id="leaderLines"></g>
       <g id="labelsGroup"></g>
     </svg>
 
@@ -746,7 +771,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;12.0s &middot; 8 tracks</span>
+    <span>0s&ndash;12.0s &middot; 9 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -873,10 +898,18 @@
   ];
 
   const W = 1200, H = 750;
-  const PAD = { top: 195, right: 90, bottom: 110, left: 130 };
+  const PAD = { top: 164, right: 66, bottom: 141, left: 154 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
   const baselineY = PAD.top + plotH;
+
+  // Centered on the plot area itself, not the frame -- PAD.left/right are
+  // asymmetric (extra left margin for the rotated axis-title), so frame-
+  // center and plot-center aren't the same point.
+  const plotCenterPct = ((PAD.left + (W - PAD.right)) / 2 / W) * 100;
+  // Kevin's pin: shift left off dead-center by 162 native units (13.5% of
+  // the 1200-wide viewBox) -- a deliberate manual offset, not re-centering.
+  document.getElementById('xAxisTitle').style.left = (plotCenterPct - 13.5) + '%';
 
   const x = pct => PAD.left + (pct / 70) * plotW;
   const y = cents => PAD.top + plotH - (cents / 40) * plotH;
@@ -895,6 +928,8 @@
   });
 
   const POP_START = 2.0, POP_STAGGER = 0.075;
+  const CHAR_W = 6.8; // measured via getBBox on real rendered labels (14px Rajdhani 500)
+
   ordered.forEach((d, i) => {
     const delay = POP_START + i * POP_STAGGER;
     const cx = x(d.pct), cy = y(d.cents);
@@ -902,54 +937,144 @@
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', cx);
     dot.setAttribute('cy', cy);
-    dot.setAttribute('r', 8.5);
+    dot.setAttribute('r', 4.25);
     dot.classList.add('dot');
-    dot.style.animationDelay = delay + 's';
+    // full shorthand stored (not just animation-delay) so later code can
+    // safely append more comma-separated animations without discarding
+    // this base pop-in -- an inline `style.animation` shorthand overrides
+    // the class rule entirely, so it has to carry the whole spec itself.
+    d._dotAnimBase = `dotPop var(--dur-pop) cubic-bezier(.34,1.56,.64,1) ${delay}s forwards`;
+    dot.style.animation = d._dotAnimBase;
     if (d.name) dot.dataset.name = d.name;
     dotsGroup.appendChild(dot);
     d._dotEl = dot;
+    d._cx = cx;
+    d._cy = cy;
 
     if (d.name) {
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       // flip to the left of the dot near the plot's right edge so long
       // names (Denmark, Lithuania) don't run off the frame
       const nearRightEdge = d.pct > 62;
-      label.setAttribute('x', cx + (nearRightEdge ? -13 : 13));
-      label.setAttribute('y', cy + 5);
+      const lx = cx + (nearRightEdge ? -9 : 9);
+      const ly = cy + 5;
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', lx);
       if (nearRightEdge) {
         label.setAttribute('text-anchor', 'end');
         label.style.transformOrigin = 'right center';
       }
       label.classList.add('dot-label');
-      label.style.animationDelay = (delay + 0.15) + 's';
+      d._labelDelay = delay + 0.15;
+      d._labelAnimBase = `labelPop .35s ease-out ${d._labelDelay}s forwards`;
+      label.style.animation = d._labelAnimBase;
       label.textContent = d.name;
       labelsGroup.appendChild(label);
       d._labelEl = label;
+      d._labelX = lx;
+      d._labelY = ly;
+      d._nearRight = nearRightEdge;
+      d._labelW = d.name.length * CHAR_W;
     }
   });
 
   const POP_END = POP_START + (ordered.length - 1) * POP_STAGGER + 0.4;
 
-  // Script call-out sequence: Denmark, Germany, Canada -- each dot grows
-  // and both dot + label shift to the heat accent color, staying lit as the
-  // narration moves to the next country (not a flash that reverts). A
-  // second keyframe animation is appended (not swapped in) so the original
-  // pop-in animation-delay is preserved -- both need their own delay, set
-  // as a comma-separated list matching animation-name's declared order.
+  // ---- Label decluttering: any two labels whose boxes overlap get pushed
+  // apart vertically (up or down, whichever direction -- never sideways,
+  // per Kevin's ask), a few passes until stable. Any label that ends up
+  // meaningfully off its dot's default row gets a thin leader line back to
+  // its dot so the connection stays legible.
+  const withLabels = DATA.filter(d => d._labelEl);
+  // The 3 script call-outs must stay directly beside their own dot (not
+  // pushed away with a leader line) -- pinned in the decluttering pass
+  // below; everyone else moves out of their way instead.
   const HL_NAMES = ['Denmark', 'Germany', 'Canada'];
+  function labelBox(d) {
+    const xMin = d._nearRight ? d._labelX - d._labelW : d._labelX;
+    const xMax = d._nearRight ? d._labelX : d._labelX + d._labelW;
+    return { xMin, xMax, yMin: d._labelY - 13, yMax: d._labelY + 6 };
+  }
+  for (let pass = 0; pass < 40; pass++) {
+    let moved = false;
+    for (let i = 0; i < withLabels.length; i++) {
+      for (let j = i + 1; j < withLabels.length; j++) {
+        const a = withLabels[i], b = withLabels[j];
+        const ba = labelBox(a), bb = labelBox(b);
+        const xOverlap = ba.xMin < bb.xMax && bb.xMin < ba.xMax;
+        const yOverlap = ba.yMin < bb.yMax && bb.yMin < ba.yMax;
+        if (!xOverlap || !yOverlap) continue;
+        const overlapAmt = Math.min(ba.yMax, bb.yMax) - Math.max(ba.yMin, bb.yMin);
+        const aFixed = HL_NAMES.includes(a.name), bFixed = HL_NAMES.includes(b.name);
+        if (aFixed && bFixed) continue; // both pinned, can't resolve -- shouldn't happen in practice
+        if (aFixed) {
+          b._labelY += (b._labelY <= a._labelY ? -1 : 1) * (overlapAmt + 1);
+        } else if (bFixed) {
+          a._labelY += (a._labelY <= b._labelY ? -1 : 1) * (overlapAmt + 1);
+        } else {
+          const push = overlapAmt / 2 + 0.5;
+          if (a._labelY <= b._labelY) { a._labelY -= push; b._labelY += push; }
+          else { a._labelY += push; b._labelY -= push; }
+        }
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+
+  const leaderLinesGroup = document.getElementById('leaderLines');
+  withLabels.forEach(d => {
+    d._labelEl.setAttribute('y', d._labelY);
+    if (Math.abs(d._labelY - (d._cy + 5)) > 3) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', d._cx);
+      line.setAttribute('y1', d._cy);
+      line.setAttribute('x2', d._nearRight ? d._labelX + 4 : d._labelX - 4);
+      line.setAttribute('y2', d._labelY - 4);
+      line.classList.add('leader-line');
+      line.style.animationDelay = d._labelDelay + 's';
+      leaderLinesGroup.appendChild(line);
+    }
+  });
+
+  // Script call-out sequence: Denmark, Germany, Canada, one at a time.
+  // Once the sequence starts, every OTHER country dims (mutes) for the rest
+  // of the timeline; each highlighted country's dot grows and turns red
+  // while it's active, then settles back to its normal mint color and joins
+  // everyone else in the muted state once its own moment passes. The 3
+  // highlighted countries are re-appended last within their groups so they
+  // always paint above every other dot/label, even mid-cluster.
   const HL_START = POP_END + 0.35;
   const HL_GAP = 1.3;
+  const HL_PULSE = 1.6; // grow+hold+settle, fixed regardless of country
+
+  HL_NAMES.forEach(name => {
+    const d = DATA.find(r => r.name === name);
+    if (!d) return;
+    dotsGroup.appendChild(d._dotEl);
+    if (d._labelEl) labelsGroup.appendChild(d._labelEl);
+  });
+
+  DATA.forEach(d => {
+    const isHL = HL_NAMES.includes(d.name);
+    const muteDelay = isHL ? null : HL_START; // highlighted ones get their own delay below
+    if (!isHL) {
+      d._dotEl.style.animation += `, dotMute var(--dur-hl) ease ${muteDelay}s forwards`;
+      if (d._labelEl) d._labelEl.style.animation += `, labelMute var(--dur-hl) ease ${muteDelay}s forwards`;
+    }
+  });
+
   HL_NAMES.forEach((name, i) => {
     const d = DATA.find(r => r.name === name);
     if (!d) return;
-    const popDelay = d._dotEl.style.animationDelay;
-    const hlDelay = (HL_START + i * HL_GAP) + 's';
-    d._dotEl.classList.add('dot-hl');
-    d._dotEl.style.animationDelay = `${popDelay}, ${hlDelay}`;
+    const start = HL_START + i * HL_GAP;
+    d._dotEl.style.animation += `, dotPulseHL ${HL_PULSE}s ease ${start}s forwards, dotMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
     if (d._labelEl) {
-      const labelPopDelay = d._labelEl.style.animationDelay;
-      d._labelEl.classList.add('label-hl');
-      d._labelEl.style.animationDelay = `${labelPopDelay}, ${hlDelay}`;
+      // scale from the dot's own coordinate, not the label's box, so the
+      // label grows outward from the dot instead of from its own corner
+      d._labelEl.classList.add('pulse-anchor');
+      d._labelEl.style.transformOrigin = `${d._cx}px ${d._cy}px`;
+      d._labelEl.style.animation += `, labelPulseHL ${HL_PULSE}s ease ${start}s forwards, labelMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
     }
   });
 
@@ -1018,9 +1143,10 @@
     { label: 'Grid', color: '#a9c2d6', start: 1.6, dur: 0.7 },
     { label: 'Axis labels', color: '#a9c2d6', start: 1.8, dur: 0.7 },
     { label: '58 dots + labels populate, bottom-left to top-right', color: '#04ffba', start: POP_START, dur: POP_END - POP_START },
-    { label: '"Denmark" highlighted', color: '#e30063', start: HL_START, dur: 0.6 },
-    { label: '"Germany" highlighted', color: '#e30063', start: HL_START + HL_GAP, dur: 0.6 },
-    { label: '"Canada" highlighted', color: '#e30063', start: HL_START + HL_GAP * 2, dur: 0.6 }
+    { label: 'Other 55 countries mute', color: '#7ea0bd', start: HL_START, dur: 0.6 },
+    { label: '"Denmark" pulses red, then settles + mutes', color: '#e30063', start: HL_START, dur: HL_PULSE },
+    { label: '"Germany" pulses red, then settles + mutes', color: '#e30063', start: HL_START + HL_GAP, dur: HL_PULSE },
+    { label: '"Canada" pulses red, then settles + mutes', color: '#e30063', start: HL_START + HL_GAP * 2, dur: HL_PULSE }
   ];
 
   const tracksEl = document.getElementById('tracks');
