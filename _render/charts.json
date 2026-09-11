@@ -1,5 +1,15 @@
 [
   {
+    "id": "6a",
+    "name": "No Low Electricity Rates",
+    "subtitle": "Solar/wind share of electricity vs. average price, by country",
+    "html": "6a-solar-wind-price.html",
+    "mov": "6a-solar-wind-price-alpha.mov",
+    "duration": 12.0,
+    "width": 1626,
+    "height": 1900
+  },
+  {
     "id": "1a",
     "name": "Cooling Curve",
     "subtitle": "Worldwide climate-related mortality decline",
