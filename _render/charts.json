@@ -5,9 +5,7 @@
     "subtitle": "Solar/wind share of electricity vs. average price, by country",
     "html": "6a-solar-wind-price.html",
     "mov": "6a-solar-wind-price-alpha.mov",
-    "duration": 12.0,
-    "width": 1626,
-    "height": 1900
+    "duration": 12.0
   },
   {
     "id": "1a",

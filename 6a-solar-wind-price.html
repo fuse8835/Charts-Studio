@@ -78,7 +78,7 @@
     container-type: inline-size;
     position: relative;
     width: 100%;
-    aspect-ratio: 1626 / 1900;
+    aspect-ratio: 16 / 10;
     border-radius: 18px;
     overflow: hidden;
     background:
@@ -182,7 +182,7 @@
   .source-note {
     position: absolute;
     right: 6%;
-    bottom: 2.6%;
+    bottom: 4%;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
     font-size: clamp(10px, 1cqw, 16px);
@@ -220,8 +220,8 @@
     stroke: var(--mist-400);
     stroke-opacity: .22;
     stroke-width: 1;
-    stroke-dasharray: 1600;
-    stroke-dashoffset: 1600;
+    stroke-dasharray: 1200;
+    stroke-dashoffset: 1200;
     animation: draw var(--dur-grid) cubic-bezier(.3,.8,.4,1) forwards;
   }
 
@@ -263,7 +263,7 @@
 
   .dot-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 21px;
+    font-size: 16px;
     font-weight: 500;
     fill: var(--mist-300);
     opacity: 0;
@@ -300,8 +300,8 @@
     animation-fill-mode: forwards, forwards;
   }
   @keyframes labelHighlight {
-    from { fill: var(--mist-300); font-size: 21px; font-weight: 500; }
-    to { fill: var(--heat-300); font-size: 27px; font-weight: 700; }
+    from { fill: var(--mist-300); font-size: 16px; font-weight: 500; }
+    to { fill: var(--heat-300); font-size: 21px; font-weight: 700; }
   }
 
   .replay {
@@ -711,12 +711,12 @@
 
 <div class="stage-wrap">
   <div class="frame" id="frame">
-    <svg class="contours" viewBox="0 0 1626 1900" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="contours" viewBox="0 0 1200 750" preserveAspectRatio="none" aria-hidden="true">
       <g fill="none" stroke="#4d74e0" stroke-width="1">
-        <path d="M-60 900 Q 350 820 750 880 T 1700 850" />
-        <path d="M-60 960 Q 420 880 850 950 T 1700 910" />
-        <path d="M-60 1020 Q 480 940 920 1000 T 1700 970" />
-        <path d="M-100 160 Q 280 120 700 170 T 1700 140" />
+        <path d="M-50 620 Q 250 560 550 610 T 1250 590" />
+        <path d="M-50 660 Q 300 600 600 655 T 1250 630" />
+        <path d="M-50 700 Q 350 650 650 695 T 1250 675" />
+        <path d="M-80 120 Q 200 90 500 130 T 1250 110" />
       </g>
     </svg>
     <div class="grain"></div>
@@ -731,7 +731,7 @@
     <div class="source-note">Source: IEA.org energy prices data set, via Fraser Institute</div>
     <div class="x-axis-title">Percent solar and wind in electricity</div>
 
-    <svg class="chart-svg" id="chartSvg" viewBox="0 0 1626 1900" preserveAspectRatio="none">
+    <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" preserveAspectRatio="none">
       <g id="gridGroup"></g>
       <g id="axisYGroup"></g>
       <g id="axisXGroup"></g>
@@ -799,82 +799,87 @@
   // outlined vector lettering (fill #e30063) instead of real <text>, which
   // is why it read as missing at first; its real dot is the plain mint
   // circle at native (294.08, 682.86), just left of that outlined wordmark.
+  // Every value below is the (%, ¢) reading taken off the client's own
+  // reference vector (Essay 06.svg) for that country's dot -- read once via
+  // the SVG's own axis calibration, then carried over as plain data instead
+  // of raw pixel coordinates so the chart can be replotted at a different
+  // frame size/ratio without ever touching a dot's real position. Country
+  // identification was cross-checked against the live dataset behind
+  // fraserinstitute.org/commentary/solar-and-wind-power-are-expensive (its
+  // own inline CanvasJS dataPoints array); most matched with very low
+  // error, a handful in the densest cluster (Slovenia/Latvia, Costa Rica/
+  // Mexico/NZ, Croatia/Romania/Estonia) are best-guess -- see the caption.
+  // Canada has no plain-text label in the source at all (hand-outlined
+  // vector lettering instead); its real dot was identified by elimination.
   const DATA = [
-      { cx: 189.06, cy: 896.73, name: 'Kyrgyzstan' },
-      { cx: 189.66, cy: 657.05, name: 'Uganda' },
-      { cx: 191.97, cy: 753.67, name: 'Indonesia' },
-      { cx: 195.13, cy: 787.97, name: 'Uzbekistan' },
-      { cx: 197.0, cy: 869.72, name: 'Algeria' },
-      { cx: 216.82, cy: 435.28, name: 'Slovenia' },
-      { cx: 235.1, cy: 597.71, name: 'Serbia' },
-      { cx: 250.43, cy: 804.67, name: 'Kazakhstan' },
-      { cx: 251.41, cy: 745.13, name: 'Russia' },
-      { cx: 256.61, cy: 610.37, name: 'NZ' },
-      { cx: 258.96, cy: 321.14, name: 'Latvia' },
-      { cx: 261.09, cy: 648.74, name: 'Iceland' },
-      { cx: 263.52, cy: 688.26, name: 'Vietnam' },
-      { cx: 277.03, cy: 240.43, name: 'Switzerland' },
-      { cx: 292.8, cy: 657.05, name: 'Korea' },
-      { cx: 294.08, cy: 682.86, name: 'Canada' },
-      { cx: 302.23, cy: 696.12, name: 'Pakistan' },
-      { cx: 302.23, cy: 664.87, name: 'India' },
-      { cx: 310.05, cy: 569.58, name: 'Japan' },
-      { cx: 311.91, cy: 481.29, name: 'Slovakia' },
-      { cx: 314.69, cy: 697.94, name: 'Argentina' },
-      { cx: 316.24, cy: 487.84, name: 'Costa Rica' },
-      { cx: 325.92, cy: 566.2, name: 'Mexico' },
-      { cx: 339.11, cy: 422.79, name: 'Czech Republic' },
-      { cx: 339.37, cy: 724.47, name: 'China' },
-      { cx: 342.62, cy: 468.96, name: 'France' },
-      { cx: 344.19, cy: 627.38, name: 'Malta' },
-      { cx: 367.94, cy: 602.31, name: 'United States' },
-      { cx: 390.27, cy: 630.64, name: 'Brazil' },
-      { cx: 399.95, cy: 583.86, name: 'Kenya' },
-      { cx: 404.82, cy: 716.89, name: 'Turkey' },
-      { cx: 407.61, cy: 517.56, name: 'Hungary' },
-      { cx: 434.89, cy: 408.16, name: 'Austria' },
-      { cx: 443.07, cy: 264.71, name: 'Italy' },
-      { cx: 447.33, cy: 502.58, name: 'Romania' },
-      { cx: 458.3, cy: 234.37, name: 'Cyprus' },
-      { cx: 470.9, cy: 415.71, name: 'Poland' },
-      { cx: 472.19, cy: 638.13, name: 'Finland' },
-      { cx: 490.21, cy: 630.64, name: 'Sweden' },
-      { cx: 497.37, cy: 615.31, name: 'Chile' },
-      { cx: 498.5, cy: 599.58, name: 'Croatia' },
-      { cx: 527.05, cy: 435.01, name: 'Australia' },
-      { cx: 536.73, cy: 382.2, name: 'Belgium' },
-      { cx: 552.88, cy: 513.97, name: 'Uruguay' },
-      { cx: 600.66, cy: 577.58, name: 'Portugal' },
-      { cx: 604.26, cy: 182.75, name: 'Germany' },
-      { cx: 658.39, cy: 456.68, name: 'European Union' },
-      { cx: 660.64, cy: 503.63, name: 'Estonia' },
-      { cx: 661.47, cy: 255.5, name: 'United Kingdom' },
-      { cx: 668.07, cy: 466.36, name: 'Greece' },
-      { cx: 688.94, cy: 265.18, name: 'Ireland' },
-      { cx: 692.47, cy: 502.58, name: 'Spain' },
-      { cx: 728.47, cy: 453.11, name: 'Netherlands' },
-      { cx: 902.02, cy: 507.88, name: 'Lithuania' },
-      { cx: 1011.16, cy: 375.48, name: 'Denmark' },
-      { cx: 342.62, cy: 819.32 },
-      { cx: 347.05, cy: 775.27 },
-      { cx: 197.0, cy: 760.6 },
+      { pct: -0.12, cents: 1.5, name: 'Kyrgyzstan' },
+      { pct: -0.07, cents: 13.53, name: 'Uganda' },
+      { pct: 0.12, cents: 8.68, name: 'Indonesia' },
+      { pct: 0.39, cents: 6.96, name: 'Uzbekistan' },
+      { pct: 0.54, cents: 2.86, name: 'Algeria' },
+      { pct: 2.21, cents: 24.65, name: 'Slovenia' },
+      { pct: 3.74, cents: 16.5, name: 'Serbia' },
+      { pct: 5.03, cents: 6.12, name: 'Kazakhstan' },
+      { pct: 5.11, cents: 9.11, name: 'Russia' },
+      { pct: 5.55, cents: 15.87, name: 'NZ' },
+      { pct: 5.74, cents: 30.38, name: 'Latvia' },
+      { pct: 5.92, cents: 13.94, name: 'Iceland' },
+      { pct: 6.13, cents: 11.96, name: 'Vietnam' },
+      { pct: 7.26, cents: 34.43, name: 'Switzerland' },
+      { pct: 8.59, cents: 13.53, name: 'Korea' },
+      { pct: 8.69, cents: 12.23, name: 'Canada' },
+      { pct: 9.38, cents: 11.57, name: 'Pakistan' },
+      { pct: 9.38, cents: 13.13, name: 'India' },
+      { pct: 10.03, cents: 17.91, name: 'Japan' },
+      { pct: 10.19, cents: 22.34, name: 'Slovakia' },
+      { pct: 10.42, cents: 11.47, name: 'Argentina' },
+      { pct: 10.55, cents: 22.02, name: 'Costa Rica' },
+      { pct: 11.37, cents: 18.08, name: 'Mexico' },
+      { pct: 12.47, cents: 25.28, name: 'Czech Republic' },
+      { pct: 12.49, cents: 10.14, name: 'China' },
+      { pct: 12.77, cents: 22.96, name: 'France' },
+      { pct: 12.9, cents: 15.01, name: 'Malta' },
+      { pct: 14.89, cents: 16.27, name: 'United States' },
+      { pct: 16.77, cents: 14.85, name: 'Brazil' },
+      { pct: 17.58, cents: 17.2, name: 'Kenya' },
+      { pct: 17.99, cents: 10.52, name: 'Turkey' },
+      { pct: 18.22, cents: 20.52, name: 'Hungary' },
+      { pct: 20.51, cents: 26.01, name: 'Austria' },
+      { pct: 21.2, cents: 33.21, name: 'Italy' },
+      { pct: 21.56, cents: 21.28, name: 'Romania' },
+      { pct: 22.48, cents: 34.73, name: 'Cyprus' },
+      { pct: 23.54, cents: 25.63, name: 'Poland' },
+      { pct: 23.65, cents: 14.48, name: 'Finland' },
+      { pct: 25.16, cents: 14.85, name: 'Sweden' },
+      { pct: 25.76, cents: 15.62, name: 'Chile' },
+      { pct: 25.85, cents: 16.41, name: 'Croatia' },
+      { pct: 28.25, cents: 24.67, name: 'Australia' },
+      { pct: 29.06, cents: 27.32, name: 'Belgium' },
+      { pct: 30.42, cents: 20.7, name: 'Uruguay' },
+      { pct: 34.43, cents: 17.51, name: 'Portugal' },
+      { pct: 34.73, cents: 37.32, name: 'Germany' },
+      { pct: 39.28, cents: 23.58, name: 'European Union' },
+      { pct: 39.47, cents: 21.22, name: 'Estonia' },
+      { pct: 39.54, cents: 33.67, name: 'United Kingdom' },
+      { pct: 40.09, cents: 23.09, name: 'Greece' },
+      { pct: 41.84, cents: 33.19, name: 'Ireland' },
+      { pct: 42.14, cents: 21.28, name: 'Spain' },
+      { pct: 45.16, cents: 23.76, name: 'Netherlands' },
+      { pct: 59.73, cents: 21.01, name: 'Lithuania' },
+      { pct: 68.89, cents: 27.65, name: 'Denmark' },
+      { pct: 12.77, cents: 5.38 },
+      { pct: 13.14, cents: 7.59 },
+      { pct: 0.54, cents: 8.33 },
   ];
 
-  // Native SVG axis calibration (Essay 06.svg's own gridlines: 0%@x=190.54,
-  // 70%@x=1024.34; 0c@y=926.64, 35c@y=229.04) -- used only to place the grid/
-  // tick labels correctly; every dot keeps its own native (cx,cy) untouched.
-  const NX0 = 190.54, NX_PER_PCT = (1024.34 - 190.54) / 70;
-  const NY0 = 926.64, NY_PER_CENT = (926.64 - 229.04) / 35;
-  const nativeX = pct => NX0 + pct * NX_PER_PCT;
-  const nativeY = cents => NY0 - cents * NY_PER_CENT;
+  const W = 1200, H = 750;
+  const PAD = { top: 195, right: 90, bottom: 110, left: 130 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+  const baselineY = PAD.top + plotH;
 
-  // Scale the whole native chart up (so the same relative spacing reads as
-  // less crowded at a larger size) and drop it down to leave room for the
-  // headline above -- a uniform transform, not a per-dot reposition.
-  const SCALE = 1.5;
-  const HEAD_H = 190;
-  const sx = nx => nx * SCALE;
-  const sy = ny => ny * SCALE + HEAD_H;
+  const x = pct => PAD.left + (pct / 70) * plotW;
+  const y = cents => PAD.top + plotH - (cents / 40) * plotH;
 
   const dotsGroup = document.getElementById('dotsGroup');
   const labelsGroup = document.getElementById('labelsGroup');
@@ -882,22 +887,22 @@
   // Populate order: bottom-left to top-right, organically -- ranked by
   // distance from the plot's bottom-left corner rather than a strict grid
   // sweep, so the reveal feels like a natural diagonal fill.
-  const originX = sx(NX0), originY = sy(NY0);
+  const originX = x(0), originY = y(0);
   const ordered = DATA.slice().sort((a, b) => {
-    const da = Math.hypot(sx(a.cx) - originX, sy(a.cy) - originY);
-    const db = Math.hypot(sx(b.cx) - originX, sy(b.cy) - originY);
+    const da = Math.hypot(x(a.pct) - originX, y(a.cents) - originY);
+    const db = Math.hypot(x(b.pct) - originX, y(b.cents) - originY);
     return da - db;
   });
 
   const POP_START = 2.0, POP_STAGGER = 0.075;
   ordered.forEach((d, i) => {
     const delay = POP_START + i * POP_STAGGER;
-    const cx = sx(d.cx), cy = sy(d.cy);
+    const cx = x(d.pct), cy = y(d.cents);
 
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', cx);
     dot.setAttribute('cy', cy);
-    dot.setAttribute('r', 12);
+    dot.setAttribute('r', 8.5);
     dot.classList.add('dot');
     dot.style.animationDelay = delay + 's';
     if (d.name) dot.dataset.name = d.name;
@@ -908,9 +913,9 @@
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       // flip to the left of the dot near the plot's right edge so long
       // names (Denmark, Lithuania) don't run off the frame
-      const nearRightEdge = d.cx > 950;
-      label.setAttribute('x', cx + (nearRightEdge ? -16 : 16));
-      label.setAttribute('y', cy + 7);
+      const nearRightEdge = d.pct > 62;
+      label.setAttribute('x', cx + (nearRightEdge ? -13 : 13));
+      label.setAttribute('y', cy + 5);
       if (nearRightEdge) {
         label.setAttribute('text-anchor', 'end');
         label.style.transformOrigin = 'right center';
@@ -948,17 +953,17 @@
     }
   });
 
-  // Grid/axis extents match the source SVG's own gridlines exactly
-  // (native x 189.23-1024.34, native y 227.94-928.73), just scaled by the
-  // same SCALE/HEAD_H transform as every dot.
+  // Grid/axis: standard PAD-based domain plot, matching every other
+  // chart's own gridline convention (e.g. 2A/7A) rather than a scaled
+  // copy of the source SVG's own pixel-space gridlines.
   const gridGroup = document.getElementById('gridGroup');
   const axisYGroup = document.getElementById('axisYGroup');
   const centSteps = [0, 5, 10, 15, 20, 25, 30, 35, 40];
   centSteps.forEach((c, i) => {
-    const gy = sy(nativeY(c));
+    const gy = y(c);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', sx(189.23));
-    line.setAttribute('x2', sx(1024.34));
+    line.setAttribute('x1', PAD.left);
+    line.setAttribute('x2', W - PAD.right);
     line.setAttribute('y1', gy);
     line.setAttribute('y2', gy);
     line.classList.add('gridline');
@@ -966,8 +971,8 @@
     gridGroup.appendChild(line);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', sx(189.23) - 20);
-    label.setAttribute('y', gy + 6);
+    label.setAttribute('x', PAD.left - 16);
+    label.setAttribute('y', gy + 5);
     label.setAttribute('text-anchor', 'end');
     label.classList.add('tick-label');
     label.style.animationDelay = `calc(var(--start-axis) + ${i * 0.03}s)`;
@@ -977,21 +982,20 @@
 
   const axisXGroup = document.getElementById('axisXGroup');
   const pctSteps = [0, 10, 20, 30, 40, 50, 60, 70];
-  const baselineY = sy(926.64);
   pctSteps.forEach((p, i) => {
-    const gx = sx(nativeX(p));
+    const gx = x(p);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', gx);
     line.setAttribute('x2', gx);
-    line.setAttribute('y1', sy(227.94));
-    line.setAttribute('y2', sy(928.73));
+    line.setAttribute('y1', PAD.top);
+    line.setAttribute('y2', baselineY);
     line.classList.add('gridline');
     line.style.animationDelay = `calc(var(--start-grid) + ${i * 0.04}s)`;
     gridGroup.appendChild(line);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', gx);
-    label.setAttribute('y', baselineY + 34);
+    label.setAttribute('y', baselineY + 26);
     label.setAttribute('text-anchor', 'middle');
     label.classList.add('tick-label');
     label.style.animationDelay = `calc(var(--start-axis) + ${i * 0.03}s)`;
