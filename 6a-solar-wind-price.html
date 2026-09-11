@@ -46,7 +46,7 @@
     --start-head: .15s;
     --dur-pop: .4s;
     --dur-hl: .6s;
-    --total: 14.3s;
+    --total: 15.3s;
 
     color-scheme: dark;
   }
@@ -288,6 +288,18 @@
   @keyframes dotMute { from { filter: brightness(1); } to { filter: brightness(.7); } }
   @keyframes labelMute { from { filter: brightness(1); } to { filter: brightness(.7); } }
 
+  /* Final reveal: once Canada (the last call-out) finishes animating back
+     out, every dot returns to full-brightness mint and every label -- muted
+     or not, ever-highlighted or not -- turns pure white, as one closing
+     beat instead of staying dimmed. Applied to all 58 dots/labels with the
+     same start time, appended after their own mute animation so it simply
+     takes over from the moment it starts. */
+  @keyframes dotUnmute { from { filter: brightness(.7); } to { filter: brightness(1); } }
+  @keyframes labelUnmute {
+    from { fill: var(--mist-300); filter: brightness(.7); }
+    to { fill: var(--paper-050); filter: brightness(1); }
+  }
+
   /* The 3 script call-outs (Denmark, Germany, Canada): a fixed-length pulse
      -- grow, hold, settle back to normal mint -- timed only by its own
      start delay (set inline in JS per country). Ends already back at
@@ -301,8 +313,8 @@
   }
   @keyframes dotPulseHL {
     0% { fill: var(--mint-400); transform: scale(1); }
-    37.5% { fill: var(--mint-400); transform: scale(1.35); }
-    62.5% { fill: var(--mint-400); transform: scale(1.35); }
+    25% { fill: var(--mint-400); transform: scale(1.35); }
+    87.5% { fill: var(--mint-400); transform: scale(1.35); }
     100% { fill: var(--mint-400); transform: scale(1); }
   }
 
@@ -790,7 +802,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;14.3s &middot; 9 tracks</span>
+    <span>0s&ndash;15.3s &middot; 10 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -810,7 +822,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="14300" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="15300" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -1153,6 +1165,16 @@
     }
   });
 
+  // Final reveal: the moment Canada (the last call-out) finishes its own
+  // animate-out, every dot brightens back to full mint and every label
+  // turns white -- applied to all 58 dots/labels, appended after whatever
+  // mute animation they already have so it simply takes over from there.
+  const FINAL_REVEAL_START = HL_START + (HL_NAMES.length - 1) * HL_GAP + HL_PULSE;
+  DATA.forEach(d => {
+    d._dotEl.style.animation += `, dotUnmute var(--dur-hl) ease ${FINAL_REVEAL_START}s forwards`;
+    if (d._labelEl) d._labelEl.style.animation += `, labelUnmute var(--dur-hl) ease ${FINAL_REVEAL_START}s forwards`;
+  });
+
   // Grid/axis: standard PAD-based domain plot, matching every other
   // chart's own gridline convention (e.g. 2A/7A) rather than a scaled
   // copy of the source SVG's own pixel-space gridlines.
@@ -1204,7 +1226,7 @@
   });
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 14.3;
+  const totalSec = 15.3;
   for (let s = 0; s <= totalSec; s += 0.5) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
@@ -1221,7 +1243,8 @@
     { label: 'Other 55 countries mute', color: '#7ea0bd', start: HL_START, dur: 0.6 },
     { label: '"Denmark" grows + brightens, then settles + mutes', color: '#04ffba', start: HL_START, dur: HL_PULSE },
     { label: '"Germany" grows + brightens, then settles + mutes', color: '#04ffba', start: HL_START + HL_GAP, dur: HL_PULSE },
-    { label: '"Canada" grows + brightens, then settles + mutes', color: '#04ffba', start: HL_START + HL_GAP * 2, dur: HL_PULSE }
+    { label: '"Canada" grows + brightens, then settles + mutes', color: '#04ffba', start: HL_START + HL_GAP * 2, dur: HL_PULSE },
+    { label: 'All 58 reveal: dots to full mint, labels to white', color: '#f8fbff', start: FINAL_REVEAL_START, dur: 0.6 }
   ];
 
   const tracksEl = document.getElementById('tracks');
