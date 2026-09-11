@@ -52,16 +52,21 @@
     --start-numL: 2.1s;   --dur-numL: .8s;
     --start-lblL: 2.9s;   --dur-lblL: .5s;
 
-    --start-arrow: 3.5s;  --dur-arrow: .5s;
-    --start-head-arrow: 4.0s; --dur-head-arrow: .3s;
+    /* 2024 group reveals centered (see .group-2024), holds for a beat once
+       the reveal finishes (~3.4s), then slides left to its native resting
+       spot before the arrow and 2050 side follow. */
+    --start-slide: 4.4s;  --dur-slide: 1.0s;
 
-    --start-yearR: 4.3s;  --dur-yearR: .5s;
-    --start-battR: 4.5s;  --dur-battR: .6s;
-    --start-segR: 5.1s;   --dur-segR: .45s; --seg-stagger: .12s;
-    --start-numR: 5.1s;   --dur-numR: 1.7s;
-    --start-lblR: 6.9s;   --dur-lblR: .5s;
+    --start-arrow: 5.4s;  --dur-arrow: .5s;
+    --start-head-arrow: 5.9s; --dur-head-arrow: .3s;
 
-    --total: 8.0s;
+    --start-yearR: 6.2s;  --dur-yearR: .5s;
+    --start-battR: 6.4s;  --dur-battR: .6s;
+    --start-segR: 7.0s;   --dur-segR: .45s; --seg-stagger: .12s;
+    --start-numR: 7.0s;   --dur-numR: 1.7s;
+    --start-lblR: 8.8s;   --dur-lblR: .5s;
+
+    --total: 10.0s;
 
     color-scheme: dark;
   }
@@ -231,10 +236,26 @@
     animation-delay: var(--start-divider);
   }
 
+  /* The whole 2024 column reveals centered on the frame (translateX(277.5)
+     shifts its native left-side position, batt center 322.5, to the
+     viewBox's own center, 600) -- animation-fill-mode:backwards holds that
+     centered position from t=0 until --start-slide, then eases back to its
+     true native (left) position as one rigid group. Every child element's
+     own reveal animation (fadeUp/draw/popIn) is untouched -- SVG transforms
+     compose, so this is purely an additional positional offset on top. */
+  .group-2024 {
+    transform-box: view-box;
+    animation: slideToNative var(--dur-slide) var(--ease-soft) var(--start-slide) both;
+  }
+  @keyframes slideToNative {
+    from { transform: translateX(277.5px); }
+    to { transform: translateX(0); }
+  }
+
   .year-label {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
-    font-size: 40px;
+    font-size: 46px;
     fill: var(--paper-050);
     text-anchor: middle;
     opacity: 0;
@@ -291,7 +312,7 @@
 
   .stat-number {
     position: absolute;
-    top: 74.5%;
+    top: 67.7%;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
     font-size: clamp(34px, 8.6cqw, 150px);
@@ -306,12 +327,16 @@
   .stat-number::after { content: counter(n); counter-reset: n var(--n); }
 
   .stat-number.num-left {
-    left: 27.5%;
-    animation-name: fadeUpCenter, countLeft;
-    animation-duration: .3s, var(--dur-numL);
-    animation-timing-function: ease-out, linear;
-    animation-delay: var(--start-numL), var(--start-numL);
-    animation-fill-mode: forwards, forwards;
+    /* starts centered (50%) alongside the rest of .group-2024, then slides
+       to its native 27.5% in lockstep with that group's own slide -- `left`
+       is a distinct property from the SVG group's `transform`, so both can
+       animate independently without conflict. */
+    left: 50%;
+    animation-name: fadeUpCenter, countLeft, slideNumToNative;
+    animation-duration: .3s, var(--dur-numL), var(--dur-slide);
+    animation-timing-function: ease-out, linear, var(--ease-soft);
+    animation-delay: var(--start-numL), var(--start-numL), var(--start-slide);
+    animation-fill-mode: forwards, forwards, both;
   }
   .stat-number.num-right {
     left: 72.5%;
@@ -321,6 +346,7 @@
     animation-delay: var(--start-numR), var(--start-numR);
     animation-fill-mode: forwards, forwards;
   }
+  @keyframes slideNumToNative { from { left: 50%; } to { left: 27.5%; } }
 
   @keyframes countLeft { to { --n: 5; } }
   @keyframes countRight { to { --n: 47; } }
@@ -789,7 +815,7 @@
     </button>
 
     <h1 class="headline">Global Battery Storage</h1>
-    <div class="subtitle">Still supplies only a few minutes<br>of the world's electricity demand</div>
+    <div class="subtitle">Still supplies only a few minutes</div>
 
     <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" preserveAspectRatio="none">
       <defs>
@@ -805,23 +831,26 @@
 
       <line class="divider" x1="560" y1="200" x2="640" y2="200"/>
 
-      <!-- 2024 column -->
-      <text class="year-label left" x="330" y="265">2024</text>
-      <g id="battLeft">
-        <rect class="batt-outline left" x="220" y="320" width="205" height="110" rx="16"/>
-        <rect class="batt-nub left" x="425" y="353" width="14" height="44" rx="4"/>
-        <rect class="seg-dim left" x="249.4" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="272.8" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="296.2" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="319.6" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="343.0" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="366.4" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-dim left" x="389.8" y="332" width="17.4" height="86" rx="3"/>
-        <rect class="seg-lit left" x="232.0" y="332" width="17.4" height="86" rx="3"/>
+      <!-- 2024 column -- wrapped as one rigid group so it can be centered on
+           first reveal, then slid over to its native left-side position as
+           one piece (see .group-2024) -->
+      <g class="group-2024">
+        <text class="year-label left" x="330" y="265">2024</text>
+        <g id="battLeft">
+          <rect class="batt-outline left" x="220" y="320" width="205" height="110" rx="16"/>
+          <rect class="batt-nub left" x="425" y="353" width="14" height="44" rx="4"/>
+          <rect class="seg-dim left" x="249.4" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="272.8" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="296.2" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="319.6" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="343.0" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="366.4" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-dim left" x="389.8" y="332" width="17.4" height="86" rx="3"/>
+          <rect class="seg-lit left" x="232.0" y="332" width="17.4" height="86" rx="3"/>
+        </g>
+        <text class="stat-unit left" x="330" y="613">Minutes</text>
+        <text class="stat-caption left" x="330" y="647">of the world's electricity demand</text>
       </g>
-      <text class="stat-unit left" x="330" y="613">Minutes</text>
-      <text class="stat-caption left" x="330" y="640">of the world's</text>
-      <text class="stat-caption left" x="330" y="663">electricity demand</text>
 
       <!-- transition arrow -->
       <g>
@@ -844,8 +873,7 @@
         <rect class="seg-lit right" style="--i:6" x="912.4" y="332" width="17.4" height="86" rx="3"/>
       </g>
       <text class="stat-unit right" x="870" y="613">Minutes</text>
-      <text class="stat-caption right" x="870" y="640">of the world's</text>
-      <text class="stat-caption right" x="870" y="663">electricity demand</text>
+      <text class="stat-caption right" x="870" y="647">of the world's electricity demand</text>
     </svg>
 
     <div class="stat-number num-left"></div>
@@ -858,7 +886,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span id="timelineRange">0s&ndash;8.0s &middot; 8 tracks</span>
+    <span id="timelineRange">0s&ndash;10.0s &middot; 10 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -878,7 +906,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="8000" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="10000" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -897,7 +925,7 @@
   }
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 8.0;
+  const totalSec = 10.0;
   for (let s = 0; s <= totalSec; s += 0.5) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
@@ -909,11 +937,13 @@
     { label: 'Backdrop', color: '#7ea0bd', start: 0, dur: 0.6 },
     { label: 'Headline + subtitle', color: '#f8fbff', start: 0.15, dur: 0.95 },
     { label: 'Divider', color: '#04ffba', start: 0.95, dur: 0.5 },
-    { label: '2024 battery + stat', color: '#04ffba', start: 1.3, dur: 1.6 },
-    { label: 'Arrow', color: '#4d74e0', start: 3.5, dur: 0.8 },
-    { label: '2050 year + outline', color: '#f8fbff', start: 4.3, dur: 0.8 },
-    { label: '2050 segments', color: '#04ffba', start: 5.1, dur: 1.17 },
-    { label: '2050 stat count', color: '#04ffba', start: 5.1, dur: 1.7 }
+    { label: '2024 battery + stat (centered)', color: '#04ffba', start: 1.3, dur: 2.1 },
+    { label: '2024 holds, centered', color: '#7ea0bd', start: 3.4, dur: 1.0 },
+    { label: '2024 slides to native position', color: '#04ffba', start: 4.4, dur: 1.0 },
+    { label: 'Arrow', color: '#4d74e0', start: 5.4, dur: 0.8 },
+    { label: '2050 year + outline', color: '#f8fbff', start: 6.2, dur: 0.8 },
+    { label: '2050 segments', color: '#04ffba', start: 7.0, dur: 1.17 },
+    { label: '2050 stat count', color: '#04ffba', start: 7.0, dur: 1.7 }
   ];
 
   const tracksEl = document.getElementById('tracks');
