@@ -46,7 +46,7 @@
     --start-head: .15s;
     --dur-pop: .4s;
     --dur-hl: .6s;
-    --total: 12.0s;
+    --total: 14.3s;
 
     color-scheme: dark;
   }
@@ -329,7 +329,7 @@
      box, then just faded in/out in sync with the pulse rather than resized. */
   .highlight-pill {
     fill: var(--midnight);
-    fill-opacity: .5;
+    fill-opacity: .65;
     stroke: var(--mint-400);
     stroke-width: 1.5;
     opacity: 0;
@@ -790,7 +790,7 @@
 <div class="stage-wrap timeline-panel">
   <div class="timeline-head">
     <h2>Layer &amp; keyframe map</h2>
-    <span>0s&ndash;12.0s &middot; 9 tracks</span>
+    <span>0s&ndash;14.3s &middot; 9 tracks</span>
   </div>
   <div class="ruler" id="ruler"></div>
   <div id="tracks"></div>
@@ -810,7 +810,7 @@
 
   <div class="scrub-row">
     <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
-    <input type="range" id="scrubber" class="scrubber" min="0" max="12000" step="10" value="0">
+    <input type="range" id="scrubber" class="scrubber" min="0" max="14300" step="10" value="0">
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
@@ -1064,8 +1064,8 @@
   // highlighted countries are re-appended last within their groups so they
   // always paint above every other dot/label, even mid-cluster.
   const HL_START = POP_END + 0.35;
-  const HL_GAP = 1.3;
-  const HL_PULSE = 1.6; // grow+hold+settle, fixed regardless of country
+  const HL_GAP = 2.0;
+  const HL_PULSE = 2.2; // grow+hold+settle, fixed regardless of country -- slowed down from 1.6s
 
   // True top z-order: moved into their own overlay group (after both
   // dotsGroup AND labelsGroup in paint order), not just re-appended within
@@ -1140,13 +1140,13 @@
     const d = DATA.find(r => r.name === name);
     if (!d) return;
     const start = HL_START + i * HL_GAP;
-    d._dotEl.style.animation += `, dotPulseHL ${HL_PULSE}s ease ${start}s forwards, dotMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
+    d._dotEl.style.animation += `, dotPulseHL ${HL_PULSE}s cubic-bezier(.22,.8,.3,1) ${start}s forwards, dotMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
     if (d._labelEl) {
       // scale from the dot's own coordinate, not the label's box, so the
       // label grows outward from the dot instead of from its own corner
       d._labelEl.classList.add('pulse-anchor');
       d._labelEl.style.transformOrigin = `${d._cx}px ${d._cy}px`;
-      d._labelEl.style.animation += `, labelPulseHL ${HL_PULSE}s ease ${start}s forwards, labelMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
+      d._labelEl.style.animation += `, labelPulseHL ${HL_PULSE}s cubic-bezier(.22,.8,.3,1) ${start}s forwards, labelMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
     }
     if (d._pillEl) {
       d._pillEl.style.animation = `pillPulseHL ${HL_PULSE}s ease ${start}s forwards`;
@@ -1204,7 +1204,7 @@
   });
 
   const ruler = document.getElementById('ruler');
-  const totalSec = 12.0;
+  const totalSec = 14.3;
   for (let s = 0; s <= totalSec; s += 0.5) {
     const tick = document.createElement('span');
     tick.style.left = (s / totalSec * 100) + '%';
