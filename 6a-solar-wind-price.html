@@ -293,6 +293,12 @@
      start delay (set inline in JS per country). Ends already back at
      normal color/scale, so the delayed dotMute above can take over cleanly
      right after with no visual seam. */
+  @keyframes pillPulseHL {
+    0% { opacity: 0; }
+    25% { opacity: 1; }
+    87.5% { opacity: 1; }
+    100% { opacity: 0; }
+  }
   @keyframes dotPulseHL {
     0% { fill: var(--mint-400); transform: scale(1); }
     37.5% { fill: var(--mint-400); transform: scale(1.35); }
@@ -315,6 +321,18 @@
     25% { fill: var(--mint-400); transform: scale(1.5); }
     87.5% { fill: var(--mint-400); transform: scale(1.5); }
     100% { fill: var(--mist-300); transform: scale(1); }
+  }
+
+  /* Experimental alternate treatment: a pill-shaped backdrop (fully-rounded
+     rect) fades in behind the grown dot+label to help it stand out further
+     -- sized once at build time to the country's own peak (scaled) bounding
+     box, then just faded in/out in sync with the pulse rather than resized. */
+  .highlight-pill {
+    fill: var(--midnight);
+    fill-opacity: .5;
+    stroke: var(--mint-400);
+    stroke-width: 1.5;
+    opacity: 0;
   }
 
   /* thin connector drawn only for labels the decluttering pass actually
@@ -1055,9 +1073,50 @@
   // could still end up visually behind some unrelated country's label
   // (labelsGroup as a whole always paints after dotsGroup as a whole).
   const highlightOverlay = document.getElementById('highlightOverlay');
+
+  // EXPERIMENTAL (2026-09-11): a pill-shaped backdrop behind the grown
+  // dot+label, to see if it reads more clearly than the plain mint pulse.
+  // Kevin asked to keep the plain version easy to restore -- it's one git
+  // revert away (this whole block is additive, nothing above it changed).
+  // Must mirror dotPulseHL/labelPulseHL's own scale amounts, since the pill
+  // is sized once here to the country's peak (already-scaled) footprint
+  // rather than resizing itself over time.
+  const DOT_R = 4.25, DOT_PEAK_SCALE = 1.35, LABEL_PEAK_SCALE = 1.5;
+  const PILL_PAD = 7;
+  function makePill(d) {
+    const dotHalf = DOT_R * DOT_PEAK_SCALE;
+    let xMin = d._cx - dotHalf, xMax = d._cx + dotHalf;
+    let yMin = d._cy - dotHalf, yMax = d._cy + dotHalf;
+    if (d._labelEl) {
+      const offX = (d._labelX - d._cx) * LABEL_PEAK_SCALE;
+      const offY = (d._labelY - d._cy) * LABEL_PEAK_SCALE;
+      const peakX = d._cx + offX, peakY = d._cy + offY;
+      const halfH = 9.5 * LABEL_PEAK_SCALE; // half of the ~19px measured label height
+      const w = d._labelW * LABEL_PEAK_SCALE;
+      const lx0 = d._nearRight ? peakX - w : peakX;
+      const lx1 = d._nearRight ? peakX : peakX + w;
+      xMin = Math.min(xMin, lx0); xMax = Math.max(xMax, lx1);
+      yMin = Math.min(yMin, peakY - halfH); yMax = Math.max(yMax, peakY + halfH);
+    }
+    xMin -= PILL_PAD; xMax += PILL_PAD; yMin -= PILL_PAD; yMax += PILL_PAD;
+    const w = xMax - xMin, h = yMax - yMin;
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', xMin);
+    rect.setAttribute('y', yMin);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', h);
+    rect.setAttribute('rx', h / 2);
+    rect.setAttribute('ry', h / 2);
+    rect.classList.add('highlight-pill');
+    return rect;
+  }
+
   HL_NAMES.forEach(name => {
     const d = DATA.find(r => r.name === name);
     if (!d) return;
+    const pill = makePill(d);
+    highlightOverlay.appendChild(pill);
+    d._pillEl = pill;
     highlightOverlay.appendChild(d._dotEl);
     if (d._labelEl) highlightOverlay.appendChild(d._labelEl);
   });
@@ -1082,6 +1141,9 @@
       d._labelEl.classList.add('pulse-anchor');
       d._labelEl.style.transformOrigin = `${d._cx}px ${d._cy}px`;
       d._labelEl.style.animation += `, labelPulseHL ${HL_PULSE}s ease ${start}s forwards, labelMute var(--dur-hl) ease ${start + HL_PULSE}s forwards`;
+    }
+    if (d._pillEl) {
+      d._pillEl.style.animation = `pillPulseHL ${HL_PULSE}s ease ${start}s forwards`;
     }
   });
 
