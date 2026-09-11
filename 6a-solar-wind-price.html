@@ -1082,23 +1082,29 @@
   // is sized once here to the country's peak (already-scaled) footprint
   // rather than resizing itself over time.
   const DOT_R = 4.25, DOT_PEAK_SCALE = 1.35, LABEL_PEAK_SCALE = 1.5;
-  const PILL_PAD = 7;
+  const PILL_PAD_X = 14, PILL_PAD_Y = 3; // wider left/right, tighter top/bottom
   function makePill(d) {
     const dotHalf = DOT_R * DOT_PEAK_SCALE;
     let xMin = d._cx - dotHalf, xMax = d._cx + dotHalf;
     let yMin = d._cy - dotHalf, yMax = d._cy + dotHalf;
     if (d._labelEl) {
-      const offX = (d._labelX - d._cx) * LABEL_PEAK_SCALE;
-      const offY = (d._labelY - d._cy) * LABEL_PEAK_SCALE;
-      const peakX = d._cx + offX, peakY = d._cy + offY;
-      const halfH = 9.5 * LABEL_PEAK_SCALE; // half of the ~19px measured label height
-      const w = d._labelW * LABEL_PEAK_SCALE;
-      const lx0 = d._nearRight ? peakX - w : peakX;
-      const lx1 = d._nearRight ? peakX : peakX + w;
-      xMin = Math.min(xMin, lx0); xMax = Math.max(xMax, lx1);
-      yMin = Math.min(yMin, peakY - halfH); yMax = Math.max(yMax, peakY + halfH);
+      // Real measured glyph box (not an estimate) -- each corner gets the
+      // exact same scale-from-the-dot transform the label itself animates
+      // with, so the union box lands precisely centered on the actual
+      // rendered text + dot, not an approximation of it.
+      const bbox = d._labelEl.getBBox();
+      const corners = [
+        [bbox.x, bbox.y], [bbox.x + bbox.width, bbox.y],
+        [bbox.x, bbox.y + bbox.height], [bbox.x + bbox.width, bbox.y + bbox.height],
+      ];
+      corners.forEach(([px, py]) => {
+        const sx = d._cx + (px - d._cx) * LABEL_PEAK_SCALE;
+        const sy = d._cy + (py - d._cy) * LABEL_PEAK_SCALE;
+        xMin = Math.min(xMin, sx); xMax = Math.max(xMax, sx);
+        yMin = Math.min(yMin, sy); yMax = Math.max(yMax, sy);
+      });
     }
-    xMin -= PILL_PAD; xMax += PILL_PAD; yMin -= PILL_PAD; yMax += PILL_PAD;
+    xMin -= PILL_PAD_X; xMax += PILL_PAD_X; yMin -= PILL_PAD_Y; yMax += PILL_PAD_Y;
     const w = xMax - xMin, h = yMax - yMin;
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('x', xMin);
