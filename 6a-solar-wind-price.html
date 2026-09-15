@@ -840,92 +840,84 @@
     document.body.classList.add('export-mode');
   }
 
-  // Every dot's position is taken directly from the client's own reference
-  // vector (Essay 06.svg -- a Fraser Institute / Bjorn Lomborg chart, IEA
-  // data) -- native (cx,cy) coordinates carried over unchanged, only scaled
-  // up uniformly and shifted down to make room for the headline, never
-  // individually repositioned. Country identification was cross-checked
-  // against the live dataset behind fraserinstitute.org/commentary/solar-
-  // and-wind-power-are-expensive (its own inline CanvasJS dataPoints array)
-  // rather than guessed from label position alone -- most matched with very
-  // low error; a handful in the densest cluster (Slovenia/Latvia area,
-  // Costa Rica/Mexico/NZ area, Croatia/Romania/Estonia area) are best-guess
-  // and flagged in the caption for Kevin to confirm. Canada's dot has no
-  // plain-text label in the source SVG at all -- it's marked with hand-
-  // outlined vector lettering (fill #e30063) instead of real <text>, which
-  // is why it read as missing at first; its real dot is the plain mint
-  // circle at native (294.08, 682.86), just left of that outlined wordmark.
-  // Every value below is the (%, ¢) reading taken off the client's own
-  // reference vector (Essay 06.svg) for that country's dot -- read once via
-  // the SVG's own axis calibration, then carried over as plain data instead
-  // of raw pixel coordinates so the chart can be replotted at a different
-  // frame size/ratio without ever touching a dot's real position. Country
-  // identification was cross-checked against the live dataset behind
-  // fraserinstitute.org/commentary/solar-and-wind-power-are-expensive (its
-  // own inline CanvasJS dataPoints array); most matched with very low
-  // error, a handful in the densest cluster (Slovenia/Latvia, Costa Rica/
-  // Mexico/NZ, Croatia/Romania/Estonia) are best-guess -- see the caption.
-  // Canada has no plain-text label in the source at all (hand-outlined
-  // vector lettering instead); its real dot was identified by elimination.
+  // Every dot's position is taken directly from a corrected reference chart
+  // Kevin provided (Fraser Institute / Bjorn Lomborg, IEA data) -- the
+  // original build used an SVG whose own axis was wrong (0-40c/0-70% instead
+  // of the real 0-55c/0-80%), which is why every dot needed re-plotting here,
+  // not just the axis labels. Denmark (69%, 37.5c), Germany (42%, 45c), and
+  // Canada (9%, 15c) are pinned exactly per Kevin's own instruction, since
+  // they are the 3 countries the narration calls out; every other value is
+  // read directly off the corrected reference image. Six countries absent
+  // from the original SVG-derived build entirely -- Mauritius, N Macedonia,
+  // Bulgaria, Ghana, Kosovo, Moldova -- are present in this reference and
+  // have been added. Moldova and N Macedonia specifically were adjusted down
+  // from their initial image reading (both landed far higher in solar/wind
+  // share than real-world data supports) after checking them against both a
+  // fresh lookup and a previously-sourced dataset, per Kevin's own
+  // instruction to verify anything the image left ambiguous.
   const DATA = [
-      { pct: -0.12, cents: 1.5, name: 'Kyrgyzstan' },
-      { pct: -0.07, cents: 13.53, name: 'Uganda' },
-      { pct: 0.12, cents: 8.68, name: 'Indonesia' },
-      { pct: 0.39, cents: 6.96, name: 'Uzbekistan' },
-      { pct: 0.54, cents: 2.86, name: 'Algeria' },
-      { pct: 2.21, cents: 24.65, name: 'Slovenia' },
-      { pct: 3.74, cents: 16.5, name: 'Serbia' },
-      { pct: 5.03, cents: 6.12, name: 'Kazakhstan' },
-      { pct: 5.11, cents: 9.11, name: 'Russia' },
-      { pct: 5.55, cents: 15.87, name: 'NZ' },
-      { pct: 5.74, cents: 30.38, name: 'Latvia' },
-      { pct: 5.92, cents: 13.94, name: 'Iceland' },
-      { pct: 6.13, cents: 11.96, name: 'Vietnam' },
-      { pct: 7.26, cents: 34.43, name: 'Switzerland' },
-      { pct: 8.59, cents: 13.53, name: 'Korea' },
-      { pct: 8.69, cents: 12.23, name: 'Canada' },
-      { pct: 9.38, cents: 11.57, name: 'Pakistan' },
-      { pct: 9.38, cents: 13.13, name: 'India' },
-      { pct: 10.03, cents: 17.91, name: 'Japan' },
-      { pct: 10.19, cents: 22.34, name: 'Slovakia' },
-      { pct: 10.42, cents: 11.47, name: 'Argentina' },
-      { pct: 10.55, cents: 22.02, name: 'Costa Rica' },
-      { pct: 11.37, cents: 18.08, name: 'Mexico' },
-      { pct: 12.47, cents: 25.28, name: 'Czech Republic' },
-      { pct: 12.49, cents: 10.14, name: 'China' },
-      { pct: 12.77, cents: 22.96, name: 'France' },
-      { pct: 12.9, cents: 15.01, name: 'Malta' },
-      { pct: 14.89, cents: 16.27, name: 'United States' },
-      { pct: 16.77, cents: 14.85, name: 'Brazil' },
-      { pct: 17.58, cents: 17.2, name: 'Kenya' },
-      { pct: 17.99, cents: 10.52, name: 'Turkey' },
-      { pct: 18.22, cents: 20.52, name: 'Hungary' },
-      { pct: 20.51, cents: 26.01, name: 'Austria' },
-      { pct: 21.2, cents: 33.21, name: 'Italy' },
-      { pct: 21.56, cents: 21.28, name: 'Romania' },
-      { pct: 22.48, cents: 34.73, name: 'Cyprus' },
-      { pct: 23.54, cents: 25.63, name: 'Poland' },
-      { pct: 23.65, cents: 14.48, name: 'Finland' },
-      { pct: 25.16, cents: 14.85, name: 'Sweden' },
-      { pct: 25.76, cents: 15.62, name: 'Chile' },
-      { pct: 25.85, cents: 16.41, name: 'Croatia' },
-      { pct: 28.25, cents: 24.67, name: 'Australia' },
-      { pct: 29.06, cents: 27.32, name: 'Belgium' },
-      { pct: 30.42, cents: 20.7, name: 'Uruguay' },
-      { pct: 34.43, cents: 17.51, name: 'Portugal' },
-      { pct: 34.73, cents: 37.32, name: 'Germany' },
-      { pct: 39.28, cents: 23.58, name: 'European Union' },
-      { pct: 39.47, cents: 21.22, name: 'Estonia' },
-      { pct: 39.54, cents: 33.67, name: 'United Kingdom' },
-      { pct: 40.09, cents: 23.09, name: 'Greece' },
-      { pct: 41.84, cents: 33.19, name: 'Ireland' },
-      { pct: 42.14, cents: 21.28, name: 'Spain' },
-      { pct: 45.16, cents: 23.76, name: 'Netherlands' },
-      { pct: 59.73, cents: 21.01, name: 'Lithuania' },
-      { pct: 68.89, cents: 27.65, name: 'Denmark' },
-      { pct: 12.77, cents: 5.38 },
-      { pct: 13.14, cents: 7.59 },
-      { pct: 0.54, cents: 8.33 },
+    { pct: 38, cents: 50, name: 'United Kingdom' },
+    { pct: 9, cents: 45, name: 'Switzerland' },
+    { pct: 17, cents: 46, name: 'Cyprus' },
+    { pct: 35, cents: 46, name: 'Ireland' },
+    { pct: 42, cents: 45, name: 'Germany' },
+    { pct: 15, cents: 44, name: 'Italy' },
+    { pct: 5, cents: 41, name: 'Czech Republic' },
+    { pct: 26, cents: 37.5, name: 'Belgium' },
+    { pct: 24, cents: 37, name: 'European Union' },
+    { pct: 69, cents: 37.5, name: 'Denmark' },
+    { pct: 16, cents: 35, name: 'Austria' },
+    { pct: 35, cents: 34, name: 'Greece' },
+    { pct: 40, cents: 33, name: 'Netherlands' },
+    { pct: 11, cents: 32, name: 'France' },
+    { pct: 24, cents: 32, name: 'Australia' },
+    { pct: 4, cents: 31, name: 'Slovakia' },
+    { pct: 18, cents: 30, name: 'Poland' },
+    { pct: 42, cents: 30, name: 'Spain' },
+    { pct: 9, cents: 29, name: 'Latvia' },
+    { pct: 7, cents: 28, name: 'Slovenia' },
+    { pct: 21, cents: 27, name: 'Croatia' },
+    { pct: 14, cents: 26, name: 'Romania' },
+    { pct: 13, cents: 25, name: 'Costa Rica' },
+    { pct: 30, cents: 25, name: 'Uruguay' },
+    { pct: 38, cents: 25, name: 'Estonia' },
+    { pct: 43, cents: 24, name: 'Portugal' },
+    { pct: 7, cents: 24, name: 'New Zealand' },
+    { pct: 59, cents: 24, name: 'Lithuania' },
+    { pct: 24, cents: 23, name: 'Sweden' },
+    { pct: 4, cents: 21, name: 'Serbia' },
+    { pct: 14, cents: 21, name: 'Mexico' },
+    { pct: 34, cents: 21, name: 'Chile' },
+    { pct: 10, cents: 20, name: 'Japan' },
+    { pct: 18, cents: 20, name: 'Kenya' },
+    { pct: 11, cents: 19, name: 'Mauritius' },
+    { pct: 17, cents: 19, name: 'Malta' },
+    { pct: 20, cents: 19, name: 'Brazil' },
+    { pct: 21, cents: 18, name: 'Hungary' },
+    { pct: 2, cents: 18, name: 'Korea' },
+    { pct: 2, cents: 17, name: 'Iceland' },
+    { pct: 3, cents: 20, name: 'N Macedonia' },
+    { pct: 13, cents: 17, name: 'Pakistan' },
+    { pct: 16, cents: 16, name: 'United States' },
+    { pct: 24, cents: 16, name: 'Finland' },
+    { pct: 4, cents: 17, name: 'Moldova' },
+    { pct: 9, cents: 15, name: 'Canada' },
+    { pct: 9, cents: 14, name: 'Uganda' },
+    { pct: 16, cents: 14.5, name: 'Bulgaria' },
+    { pct: 13, cents: 13, name: 'Vietnam' },
+    { pct: 19, cents: 12, name: 'Turkey' },
+    { pct: 2, cents: 12, name: 'Russia' },
+    { pct: 2, cents: 11, name: 'Ghana' },
+    { pct: 9, cents: 11, name: 'Kosovo' },
+    { pct: 15, cents: 10.5, name: 'India' },
+    { pct: 17, cents: 10, name: 'China' },
+    { pct: 11, cents: 8, name: 'Argentina' },
+    { pct: 2, cents: 9, name: 'Ecuador' },
+    { pct: 1, cents: 6.5, name: 'Indonesia' },
+    { pct: 5, cents: 4.5, name: 'Kazakhstan' },
+    { pct: 9, cents: 4.5, name: 'Uzbekistan' },
+    { pct: 2, cents: 3, name: 'Algeria' },
+    { pct: 1, cents: 1, name: 'Kyrgyzstan' },
   ];
 
   const W = 1200, H = 750;
@@ -942,8 +934,8 @@
   // the 1200-wide viewBox) -- a deliberate manual offset, not re-centering.
   document.getElementById('xAxisTitle').style.left = (plotCenterPct - 13.5) + '%';
 
-  const x = pct => PAD.left + (pct / 70) * plotW;
-  const y = cents => PAD.top + plotH - (cents / 40) * plotH;
+  const x = pct => PAD.left + (pct / 80) * plotW;
+  const y = cents => PAD.top + plotH - (cents / 55) * plotH;
 
   const dotsGroup = document.getElementById('dotsGroup');
   const labelsGroup = document.getElementById('labelsGroup');
@@ -959,7 +951,6 @@
   });
 
   const POP_START = 2.0, POP_STAGGER = 0.075;
-  const CHAR_W = 6.8; // measured via getBBox on real rendered labels (14px Rajdhani 500)
 
   ordered.forEach((d, i) => {
     const delay = POP_START + i * POP_STAGGER;
@@ -985,7 +976,7 @@
     if (d.name) {
       // flip to the left of the dot near the plot's right edge so long
       // names (Denmark, Lithuania) don't run off the frame
-      const nearRightEdge = d.pct > 62;
+      const nearRightEdge = d.pct > 71;
       const lx = cx + (nearRightEdge ? -9 : 9);
       const ly = cy + 5;
 
@@ -1005,7 +996,7 @@
       d._labelX = lx;
       d._labelY = ly;
       d._nearRight = nearRightEdge;
-      d._labelW = d.name.length * CHAR_W;
+      d._labelW = label.getBBox().width;
     }
   });
 
@@ -1026,7 +1017,7 @@
     const xMax = d._nearRight ? d._labelX : d._labelX + d._labelW;
     return { xMin, xMax, yMin: d._labelY - 13, yMax: d._labelY + 6 };
   }
-  for (let pass = 0; pass < 40; pass++) {
+  for (let pass = 0; pass < 100; pass++) {
     let moved = false;
     for (let i = 0; i < withLabels.length; i++) {
       for (let j = i + 1; j < withLabels.length; j++) {
@@ -1180,7 +1171,7 @@
   // copy of the source SVG's own pixel-space gridlines.
   const gridGroup = document.getElementById('gridGroup');
   const axisYGroup = document.getElementById('axisYGroup');
-  const centSteps = [0, 5, 10, 15, 20, 25, 30, 35, 40];
+  const centSteps = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
   centSteps.forEach((c, i) => {
     const gy = y(c);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1203,7 +1194,7 @@
   });
 
   const axisXGroup = document.getElementById('axisXGroup');
-  const pctSteps = [0, 10, 20, 30, 40, 50, 60, 70];
+  const pctSteps = [0, 10, 20, 30, 40, 50, 60, 70, 80];
   pctSteps.forEach((p, i) => {
     const gx = x(p);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
