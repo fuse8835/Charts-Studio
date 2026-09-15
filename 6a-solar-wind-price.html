@@ -263,7 +263,7 @@
 
   .dot-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 500;
     fill: var(--mist-300);
     opacity: 0;
@@ -978,7 +978,12 @@
       // names (Denmark, Lithuania) don't run off the frame
       const nearRightEdge = d.pct > 71;
       const lx = cx + (nearRightEdge ? -9 : 9);
-      const ly = cy + 5;
+      // Dots sitting right at the bottom axis (very low cents) can't fit a
+      // label below them at all -- no amount of vertical decluttering room
+      // helps if the default position already pokes through baselineY, so
+      // those start above the dot instead.
+      const belowOverflows = (cy + 5 + 5) > baselineY;
+      const ly = belowOverflows ? cy - 8 : cy + 5;
 
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       label.setAttribute('x', lx);
@@ -1015,33 +1020,82 @@
   function labelBox(d) {
     const xMin = d._nearRight ? d._labelX - d._labelW : d._labelX;
     const xMax = d._nearRight ? d._labelX : d._labelX + d._labelW;
-    return { xMin, xMax, yMin: d._labelY - 13, yMax: d._labelY + 6 };
+    return { xMin, xMax, yMin: d._labelY - 12.2, yMax: d._labelY + 5 };
   }
-  for (let pass = 0; pass < 100; pass++) {
+  // Every label must stay inside the plot's own axes -- pulled back in-bounds
+  // at the end of each pass (never just once at the end), so the pairwise
+  // relaxation below gets a chance to re-resolve any overlap that correction
+  // itself creates, instead of leaving a label pinned to the axis but
+  // colliding with a neighbor.
+  const plotRight = W - PAD.right;
+  function clampToAxes(d) {
     let moved = false;
-    for (let i = 0; i < withLabels.length; i++) {
-      for (let j = i + 1; j < withLabels.length; j++) {
-        const a = withLabels[i], b = withLabels[j];
-        const ba = labelBox(a), bb = labelBox(b);
-        const xOverlap = ba.xMin < bb.xMax && bb.xMin < ba.xMax;
-        const yOverlap = ba.yMin < bb.yMax && bb.yMin < ba.yMax;
-        if (!xOverlap || !yOverlap) continue;
-        const overlapAmt = Math.min(ba.yMax, bb.yMax) - Math.max(ba.yMin, bb.yMin);
-        const aFixed = HL_NAMES.includes(a.name), bFixed = HL_NAMES.includes(b.name);
-        if (aFixed && bFixed) continue; // both pinned, can't resolve -- shouldn't happen in practice
-        if (aFixed) {
-          b._labelY += (b._labelY <= a._labelY ? -1 : 1) * (overlapAmt + 1);
-        } else if (bFixed) {
-          a._labelY += (a._labelY <= b._labelY ? -1 : 1) * (overlapAmt + 1);
-        } else {
-          const push = overlapAmt / 2 + 0.5;
-          if (a._labelY <= b._labelY) { a._labelY -= push; b._labelY += push; }
-          else { a._labelY += push; b._labelY -= push; }
+    const box = labelBox(d);
+    if (box.yMax > baselineY) { d._labelY -= (box.yMax - baselineY); moved = true; }
+    if (box.yMin < PAD.top) { d._labelY += (PAD.top - box.yMin); moved = true; }
+    const box2 = labelBox(d);
+    if (box2.xMax > plotRight) { d._labelX -= (box2.xMax - plotRight); moved = true; }
+    if (box2.xMin < PAD.left) { d._labelX += (PAD.left - box2.xMin); moved = true; }
+    return moved;
+  }
+  // Resolves overlaps by pushing apart along one axis, applied to every
+  // still-overlapping pair each pass; 'prop' is '_labelY' (the normal case)
+  // or '_labelX' (the dense-corner fallback below).
+  function relax(prop) {
+    for (let pass = 0; pass < 60; pass++) {
+      let moved = false;
+      for (let i = 0; i < withLabels.length; i++) {
+        for (let j = i + 1; j < withLabels.length; j++) {
+          const a = withLabels[i], b = withLabels[j];
+          const ba = labelBox(a), bb = labelBox(b);
+          const xOverlap = ba.xMin < bb.xMax && bb.xMin < ba.xMax;
+          const yOverlap = ba.yMin < bb.yMax && bb.yMin < ba.yMax;
+          if (!xOverlap || !yOverlap) continue;
+          const overlapAmt = prop === '_labelX'
+            ? Math.min(ba.xMax, bb.xMax) - Math.max(ba.xMin, bb.xMin)
+            : Math.min(ba.yMax, bb.yMax) - Math.max(ba.yMin, bb.yMin);
+          const aFixed = HL_NAMES.includes(a.name), bFixed = HL_NAMES.includes(b.name);
+          if (aFixed && bFixed) continue; // both pinned, can't resolve -- shouldn't happen in practice
+          if (aFixed) {
+            b[prop] += (b[prop] <= a[prop] ? -1 : 1) * (overlapAmt + 1);
+          } else if (bFixed) {
+            a[prop] += (a[prop] <= b[prop] ? -1 : 1) * (overlapAmt + 1);
+          } else {
+            const push = overlapAmt / 2 + 0.5;
+            if (a[prop] <= b[prop]) { a[prop] -= push; b[prop] += push; }
+            else { a[prop] += push; b[prop] -= push; }
+          }
+          moved = true;
         }
-        moved = true;
+      }
+      withLabels.forEach(d => { if (clampToAxes(d)) moved = true; });
+      if (!moved) return;
+    }
+  }
+  // Vertical-only relaxation resolves nearly everything and keeps the usual
+  // top-to-bottom reading flow next to each dot. But a handful of very
+  // close-together, low-value dots (bottom-left corner) need more vertical
+  // room collectively than actually exists between them before the bottom
+  // axis cuts it off -- no amount of vertical-only pushing can fit them.
+  // Alternating a full vertical pass with a single horizontal sweep on
+  // whatever's still overlapping (rather than choosing an axis per pair per
+  // pass, which oscillates) gives those corner cases a second, stable
+  // degree of freedom without disturbing pairs vertical relaxation already
+  // resolves on its own.
+  for (let round = 0; round < 6; round++) {
+    relax('_labelY');
+    let stillOverlapping = false;
+    for (let i = 0; i < withLabels.length && !stillOverlapping; i++) {
+      for (let j = i + 1; j < withLabels.length; j++) {
+        const ba = labelBox(withLabels[i]), bb = labelBox(withLabels[j]);
+        if (ba.xMin < bb.xMax && bb.xMin < ba.xMax && ba.yMin < bb.yMax && bb.yMin < ba.yMax) {
+          stillOverlapping = true;
+          break;
+        }
       }
     }
-    if (!moved) break;
+    if (!stillOverlapping) break;
+    relax('_labelX');
   }
 
   const leaderLinesGroup = document.getElementById('leaderLines');
