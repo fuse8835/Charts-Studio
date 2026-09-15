@@ -1000,6 +1000,8 @@
       d._labelEl = label;
       d._labelX = lx;
       d._labelY = ly;
+      d._defaultLabelX = lx;
+      d._defaultLabelY = ly;
       d._nearRight = nearRightEdge;
       d._labelW = label.getBBox().width;
     }
@@ -1100,8 +1102,19 @@
 
   const leaderLinesGroup = document.getElementById('leaderLines');
   withLabels.forEach(d => {
+    // The relaxation above only ever updates the JS-side _labelX/_labelY --
+    // the label's real 'x' attribute was never written back after a
+    // horizontal push, so the visible text stayed put while any leader
+    // line (correctly using the updated _labelX) pointed at empty space.
+    d._labelEl.setAttribute('x', d._labelX);
     d._labelEl.setAttribute('y', d._labelY);
-    if (Math.abs(d._labelY - (d._cy + 5)) > 3) {
+    // Compare against this label's own actual default position -- not a
+    // single hardcoded offset -- since a dot near the bottom axis defaults
+    // to a label ABOVE it, not below, and a genuine displacement can now be
+    // horizontal (the corner fallback) as well as vertical.
+    const dx = d._labelX - d._defaultLabelX;
+    const dy = d._labelY - d._defaultLabelY;
+    if (Math.hypot(dx, dy) > 3) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', d._cx);
       line.setAttribute('y1', d._cy);
