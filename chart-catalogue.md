@@ -288,3 +288,32 @@ Pieces that sit outside the numbered Script series (excluded from `index.html`, 
 - **Status:**
 - **Last revised:**
 ```
+
+## 8A — Global Energy: Addition, not Transition
+
+- **File:** `8a-energy-addition.html` · **Duration:** 29 seconds · **Export:** 1920 × 1200, ProRes 4444 alpha through the existing render server.
+- **Source:** supplied `Essay 08-A.svg`. Retains the original polygons and correction paths in their original paint order; no synthetic annual data or smoothing. Source x = 170.51–1011.51 maps to 1800–2023; y = 894.25 is zero and y = 198.23 is 160 thousand TWh. Small geometric irregularities in the supplied artwork are retained, including the early oil-colored sliver. The supplied vector has no separately identified nuclear category.
+- **Style:** existing Rajdhani fonts, navy vignette, review controls and transparent export panel; muted category colors with mint reserved for renewables and era headings.
+- **Motion:** native Web Animations; reveal masks, axis scales, ticks, labels and final emphasis all seek through `document.getAnimations()` with no animation-frame drawing loop.
+
+| Time | Action |
+| --- | --- |
+| 0–2s | Frame, title and first era establish |
+| 2–5s | Reveal 1800–1860; axis ends at 1860 |
+| 5–6s | One-second completed-era hold |
+| 6–7s | Expand axes to 1900 and 20 thousand TWh |
+| 7–8s | One-second hold before the next reveal |
+| 8–11s | Reveal 1861–1900 |
+| 11–12s | One-second completed-era hold |
+| 12–13s | Expand axes to 1960 and 50 thousand TWh |
+| 13–14s | One-second hold before the next reveal |
+| 14–18s | Reveal 1901–1956 (1900 is the selected optional second-era endpoint) |
+| 18–19s | One-second completed-era hold |
+| 19–20s | Expand axes to 2023 and 180 thousand TWh |
+| 20–21s | One-second hold before the next reveal |
+| 21–26s | Reveal 1957–2023; final regular year tick is 2020 |
+| 26–27s | One-second full-chart hold |
+| 27–28s | Renewables annotation appears while the full stack remains |
+| 28–29s | One-second final hold (renderer adds its standard extra hold) |
+
+Validation: `node --test test/*.test.cjs`; browser check: start the render server and run `CHART_BASE_URL=http://localhost:8793 node _render/check-8a.cjs`. Checks actual pixel-identical holds, out-of-order seeking, landing-page discovery, era jumps, replay and browser errors. Screenshots go to the OS temporary directory.

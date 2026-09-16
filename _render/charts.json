@@ -158,5 +158,15 @@
     "html": "battery-storage.html",
     "mov": "battery-storage-alpha.mov",
     "duration": 10.0
+  },
+  {
+    "id": "8a",
+    "name": "Global Energy: Addition, not Transition",
+    "subtitle": "1800\u20132023 in four expanding eras, with one-second editing holds",
+    "html": "8a-energy-addition.html",
+    "mov": "8a-energy-addition-alpha.mov",
+    "duration": 29,
+    "width": 1920,
+    "height": 1200
   }
 ]
