@@ -62,14 +62,21 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 .export-mode .controls,.export-mode .beats,.export-mode .page-note,.export-mode .replay{display:none!important}
 @media(max-width:600px){body{padding:14px 10px 30px}.frame{border-radius:12px}.controls{gap:10px}.beats button{font-size:13px;padding:7px 9px}}
 </style>
+<link rel="stylesheet" href="energy-treatments.css">
+<link rel="stylesheet" href="energy-review.css">
 </head>
 <body>
 <main class="stage-wrap">
-<div class="frame" id="frame">
+<div class="frame" id="frame" data-style="1">
 <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" role="img" aria-labelledby="sceneTitle sceneDesc">
 <title id="sceneTitle">The energy transition</title>
 <desc id="sceneDesc">A conceptual replacement sequence. Oil, gas and coal first appear across the frame, then compress into a left-hand panel. A central arrow introduces a mint panel containing wind and solar as the fossil sources dim. No quantities or dates are represented.</desc>
 <defs>
+ <linearGradient id="bezel" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#c5e2e5" stop-opacity=".38"/><stop offset=".3" stop-color="#c5e2e5" stop-opacity=".02"/><stop offset=".75" stop-color="#c5e2e5" stop-opacity=".04"/><stop offset="1" stop-color="#c5e2e5" stop-opacity=".22"/></linearGradient>
+ <linearGradient id="lightSweep"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+ <filter id="objectShadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="9" stdDeviation="6" flood-color="#000" flood-opacity=".35"/></filter>
+ <filter id="panelShadow" x="-20%" y="-30%" width="140%" height="180%"><feDropShadow dx="0" dy="16" stdDeviation="15" flood-color="#000" flood-opacity=".25"/></filter>
+ <radialGradient id="baseMetal"><stop stop-color="#81aaa9" stop-opacity=".16"/><stop offset=".85" stop-color="#071418" stop-opacity=".3"/><stop offset="1" stop-color="#aacdc6" stop-opacity=".28"/></radialGradient>
  <linearGradient id="steelMaterial" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#9fc2dd"/><stop offset=".35" stop-color="#567e9e"/><stop offset=".6" stop-color="#365772"/><stop offset="1" stop-color="#173047"/></linearGradient>
  <linearGradient id="mintMaterial" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b6fff0"/><stop offset=".28" stop-color="#4ff1ce"/><stop offset=".55" stop-color="#0ba58f"/><stop offset="1" stop-color="#034d50"/></linearGradient>
  <linearGradient id="outerMaterial" x2="0" y2="1"><stop stop-color="#102e46" stop-opacity=".75"/><stop offset="1" stop-color="#031323" stop-opacity=".65"/></linearGradient>
@@ -80,9 +87,18 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 </defs>
 <text id="headline" class="headline" x="600" y="158">The energy transition</text>
 <g id="panelShell">
- <rect x="30" y="229" width="1140" height="347" rx="34" fill="url(#outerMaterial)" stroke="#47738b" stroke-opacity=".7" stroke-width=".7"/>
+ <rect id="outerPanel" x="30" y="229" width="1140" height="347" rx="34" fill="url(#outerMaterial)" stroke="#47738b" stroke-opacity=".7" stroke-width=".7"/>
  <rect id="fossilPanel" x="46" y="246" width="1108" height="315" rx="32" fill="url(#leftMaterial)" stroke="#3c627c" stroke-opacity=".5" stroke-width=".7"/>
  <rect id="renewablePanel" x="693" y="246" width="462" height="315" rx="32" fill="url(#rightMaterial)" stroke="#16b6ae" stroke-opacity=".65" stroke-width=".7"/>
+ <g class="premium-detail" aria-hidden="true">
+ <rect class="bezel-inner" x="36" y="235" width="1128" height="335" rx="30" fill="none" stroke="url(#bezel)" stroke-width="1"/>
+ <path class="rim-light" d="M77 231 H1123" stroke="url(#lightSweep)" stroke-width="2"/>
+ <path class="lower-light" d="M96 569 H1104" stroke="url(#lightSweep)" stroke-width="2"/>
+ </g>
+ <g class="architecture" aria-hidden="true" fill="none" stroke="url(#bezel)">
+ <rect x="18" y="217" width="1164" height="371" rx="40"/>
+ <path d="M84 596 H1116" stroke-opacity=".4"/>
+ </g>
 </g>
 <ellipse id="renewableHalo" cx="948" cy="445" rx="194" ry="103" fill="url(#halo)"/>
 <g id="transitionArrow" transform="translate(682 397)" aria-hidden="true">
@@ -92,20 +108,25 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 </g>
 <g id="oil" class="source" style="transform:translate(170px,420px) scale(1.02)">
   <g class="source-body"><g class="icon">
+<g class="material-base" aria-hidden="true"><ellipse cx="0" cy="59" rx="88" ry="12" fill="url(#baseMetal)" stroke="none"/><ellipse cx="0" cy="55" rx="88" ry="11" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width=".65"/></g>
 <path class="ground" d="M-96 54 H96"/>
     <path class="surface" d="M-27 49 L-5-40 L7-40 L29 49 Z"/>
     <path d="M-27 49 L-5-40 L7-40 L29 49 M-12 7 L14 7 M-19 30 L20 30 M-21 29 L12 7 M-13 7 L7-19 M-6-19 H8"/>
+    <g id="pumpBeam">
     <path class="surface" d="M-67-34 L51-67 L55-53 L-64-20 Z"/>
     <path class="surface" d="M51-75 Q74-51 62-22 L51-29 L44-70 Z"/>
-    <circle cx="0" cy="-43" r="4" fill="url(#steelMaterial)"/>
-    <path d="M-63-25 V32 M61-24 V48 M-78 49 H78"/>
-    <path class="surface" d="M-73 32 H-47 V49 H-73 Z M52 48 H69 V53 H52 Z"/>
     <path class="edge" d="M-64-30 L41-59"/>
+    </g>
+    <circle cx="0" cy="-43" r="4" fill="url(#steelMaterial)"/>
+    <path id="oilRod" d="M61-24 V48"/><path id="oilCrank" d="M-63-25 V32"/><path d="M-78 49 H78"/>
+    <path class="surface" d="M-73 32 H-47 V49 H-73 Z M52 48 H69 V53 H52 Z"/>
+
   </g></g>
   <text class="source-label" y="94">OIL</text>
 </g>
 <g id="gas" class="source" style="transform:translate(350px,420px) scale(1.02)">
   <g class="source-body"><g class="icon">
+<g class="material-base" aria-hidden="true"><ellipse cx="0" cy="59" rx="88" ry="12" fill="url(#baseMetal)" stroke="none"/><ellipse cx="0" cy="55" rx="88" ry="11" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width=".65"/></g>
 <path class="ground" d="M-96 54 H96"/>
     <path class="surface" d="M-78 53 V21 Q-78-7-50-7 H-25 V-15 H25 V-7 H50 Q78-7 78 21 V53 H58 V22 Q58 13 49 13 H25 V23 H-25 V13 H-49 Q-58 13-58 22 V53 Z"/>
     <path class="surface" d="M-32-15 H-23 V24 H-32 Z M23-15 H32 V24 H23 Z"/>
@@ -119,6 +140,7 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 </g>
 <g id="coal" class="source" style="transform:translate(535px,420px) scale(1.02)">
   <g class="source-body"><g class="icon">
+<g class="material-base" aria-hidden="true"><ellipse cx="0" cy="59" rx="88" ry="12" fill="url(#baseMetal)" stroke="none"/><ellipse cx="0" cy="55" rx="88" ry="11" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width=".65"/></g>
 <path class="ground" d="M-96 54 H96"/>
     <path class="surface" d="M-73 37 L-53 6 L-25 2 L-13 34 L-24 48 H-65 Z"/>
     <path class="surface" d="M-32 3 L-13-32 L15-43 L39-17 L28 17 L-9 27 Z"/>
@@ -131,6 +153,7 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 </g>
 <g id="wind" class="source renewable" style="transform:translate(835px,386px) scale(1.18)">
  <g class="source-body"><g class="icon">
+<g class="material-base" aria-hidden="true"><ellipse cx="0" cy="59" rx="88" ry="12" fill="url(#baseMetal)" stroke="none"/><ellipse cx="0" cy="55" rx="88" ry="11" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width=".65"/></g>
 <path class="ground" d="M-96 54 H96"/>
    <path class="surface" d="M-5-12 L-10 63 H10 L5-12 Z"/>
    <path d="M-25 64 H25"/>
@@ -144,6 +167,7 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 </g>
 <g id="solar" class="source renewable" style="transform:translate(1040px,416px) scale(1.12)">
  <g class="source-body"><g class="icon">
+<g class="material-base" aria-hidden="true"><ellipse cx="0" cy="59" rx="88" ry="12" fill="url(#baseMetal)" stroke="none"/><ellipse cx="0" cy="55" rx="88" ry="11" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-width=".65"/></g>
 <path class="ground" d="M-96 54 H96"/>
    <path class="surface" d="M-52-49 H82 L48 29 H-86 Z"/>
    <path class="edge" d="M-48-44 H74 L44 24 H-78 Z"/>
@@ -153,8 +177,20 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
  <text class="source-label" y="94">SOLAR</text>
 </g>
 </svg>
+<div class="pins-layer" id="pinsLayer"></div>
 <button class="replay" id="replayBtn" type="button" aria-label="Replay animation">↻ Replay</button>
 </div>
+<section class="style-picker" aria-label="Visual treatment">
+ <div class="picker-head"><span>VISUAL TREATMENT</span><span id="styleDescription">The original navy and mint composition.</span></div>
+ <div class="style-options">
+ <button type="button" data-variant="1" aria-pressed="true"><span>01</span> Original</button>
+ <button type="button" data-variant="2" aria-pressed="false"><span>02</span> Satin</button>
+ <button type="button" data-variant="3" aria-pressed="false"><span>03</span> Copper &amp; jade</button>
+ <button type="button" data-variant="4" aria-pressed="false"><span>04</span> Glass</button>
+ <button type="button" data-variant="5" aria-pressed="false"><span>05</span> Obsidian gold</button>
+ </div>
+</section>
+<div id="renderTools" class="render-tools" aria-label="Preview and export tools"></div>
 <div class="controls">
 <button class="replay" id="playBtn" type="button">Pause</button>
 <input id="timeline" type="range" min="0" max="12000" step="10" value="0" aria-label="Animation timeline">
@@ -166,6 +202,29 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 <button type="button" data-seek="8000">03 · Renewables</button>
 <button type="button" data-seek="12000">04 · Final frame</button>
 </div>
+<div class="stage-wrap review-panel">
+  <div class="review-head">
+    <h2>Review &amp; annotate</h2>
+    <div class="review-actions">
+      <button id="addPinBtn" class="pill-btn" type="button">+ Add note</button>
+      <button id="copyNotesBtn" class="pill-btn pill-btn-solid" type="button">Copy feedback</button>
+    </div>
+  </div>
+
+  <p class="review-hint">Scrub to the moment you want to talk about, click <b>+ Add note</b>, then click on the frame above to drop a numbered pin. Write your note, then hit <b>Copy feedback</b> and paste the result back into chat.</p>
+
+  <div class="scrub-row">
+    <button id="scrubPlayBtn" class="icon-btn" type="button" aria-label="Play or pause the preview">&#9654;</button>
+    <input type="range" aria-label="Review timeline" id="scrubber" class="scrubber" min="0" max="12000" step="10" value="0">
+    <span id="scrubTime" class="scrub-time">0.0s</span>
+  </div>
+
+  <ol id="notesList" class="notes-list"></ol>
+
+  <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
+</div>
+
+
 <p class="page-note">A conceptual illustration of replacement, not a forecast or measured energy mix.<br><a href="explainers.html">← All explainers</a></p>
 </main>
 <script id="motion-plan">
@@ -189,7 +248,10 @@ function buildEnergyTracks() {
   add('charge','#'+id+' .surface',[{fillOpacity:.1},{fillOpacity:1}],6200+i*650,1300);
  });
  add('reveal','#renewableHalo',[{opacity:0},{opacity:1}],6100,2400);
- add('rotate','#rotor',[{transform:'rotate(0deg)'},{transform:'rotate(120deg)'}],8000,3200,'cubic-bezier(.4,0,.2,1)');
+ tracks.push({name:'rotate',target:'#rotor',frames:[{transform:'rotate(0deg)'},{transform:'rotate(360deg)'}],options:{delay:0,duration:9000,iterations:Infinity,easing:'linear',fill:'both'}});
+ tracks.push({name:'pump',target:'#pumpBeam',frames:[{transform:'rotate(-6deg)'},{transform:'rotate(6deg)'},{transform:'rotate(-6deg)'}],options:{delay:0,duration:3200,iterations:Infinity,easing:'ease-in-out',fill:'both'}});
+ tracks.push({name:'pump',target:'#oilRod',frames:[{transform:'translateY(-6px)'},{transform:'translateY(6px)'},{transform:'translateY(-6px)'}],options:{delay:0,duration:3200,iterations:Infinity,easing:'ease-in-out',fill:'both'}});
+ tracks.push({name:'pump',target:'#oilCrank',frames:[{transform:'translateY(6px)'},{transform:'translateY(-6px)'},{transform:'translateY(6px)'}],options:{delay:0,duration:3200,iterations:Infinity,easing:'ease-in-out',fill:'both'}});
  return tracks;
 }
 </script>
@@ -213,19 +275,24 @@ function buildEnergyTracks() {
  const slider=document.querySelector('#timeline');
  const readout=document.querySelector('#timeReadout');
  const play=document.querySelector('#playBtn');
+ const isRunning=()=>animations.some(a=>a.playState==='running');
+ const pause=()=>{animations.forEach(a=>a.pause());refresh();};
  const now=()=>Math.min(ENERGY_DURATION,Math.max(0,Number(clock.currentTime)||0));
- function refresh(){slider.value=now();readout.value=(now()/1000).toFixed(1)+' / 12s';play.textContent=clock.playState==='running'?'Pause':'Play';}
+ function refresh(){slider.value=now();readout.value=(now()/1000).toFixed(1)+' / 12s';play.textContent=isRunning()?'Pause':'Play';}
  function seek(time){const bounded=Math.max(0,Math.min(ENERGY_DURATION,time));animations.forEach(a=>{a.pause();a.currentTime=bounded;});refresh();}
  function resume(){const time=now()>=ENERGY_DURATION?0:now();const start=document.timeline.currentTime-time;animations.forEach(a=>{a.play();a.startTime=start;});refresh();}
  document.querySelector('#replayBtn').addEventListener('click',()=>{seek(0);resume();});
- play.addEventListener('click',()=>{if(clock.playState==='running')seek(now());else resume();});
+ play.addEventListener('click',()=>{if(isRunning())pause();else resume();});
  slider.addEventListener('input',()=>seek(Number(slider.value)));
  document.querySelectorAll('[data-seek]').forEach(button=>button.addEventListener('click',()=>seek(Number(button.dataset.seek))));
  // The timer updates controls only; animation state is entirely native and seekable.
+ window.energyPlayer={seek,resume,pause,now,isPlaying:isRunning};
  if(!exporting){setInterval(refresh,100);if(matchMedia('(prefers-reduced-motion: reduce)').matches)seek(ENERGY_DURATION);}
  refresh();
 })();
 </script>
-<script src="render-client.js" data-chart-id="energy-transition"></script>
+<script src="energy-treatments.js"></script>
+<script src="energy-review.js"></script>
+<script src="render-client.js" data-chart-id="energy-transition" data-controls-container="renderTools"></script>
 </body>
 </html>

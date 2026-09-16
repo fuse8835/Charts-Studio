@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
+const { resolveRenderVariant } = require('./render-variant');
+
 const ROOT = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8793;
 const CHARTS_PATH = path.join(__dirname, 'charts.json');
@@ -59,7 +61,10 @@ async function renderChart(chart, send) {
     deviceScaleFactor: 1,
   });
 
-  await page.goto(`http://localhost:${PORT}/${chart.html}?export`, { waitUntil: 'networkidle' });
+  const captureUrl = new URL(chart.html, `http://localhost:${PORT}/`);
+  captureUrl.searchParams.set('export', '');
+  if (chart.variant) captureUrl.searchParams.set('variant', chart.variant);
+  await page.goto(captureUrl.href, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
 
   const fps = 30;
@@ -68,7 +73,8 @@ async function renderChart(chart, send) {
   const animEndMs = chart.duration * 1000;
 
   for (let i = 0; i < totalFrames; i++) {
-    const tMs = Math.min(i * (1000 / fps), animEndMs);
+    const frameMs = i * (1000 / fps);
+    const tMs = chart.continuousHold ? frameMs : Math.min(frameMs, animEndMs);
     await page.evaluate((t) => {
       document.getAnimations().forEach(a => { a.currentTime = t; });
     }, tMs);
@@ -162,8 +168,11 @@ const server = http.createServer((req, res) => {
       send('Another render is already in progress on this server -- try again shortly.', true);
       return;
     }
+    let renderConfig;
+    try { renderConfig = resolveRenderVariant(chart, u.searchParams.get('variant')); }
+    catch (err) { send(err.message, true); return; }
     rendering = true;
-    renderChart(chart, send)
+    renderChart(renderConfig, send)
       .catch((err) => send(`Render failed: ${err.message}`, true))
       .finally(() => { rendering = false; });
     return;

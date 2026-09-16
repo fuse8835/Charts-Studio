@@ -10,7 +10,12 @@
 
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute; top:6%; right:6%; z-index:5; display:flex; gap:8px; align-items:center;';
-    replayBtn.parentNode.insertBefore(wrap, replayBtn);
+    const controlsId = scriptTag.getAttribute('data-controls-container');
+    const controls = controlsId && document.getElementById(controlsId);
+    if (controls) {
+      wrap.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+      controls.appendChild(wrap);
+    } else replayBtn.parentNode.insertBefore(wrap, replayBtn);
     replayBtn.style.position = 'static';
     wrap.appendChild(replayBtn);
 
@@ -27,7 +32,10 @@
     status.style.cssText =
       'position:absolute; top:calc(6% + 40px); right:6%; z-index:5; max-width:260px; text-align:right; ' +
       'font-family:Rajdhani,sans-serif; font-size:12px; color:#a9c2d6; text-shadow:0 1px 4px rgba(0,0,0,.6);';
-    frame.appendChild(status);
+    if (controls) {
+      status.style.cssText='font:500 13px Rajdhani,sans-serif;color:#a9c2d6;max-width:340px';
+      controls.appendChild(status);
+    } else frame.appendChild(status);
 
     let busy = false;
     renderBtn.addEventListener('click', () => {
@@ -37,7 +45,9 @@
       renderBtn.style.opacity = '.6';
       status.textContent = 'Starting render...';
 
-      const es = new EventSource('/api/render?id=' + encodeURIComponent(chartId));
+      const renderVariant = scriptTag.dataset.renderVariant;
+      const variantQuery = renderVariant ? '&variant=' + encodeURIComponent(renderVariant) : '';
+      const es = new EventSource('/api/render?id=' + encodeURIComponent(chartId) + variantQuery);
       es.onmessage = (e) => { status.textContent = e.data; };
       es.addEventListener('done', (e) => {
         status.textContent = e.data;

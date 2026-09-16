@@ -167,6 +167,7 @@
     "mov": "energy-transition-alpha.mov",
     "duration": 12,
     "width": 1920,
-    "height": 1200
+    "height": 1200,
+    "continuousHold": true
   }
 ]

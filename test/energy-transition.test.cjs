@@ -63,3 +63,19 @@ test('panel opens before renewables arrive and remains rounded during compressio
   const wind=tracks.find(t=>t.target==='#wind');
   assert.ok(open.options.delay+open.options.duration<=wind.options.delay);
 });
+test('turbine and pump run continuously on the shared seekable timeline',()=>{
+ const {tracks}=plan();
+ for(const selector of ['#rotor','#pumpBeam']) {
+  const motion=tracks.find(t=>t.target===selector && t.options.iterations===Infinity);
+  assert.ok(motion,selector+' needs continuous motion');
+  assert.equal(motion.options.delay,0);
+ }
+});
+test('all five styles have export-safe selection and annotation tools',()=>{
+ const html=fs.readFileSync(path.join(root,'energy-transition.html'),'utf8');
+ for(let i=1;i<=5;i++) assert.ok(html.includes('data-variant="'+i+'"'));
+ for(const id of ['pinsLayer','addPinBtn','copyNotesBtn','notesList','feedbackOut','renderTools']) assert.ok(html.includes('id="'+id+'"'));
+ assert.ok(html.includes('energy-review.js'));
+ const server=fs.readFileSync(path.join(root,'_render/server.js'),'utf8');
+ assert.ok(server.includes('resolveRenderVariant'));
+});

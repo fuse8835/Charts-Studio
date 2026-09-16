@@ -1,6 +1,6 @@
 # The energy transition
 
-`energy-transition.html` is a self-contained animated SVG explainer using the series' embedded Rajdhani font and navy/mint palette. It combines a centered title with two rounded, softly shaded source panels and a central arrow.
+`energy-transition.html` is a animated SVG explainer using the series' embedded Rajdhani font and navy/mint palette. It combines a centered title with two rounded, softly shaded source panels and a central arrow.
 
 ## Sequence
 
@@ -19,10 +19,22 @@ Start the existing server with `node _render/server.js`, then open `/energy-tran
 
 The timeline supports keyboard scrubbing, play/pause, replay and scene shortcuts. Reduced-motion users see the final frame initially and can explicitly play the sequence. Review controls are excluded from `?export` captures.
 
-All motion is built at load time with native Web Animations and a shared start time. The existing renderer can pause and seek every animation via `document.getAnimations()`. There are no frame-driven animation callbacks, external assets, or new production dependencies. Export is registered at 1920×1200 for the existing ProRes 4444 `.mov` workflow.
+All motion is built at load time with native Web Animations and a shared start time. The existing renderer can pause and seek every animation via `document.getAnimations()`. Motion is native and seekable; small UI timers only update controls. Styling and annotation helpers are local files, with no new production dependencies. Export is registered at 1920×1200 for the existing ProRes 4444 `.mov` workflow.
 
 ## Validation
 
 Run `node --test test/energy-transition.test.cjs` for sequencing and catalogue integration checks. Inline JavaScript also passes `node --check`.
 
 Browser preview was blocked by the environment's browser security check during authoring. Visual playback, frame capture and an actual `.mov` export still require verification; these checks are not represented as complete.
+
+## Five visual treatments
+
+The selector below the frame offers Original, Satin, Copper & jade, Glass and Obsidian gold. Each uses the same choreography, with progressively richer surface materials, edge lighting, inset borders and object bases. No background imagery or decorative data is added. Icons are smaller throughout, especially the turbine.
+
+The selection is encoded in `?variant=1` through `?variant=5`, survives a reload and preserves the current playhead when changed. The MOV button reads that selection and exports `energy-transition-vN-alpha.mov`. The catalogue's default Render button keeps the original filename and treatment.
+
+Pumpjack and turbine loops run from time zero on the shared native timeline, including the final export hold (`continuousHold`). Pause, scrubbing and reduced-motion mode also pause those loops. During ordinary playback the machines continue moving after the main reveal settles.
+
+The shared Render MOV and Ruler tools now appear below the video frame. Review & annotate is adapted from the battery explainer: numbered pins, timestamps, text notes, deletion and copy feedback. Notes include the treatment number and clicking a note restores its treatment and time. Notes remain in the current page session. All selectors, tools and review pins are hidden from export.
+
+Validation: `node --test test/*.test.cjs` passes ten checks covering sequence timing, continuous motion, review hooks, catalogue integration and safe per-treatment output selection. Browser security still blocks visual inspection and an actual render has not been performed.
