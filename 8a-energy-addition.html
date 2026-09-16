@@ -644,6 +644,22 @@ const ERAS = [
  {end:1960, max:50, year:1956, start:14, finish:18, zoom:12, label:'1901–1956 · Gas and hydropower'},
  {end:2023, max:180, year:2023, start:21, finish:26, zoom:19, label:'1957–2023 · Energy sources accumulate'}
 ];
+// Source y decreases as energy increases. Ignore geometry beyond the wipe,
+// but interpolate the segment intersected by the moving reveal edge.
+function visiblePeak(edges, x) {
+ let top=894.25;
+ for(const points of edges){
+  for(let i=0;i<points.length;i++){
+   const [px,py]=points[i];
+   if(px<=x)top=Math.min(top,py);
+   else {
+    if(i>0){const [ax,ay]=points[i-1];top=Math.min(top,ay+(py-ay)*(x-ax)/(px-ax));}
+    break;
+   }
+  }
+ }
+ return top;
+}
 const clamp = v => Math.max(0, Math.min(1, v));
 function stateAt(time) {
  let end=1860, max=12, year=1800;
@@ -670,28 +686,31 @@ function svg(tag,attrs,parent,text){const el=document.createElementNS(svgNS,tag)
 const paintLayer=document.querySelector('#dataScale > g');
 const sourceShapes=[...paintLayer.children];
 const defs=svg('defs',{id:'energySourceGeometry'},document.getElementById('dataScale'));
-const bounds=new Map();
+const colors=new Set();
+const gradientBands=new Map();
 sourceShapes.forEach((shape,i)=>{
- const color=shape.getAttribute('fill'), box=shape.getBBox();
- bounds.set(color,Math.min(bounds.get(color) ?? 894.25,box.y));
+ const color=shape.getAttribute('fill');
+ colors.add(color);
  shape.dataset.color=color;
  shape.id=`energySource${i}`;
  shape.removeAttribute('fill');
  defs.appendChild(shape);
 });
-for(const [color,top] of bounds){
+for(const color of colors){
  const id=color.slice(1);
  const mask=svg('mask',{id:`energyMask${id}`,maskUnits:'userSpaceOnUse',
   x:170,y:0,width:843,height:896,'mask-type':'luminance'},defs);
  sourceShapes.forEach(shape=>svg('use',{href:`#${shape.id}`,
   fill:shape.dataset.color===color?'white':'black'},mask));
- const gradient=svg('linearGradient',{id:`energyFill${id}`,gradientUnits:'userSpaceOnUse',
-  x1:0,y1:top,x2:0,y2:894.25},defs);
+ const gradient=svg('linearGradient',{id:`energyFill${id}`,gradientUnits:'objectBoundingBox',
+  x1:0,y1:0,x2:0,y2:1},defs);
  svg('stop',{offset:0,'stop-color':color,'stop-opacity':.88},gradient);
  svg('stop',{offset:.5,'stop-color':color,'stop-opacity':.5},gradient);
  svg('stop',{offset:1,'stop-color':color,'stop-opacity':.13},gradient);
  const band=svg('g',{'mask':`url(#energyMask${id})`},paintLayer);
- svg('rect',{x:170,y:0,width:843,height:896,fill:`url(#energyFill${id})`},band);
+ const fill=svg('rect',{x:170,y:0,width:843,height:1,fill:`url(#energyFill${id})`,
+  'data-gradient-color':color,style:'transform-origin:0 0'},band);
+ gradientBands.set(color,fill);
 
 }
 
@@ -711,6 +730,37 @@ for(const start of [6,12,19])for(let i=1;i<60;i++)times.add(start+i/60);
 const samples=[...times].sort((a,b)=>a-b).map(t=>({t,...stateAt(t)}));
 function animate(el,frames){return el.animate(frames,{duration:DURATION*1000,fill:'both',easing:'linear'});}
 function sampled(el,fn){return animate(el,samples.map(s=>({offset:s.t/DURATION,...fn(s)})));}
+// Animate the gradient rectangle inside the fixed category mask. A unit-height
+// gradient stretches only from the highest revealed point down to the baseline.
+// Native keyframes keep playback, reverse scrubbing and alpha capture identical.
+for(const [color,fill] of gradientBands){
+ const edges=upperEdges.filter(e=>e.color===color).map(e=>e.points.split(' ').map(p=>p.split(',').map(Number)));
+ const peakTimes=new Set(times);
+ function addRevealTime(x){
+  const year=1800+(x-170.51)/841*223;
+  ERAS.forEach((era,i)=>{
+   const from=i?ERAS[i-1].year:1800;
+   if(year>=from && year<=era.year)peakTimes.add(era.start+(year-from)/(era.year-from)*(era.finish-era.start));
+  });
+ }
+ for(const points of edges)for(let i=0;i<points.length;i++){
+  const [x,y]=points[i];
+  // Keep a not-yet-visible band at zero height until its first point arrives.
+  if(i===0)addRevealTime(x-0.000001);
+  addRevealTime(x);
+  if(i){
+   const [ax,ay]=points[i-1], previous=visiblePeak(edges,ax);
+   // A rising segment changes the running peak only after overtaking it.
+   if(ay>previous && y<previous)addRevealTime(ax+(x-ax)*(ay-previous)/(ay-y));
+  }
+ }
+ animate(fill,[...peakTimes].sort((a,b)=>a-b).map(t=>{
+  const x=170.51+841*(stateAt(t).year-1800)/223;
+  const top=visiblePeak(edges,x);
+  return {offset:t/DURATION,y:`${top}px`,height:`${Math.max(.001,894.25-top)}px`};
+ }));
+}
+
 // Source x=170.51..1011.51 spans 1800..2023. Source y=894.25 is
 // zero, with 160 units at y=198.23. Never synthesize or smooth source data.
 sampled(document.getElementById('dataScale'),s=>{

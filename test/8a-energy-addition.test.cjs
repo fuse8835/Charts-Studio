@@ -6,7 +6,7 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 function plan(){
  const html=fs.readFileSync(path.join(root,'8a-energy-addition.html'),'utf8');
- return vm.runInNewContext(html.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1]+';({stateAt,DURATION,ERAS})');
+ return vm.runInNewContext(html.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1]+';({stateAt,DURATION,ERAS,visiblePeak})');
 }
 test('each completed era and expanded axis has a full second of stillness',()=>{
  const {stateAt}=plan();
@@ -32,4 +32,15 @@ test('registry duration matches the seekable timeline',()=>{
  const entry=JSON.parse(fs.readFileSync(path.join(root,'_render/charts.json'))).find(c=>c.id==='8a');
  assert.equal(entry.duration,DURATION);assert.equal(entry.width/entry.height,1.6);
  assert.ok(fs.existsSync(path.join(root,entry.html)));
+});
+
+test('gradient peak considers only revealed geometry, including a partial segment',()=>{
+ const {visiblePeak}=plan();
+ const edges=[[[0,90],[10,70],[20,80],[30,10]]];
+ assert.equal(visiblePeak(edges,5),80);
+ assert.equal(visiblePeak(edges,15),70);
+ assert.equal(visiblePeak(edges,20),70);
+ assert.equal(visiblePeak(edges,25),45);
+ assert.equal(visiblePeak(edges,30),10);
+ assert.equal(visiblePeak(edges,-1),894.25);
 });
