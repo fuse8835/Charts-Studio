@@ -1,6 +1,6 @@
 # "Cooling Curve" Chart Series — Visual & Motion Style Guide
 
-Reference template: worldwide climate-mortality decline chart, built as a two-act animated data-reveal. This guide captures the design language established for that piece so future charts in the series stay consistent. **Status: design is provisional — not yet signed off by the client.** Treat every value below as "current," not "final," until confirmed locked.
+Reference template: worldwide climate-mortality decline chart, built as a two-act animated data-reveal. This guide captures the design language established for that piece so future charts in the series stay consistent. **Status: design is provisional — not yet signed off by the client.** Treat the original template values below as "current," not "final," until confirmed locked. **Exception: the Chart 8A gradient treatment in section 1A is approved by Kevin and is the default for similar filled-area charts.**
 
 ---
 
@@ -14,7 +14,21 @@ Reference template: worldwide climate-mortality decline chart, built as a two-ac
 | Primary text | Near-white | `#EEF3FA` / `#F8FBFF` | Headlines, ring percentage number |
 | Secondary text | Muted grey-blue ("mist") | `#A9C2D6` / `#7EA0BD` | Captions, axis labels, gridlines, axis titles — always de-emphasized relative to the data |
 
-**Rule:** only one saturated "hero" color (the turquoise) ever appears in the data itself. Everything else is either near-white, muted grey-blue, or the near-black background. Don't introduce a third bright color.
+**Original single-series template rule:** only one saturated "hero" color (the turquoise) ever appears in the data itself. Everything else is either near-white, muted grey-blue, or the near-black background. Don't introduce a third bright color.
+
+## 1A. Approved filled-area gradient style — Chart 8A
+
+**Approved by Kevin on September 16, 2026.** Use [Chart 8A — Global Energy: Addition, not Transition](8a-energy-addition.html) as the design reference for new or restyled area charts, stacked-area charts, and similar coloured fills beneath curves. This is the preferred treatment for those charts and supersedes the single-accent restriction above when multiple categories need distinct colours.
+
+- **Vibrant category colours:** use the supplied source palette or the chart's approved palette. Avoid muted pastel substitutions. Keep each band's outline and legend swatch consistent with its bright colour.
+- **Colour and transparency together:** blend from the bright category colour at the top, through a richer middle tone, into a darker matching accent at the bottom. Do not merely fade the same colour to transparent. Chart 8A uses stops at 0%, 55%, and 100%, with opacity 0.88, 0.78, and 0.68 respectively. Its golden biomass fades through warm orange to burnt orange; choose equivalent darker accents for other hues.
+- **Gradients follow the reveal:** anchor each gradient's strongest colour to that band's highest point currently visible, not its future final peak. Expand the gradient as higher points are revealed, keeping completed-era holds motionless. Follow the running visible peak, including when the curve dips after an earlier peak.
+- **Crisp upper boundary and subtle shadow:** use a thin solid-colour top line (8A: 1.5px, retaining its width through zooms), with a restrained dark inner shadow immediately beneath it to separate the line from the fill.
+- **Fine organic wave texture:** include numerous faint, gently irregular flowing lines within the gradients. Clip them to the band, keep them subordinate to the data, and make the pattern deterministic so replay, reverse scrubbing, and exported holds look identical. Chart 8A uses 36 contours per category.
+- **Preserve the geometry:** transparency must not reveal hidden cumulative layers or alter the visible category areas. Mask overlapping source artwork into its visible bands before applying the gradients and texture.
+- **Keep the series context:** retain the navy background, Rajdhani type, subdued axes and grid, and native seekable animation/export workflow. Adapt colours to the chart's categories; energy-specific colours are not mandatory for unrelated subjects.
+
+Apply this style when building or restyling similar charts. This note does not require a bulk redesign of existing charts or applying area-fill texture to unrelated chart types. Review both early and final animation states, and verify the gradient treatment during scrubbing and transparent export.
 
 ## 2. Typography
 

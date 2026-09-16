@@ -4,6 +4,10 @@ Animated data-viz charts for the Fraser Institute climate-mortality video series
 
 See [chart-catalogue.md](chart-catalogue.md) for the full list of charts, their data sources, and design notes.
 
+## Design reference
+
+For area charts, stacked-area charts, and similar filled curves, use the **approved Chart 8A gradient style**: vibrant colours blending into darker accents, transparency, thin top lines with subtle inner shadows, and fine organic wave texture. Gradients follow the highest point revealed so far. See the [filled-area design standard](cooling-curve-style-guide.md#1a-approved-filled-area-gradient-style--chart-8a) for details.
+
 ## Running it
 
 ```bash
