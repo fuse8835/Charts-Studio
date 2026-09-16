@@ -25,7 +25,7 @@ Clicking "Render .mov" runs a headless-Chrome capture (deterministically seeking
 - Google Chrome installed (Playwright drives your real local Chrome via `channel: 'chrome'`, no separate browser download)
 - `ffmpeg` with the `prores_videotoolbox` encoder (macOS only) — swap the encoder in `_render/server.js` if you're on another platform
 
-Rendered `.mov` files are **not** committed to this repo (they're multi-hundred-MB to multi-GB alpha-channel exports) — they're written straight to the project root and are gitignored. Regenerate them locally via the button above.
+Rendered `.mov` files are **not** committed to this repo (they're multi-hundred-MB to multi-GB alpha-channel exports) — they're always written to `~/Desktop/Charts-Studio` (`/Users/kevincave/Desktop/Charts-Studio` on Kevin's Mac), regardless of which checkout runs the server. The folder is created if needed, and the completion message shows the full file path. Restart an already-running render server after updating to pick up this destination. Regenerate them locally via the button above.
 
 Two smaller alternatives were tried (HEVC-with-alpha via Apple's `avconvert`, GoPro CineForm via ffmpeg's `cfhd` encoder) and both failed real Adobe After Effects import despite passing every automated test available, including AVFoundation-level verification (QuickLook thumbnails, a full ProRes round-trip). ProRes 4444 remains the only format verified to reliably preserve alpha across every tool this pipeline needs to feed, including AE specifically.
 

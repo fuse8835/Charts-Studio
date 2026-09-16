@@ -1,10 +1,12 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { spawn } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8793;
+const OUTPUT_DIR = path.join(os.homedir(), 'Desktop', 'Charts-Studio');
 const CHARTS_PATH = path.join(__dirname, 'charts.json');
 
 // Read fresh on every request instead of caching at startup -- this server stays running for
@@ -47,6 +49,10 @@ function serveStatic(req, res, pathname) {
 let rendering = false;
 
 async function renderChart(chart, send) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  fs.accessSync(OUTPUT_DIR, fs.constants.W_OK);
+  const outPath = path.join(OUTPUT_DIR, chart.mov);
+  send(`Saving export to ${outPath}`);
   const { chromium } = require('playwright-core');
   const outDir = path.join(__dirname, `frames_${chart.id}`);
   fs.rmSync(outDir, { recursive: true, force: true });
@@ -117,7 +123,6 @@ async function renderChart(chart, send) {
   // Confirmed via a real After Effects import test (Kevin verified transparency renders
   // correctly). Same codec/profile throughout, so no compatibility risk, just ~3.5x smaller
   // files than the old hardware-encoder defaults.
-  const outPath = path.join(ROOT, chart.mov);
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
       '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
@@ -129,7 +134,7 @@ async function renderChart(chart, send) {
   });
 
   fs.rmSync(outDir, { recursive: true, force: true });
-  send(`Done -- saved to ${chart.mov}`, true);
+  send(`Done -- saved to ${outPath}`, true);
 }
 
 const server = http.createServer((req, res) => {
