@@ -697,6 +697,16 @@ sourceShapes.forEach((shape,i)=>{
  shape.removeAttribute('fill');
  defs.appendChild(shape);
 });
+// Richer lower tones keep the fills coloured as they become translucent.
+const gradientAccents={
+ '#ffb21c':['#bc6412','#652508'],
+ '#d45463':['#913142','#451322'],
+ '#a51b91':['#691b70','#2e103e'],
+ '#e30063':['#9b0847','#490c2c'],
+ '#0f875f':['#08553f','#043128'],
+ '#07669e':['#08436d','#06283f'],
+ '#04ffba':['#079b79','#064a3e']
+};
 for(const color of colors){
  const id=color.slice(1);
  const mask=svg('mask',{id:`energyMask${id}`,maskUnits:'userSpaceOnUse',
@@ -706,8 +716,9 @@ for(const color of colors){
  const gradient=svg('linearGradient',{id:`energyFill${id}`,gradientUnits:'objectBoundingBox',
   x1:0,y1:0,x2:0,y2:1},defs);
  svg('stop',{offset:0,'stop-color':color,'stop-opacity':.88},gradient);
- svg('stop',{offset:.5,'stop-color':color,'stop-opacity':.5},gradient);
- svg('stop',{offset:1,'stop-color':color,'stop-opacity':.13},gradient);
+ const [middle,base]=gradientAccents[color];
+ svg('stop',{offset:.55,'stop-color':middle,'stop-opacity':.78},gradient);
+ svg('stop',{offset:1,'stop-color':base,'stop-opacity':.68},gradient);
  const band=svg('g',{'mask':`url(#energyMask${id})`},paintLayer);
  const fill=svg('rect',{x:170,y:0,width:843,height:1,fill:`url(#energyFill${id})`,
   'data-gradient-color':color,style:'transform-origin:0 0'},band);
