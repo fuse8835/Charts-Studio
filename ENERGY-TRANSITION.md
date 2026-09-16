@@ -1,14 +1,14 @@
 # The energy transition
 
-`energy-transition.html` is a self-contained animated SVG explainer using the series' embedded Rajdhani font and navy/mint palette. It combines a centered title with a curved flow diagram.
+`energy-transition.html` is a self-contained animated SVG explainer using the series' embedded Rajdhani font and navy/mint palette. It combines a centered title with two rounded, softly shaded source panels and a central arrow.
 
 ## Sequence
 
 - 0–3.5s: oil, gas and coal reveal sequentially across the frame.
-- 3.5–5.2s: the three sources move into a compact left column.
-- 5.2–7.7s: three incoming paths trace through a junction toward wind.
-- 7.55–8.95s: wind, then solar, appear along the outgoing branches.
-- 7.8–11.2s: fossil fills recede and outlines dim; renewable fills build and the turbine rotates.
+- 3.5–5.2s: the three sources compress into the left panel as its width contracts.
+- 4.5–5.95s: the renewable panel opens; the central arrow appears and draws.
+- 6.1–7.8s: wind, then solar, appear in the right panel.
+- 8–11.2s: fossil sources soften without losing their shaded forms; renewable fills build and the turbine rotates.
 - 11.2–12s: the completed composition holds. The existing exporter adds its normal one-second final hold.
 
 This illustrates the replacement idea described by the narration; it is not a measured energy mix, forecast, or claim about the historical rate of replacement. No quantities or dates are displayed.

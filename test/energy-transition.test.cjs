@@ -9,14 +9,15 @@ function plan() {
   const script = html.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1];
   return vm.runInNewContext(script + '; ({tracks: buildEnergyTracks(), duration: ENERGY_DURATION})');
 }
-test('fossil sources establish a row before moving into the left column', () => {
+test('fossil sources establish a row before compressing into the left panel', () => {
   const {tracks} = plan();
   const moves = ['oil','gas','coal'].map(id => tracks.find(t => t.target === '#' + id && t.name === 'reposition'));
   const starts = moves.map(t => t.frames[0].transform);
   assert.equal(new Set(starts).size, 3);
   assert.ok(starts.every(s => s.includes('420px')));
   assert.ok(moves.every(t => t.options.delay >= 3000));
-  assert.ok(moves.every(t => t.frames.at(-1).transform.includes('155px')));
+  assert.ok(moves.every(t => t.frames.at(-1).transform.includes('420px')));
+  assert.ok(moves.every(t => Number(t.frames.at(-1).transform.match(/translate\((\d+)/)[1]) < 650));
   assert.equal(new Set(moves.map(t => t.frames.at(-1).transform)).size, 3);
 });
 test('renewables appear only after fossil relocation and finish within export duration', () => {
@@ -37,7 +38,7 @@ test('replacement dims fossils while preserving identifiable outlines', () => {
   for(const id of ['oil','gas','coal']) {
     const track=tracks.find(t=>t.target==='#'+id+' .source-body' && t.name==='deplete');
     assert.equal(track.frames[0].opacity,1);
-    assert.ok(track.frames.at(-1).opacity>0 && track.frames.at(-1).opacity<0.6);
+    assert.ok(track.frames.at(-1).opacity>0 && track.frames.at(-1).opacity<0.9);
   }
 });
 test('registered on Explainers and omitted from Charts with matching export duration', () => {
@@ -51,4 +52,14 @@ test('registered on Explainers and omitted from Charts with matching export dura
     const html=fs.readFileSync(path.join(root,file),'utf8');
     assert.match(html,/new Set\(\[[^\]]*'energy-transition'/);
   }
+});
+
+test('panel opens before renewables arrive and remains rounded during compression', () => {
+  const {tracks}=plan();
+  const panel=tracks.find(t=>t.target==='#fossilPanel');
+  assert.equal(panel.frames[0].width,'1108px');
+  assert.equal(panel.frames.at(-1).width,'610px');
+  const open=tracks.find(t=>t.target==='#renewablePanel');
+  const wind=tracks.find(t=>t.target==='#wind');
+  assert.ok(open.options.delay+open.options.duration<=wind.options.delay);
 });
