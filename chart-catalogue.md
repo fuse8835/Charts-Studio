@@ -317,3 +317,13 @@ Pieces that sit outside the numbered Script series (excluded from `index.html`, 
 | 28–29s | One-second final hold (renderer adds its standard extra hold) |
 
 Validation: `node --test test/*.test.cjs`; browser check: start the render server and run `CHART_BASE_URL=http://localhost:8793 node _render/check-8a.cjs`. Checks actual pixel-identical holds, out-of-order seeking, landing-page discovery, era jumps, replay and browser errors. Screenshots go to the OS temporary directory.
+
+## 8B — Energy Consumption by Source in Canada
+
+- **File:** `8b-energy-canada.html` · **Duration:** 11 seconds · **Export:** 1920 × 1200 ProRes 4444 alpha, saved to `~/Desktop/Charts-Studio` by the shared renderer.
+- **Source:** supplied `Essay 08-B.svg`. The seven straight-line paths are converted to equivalent polygons, preserving vertices, category order and shape. Original plot bounds: x = 195.66–1028.71, y = 918.68 at zero and 199.53 at 4,500 TWh. These are linearly normalized to the shared chart coordinates; the biofuels path's tiny right-edge overrun is clipped at the plot boundary.
+- **Dates:** the supplied screenshot title states 1965–2024. The major bands have 60 annual vertices, consistent with that inclusive range. The SVG's conflicting final tick of 2023 is treated as a label error; this chart uses 2024 consistently. No external replacement dataset is introduced.
+- **Palette:** matches 8A by energy source: biofuels blue #07669e, hydro green #0f875f, gas magenta #e30063, coal coral #d45463, oil purple #a51b91, and renewables mint #04ffba. Nuclear, absent from 8A, uses distinct gold #ffb21c.
+- **Design:** approved 8A darker-accent gradients and transparency, visible-peak gradient bounds, organic wave texture, thin solid upper outlines with subtle inner shadows, navy panel, Rajdhani type, vertical unit label, review pins, replay and scrub controls.
+- **Motion:** 0–2s establishes the chart; 2–9s reveals every band together from 1965 to 2024 with fixed axes; 9–11s holds the completed chart. The renderer adds its usual extra one-second final hold. No era transitions or separate source reveals.
+- **Validation:** `node --test test/*.test.cjs`; run the preview server, then `CHART_BASE_URL=http://localhost:8793 node _render/check-8b.cjs` for browser checks. Verifies all seven source polygons, gradient bounds during forward/backward seeks, identical completed-chart hold frames, landing-page discovery, timeline jumps, replay, render-button presence, and absence of browser errors.

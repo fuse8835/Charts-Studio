@@ -162,10 +162,20 @@
   {
     "id": "8a",
     "name": "Global Energy: Addition, not Transition",
-    "subtitle": "1800\u20132023 in four expanding eras, with one-second editing holds",
+    "subtitle": "1800–2023 in four expanding eras, with one-second editing holds",
     "html": "8a-energy-addition.html",
     "mov": "8a-energy-addition-alpha.mov",
     "duration": 29,
+    "width": 1920,
+    "height": 1200
+  },
+  {
+    "id": "8b",
+    "name": "Energy Consumption by Source in Canada",
+    "subtitle": "1965–2024 · Seven energy sources, one continuous reveal",
+    "html": "8b-energy-canada.html",
+    "mov": "8b-energy-canada-alpha.mov",
+    "duration": 11,
     "width": 1920,
     "height": 1200
   }
