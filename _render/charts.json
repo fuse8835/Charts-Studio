@@ -158,5 +158,15 @@
     "html": "battery-storage.html",
     "mov": "battery-storage-alpha.mov",
     "duration": 10.0
+  },
+  {
+    "id": "energy-transition",
+    "name": "The energy transition",
+    "subtitle": "The replacement idea: fossil fuels decrease as wind and solar emerge",
+    "html": "energy-transition.html",
+    "mov": "energy-transition-alpha.mov",
+    "duration": 12,
+    "width": 1920,
+    "height": 1200
   }
 ]
