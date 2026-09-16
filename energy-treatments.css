@@ -15,9 +15,8 @@
 #mintMaterial stop:nth-child(4){stop-color:var(--mint-deep)}
 #rightMaterial stop:first-child{stop-color:var(--panel-top)}
 #rightMaterial stop:last-child{stop-color:var(--panel-bottom)}
-#renewablePanel{stroke:var(--accent);stroke-opacity:.35}
 #halo stop:first-child{stop-color:var(--accent)}
-.premium-detail,.architecture,.material-base{display:none}
+.material-base{display:none}
 .style-picker{margin-top:26px;padding:20px;border:1px solid #a9c2d61c;border-radius:14px;background:#081824}
 .picker-head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:15px;color:#8da5b6;font-size:13px;letter-spacing:1.4px}
 #styleDescription{letter-spacing:0;font-size:15px;text-align:right}
@@ -28,62 +27,72 @@
 .style-options button:hover{background:#16313e}.style-options button:active{transform:scale(.98)}
 .render-tools{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 0;min-height:36px}
 .render-tools .replay{font-size:14px;padding:9px 13px}
-/* 02 — Satin: machined surfaces, quiet bevels and more space around objects. */
-.frame[data-style="2"]{background:radial-gradient(ellipse at 26% 0%,#23404d,transparent 60%),linear-gradient(140deg,#101f2a,#040e17 80%);--metal-light:#c4dae4;--metal-mid:#7392a5;--metal-dark:#233847;--mint-light:#e1fff6;--mint-mid:#9bdfc7;--accent:#64d6b6;--panel-top:#254d4b;--panel-bottom:#0a262a}
-.frame[data-style="2"] .premium-detail{display:block}
-.frame[data-style="2"] #panelShell{filter:url(#panelShadow)}
-.frame[data-style="2"] #outerPanel{stroke:#afc7ce;stroke-opacity:.2}
-.frame[data-style="2"] .source-body{filter:url(#objectShadow)}
-.frame[data-style="2"] .headline{font-size:49px;letter-spacing:1.8px}
-.frame[data-style="2"] .source-label{font-size:16px;letter-spacing:4px;fill:#cfdbdd}
-/* 03 — Copper & jade: warm light against charcoal, layered metal and low plinths. */
-.frame[data-style="3"]{background:radial-gradient(ellipse at 5% 0%,#72564466,transparent 57%),radial-gradient(ellipse at 95% 65%,#25493b55,transparent 55%),linear-gradient(140deg,#272b2a,#0c1112 85%);--metal-light:#e5c8aa;--metal-mid:#a07e62;--metal-dark:#423b32;--mint-light:#e2f0c8;--mint-mid:#9ad8ae;--mint-deep:#284c3e;--accent:#92d7aa;--panel-top:#345347;--panel-bottom:#142c26}
-.frame[data-style="3"] .premium-detail,.frame[data-style="3"] .material-base{display:block}
-.frame[data-style="3"] #panelShell{filter:url(#panelShadow)}
-.frame[data-style="3"] #outerMaterial stop{stop-color:#282e2b}
-.frame[data-style="3"] #leftMaterial stop{stop-color:#3a3530}
-.frame[data-style="3"] #outerPanel{stroke:#d2b694;stroke-opacity:.3}
-.frame[data-style="3"] #fossilPanel{stroke:#caaa87;stroke-opacity:.22}
-.frame[data-style="3"] .source{color:#d1bda5}
-.frame[data-style="3"] .renewable{color:#9ad5af}
-.frame[data-style="3"] .source-body{filter:url(#objectShadow)}
-.frame[data-style="3"] .headline{fill:#f2e9db;font-size:49px;letter-spacing:2px}
-.frame[data-style="3"] .source-label{font-size:16px;letter-spacing:4px;fill:#d6cebf}
-.frame[data-style="3"] #transitionArrow circle:first-child{fill:#1b2622;stroke:#a4c5ad}
-/* 04 — Glass: nested translucent surfaces, cyan edge light, dark floating pedestals. */
-.frame[data-style="4"]{background:radial-gradient(ellipse at 0% 10%,#557c8980,transparent 53%),radial-gradient(ellipse at 100% 0%,#23616b66,transparent 60%),linear-gradient(150deg,#132d36,#030b13 80%);--metal-light:#d9eef0;--metal-mid:#83b4bc;--metal-dark:#19373e;--mint-light:#e4fffb;--mint-mid:#8ff8e8;--mint-deep:#0b4144;--accent:#50e8d4;--panel-top:#18545a;--panel-bottom:#08262f}
-.frame[data-style="4"] .premium-detail,.frame[data-style="4"] .architecture,.frame[data-style="4"] .material-base{display:block}
-.frame[data-style="4"] #panelShell{filter:url(#panelShadow)}
-.frame[data-style="4"] #outerMaterial stop{stop-color:#163039;stop-opacity:.48}
-.frame[data-style="4"] #leftMaterial stop{stop-color:#19343e;stop-opacity:.35}
-.frame[data-style="4"] #rightMaterial stop{stop-opacity:.4}
-.frame[data-style="4"] #outerPanel{stroke:#a5e7e8;stroke-opacity:.35}
-.frame[data-style="4"] .bezel-inner{stroke-width:1.5}
-.frame[data-style="4"] .source-body{filter:url(#objectShadow)}
-.frame[data-style="4"] .source-label{font-size:15px;letter-spacing:4.5px;fill:#b7d1d4}
-.frame[data-style="4"] .headline{font-size:48px;letter-spacing:3px;fill:#d6ecec}
-.frame[data-style="4"] #transitionArrow circle:first-child{stroke:#85d8da;fill:#102830}
-/* 05 — Obsidian gold: sculpted dark housing, inset enamel, fine champagne highlights. */
-.frame[data-style="5"]{background:radial-gradient(ellipse at 50% -10%,#63573470,transparent 62%),radial-gradient(ellipse at 90% 95%,#302a1240,transparent 60%),linear-gradient(135deg,#1b1f1e,#070909 75%);--metal-light:#d5ccac;--metal-mid:#8c8775;--metal-dark:#2b2e2a;--mint-light:#fff4c8;--mint-mid:#e3c66f;--mint-deep:#59451a;--accent:#e2bf61;--panel-top:#3b3828;--panel-bottom:#161a13}
-.frame[data-style="5"] .premium-detail,.frame[data-style="5"] .architecture,.frame[data-style="5"] .material-base{display:block}
-.frame[data-style="5"] #panelShell{filter:url(#panelShadow)}
-.frame[data-style="5"] #outerMaterial stop{stop-color:#171c1b;stop-opacity:1}
-.frame[data-style="5"] #leftMaterial stop{stop-color:#121918;stop-opacity:.9}
-.frame[data-style="5"] #rightMaterial stop{stop-opacity:.75}
-.frame[data-style="5"] #outerPanel{stroke:#e3ca84;stroke-opacity:.17;stroke-width:1.2}
-.frame[data-style="5"] #fossilPanel{stroke:#d5c89e;stroke-opacity:.15}
-.frame[data-style="5"] #renewablePanel{stroke:#d1af58;stroke-opacity:.35}
-.frame[data-style="5"] #bezel stop{stop-color:#f9dda3}
-.frame[data-style="5"] .architecture{stroke-opacity:.55}
-.frame[data-style="5"] .source{color:#b4b09b}
-.frame[data-style="5"] .renewable{color:#e7ca7c}
-.frame[data-style="5"] .source-body{filter:url(#objectShadow)}
-.frame[data-style="5"] .headline{fill:#f4ebcf;font-size:48px;font-weight:500;letter-spacing:3px}
-.frame[data-style="5"] .source-label{fill:#c9c4ad;font-size:15px;letter-spacing:4.5px}
-.frame[data-style="5"] #transitionArrow circle:first-child{stroke:#c3a75c;fill:#171d18}
-.frame[data-style="5"] #arrowStroke{stroke:#eed99c}
-.frame[data-style="5"] .rim-light{stroke:#e5c878;stroke-opacity:.15}
-.frame[data-style="5"] .material-base ellipse:last-child{stroke-opacity:.28}
+/* Five independent compositions. The SVG contains separate architecture for each. */
+.design{display:none}
+.frame[data-style="1"] .design[data-design="1"],.frame[data-style="2"] .design[data-design="2"],.frame[data-style="3"] .design[data-design="3"],.frame[data-style="4"] .design[data-design="4"],.frame[data-style="5"] .design[data-design="5"]{display:block}
+.design .floating{filter:url(#panelShadow)}
+.design .tile{fill:url(#leftMaterial);stroke:url(#bezel);stroke-width:1}
+.design .green{fill:url(#rightMaterial);stroke:var(--accent);stroke-opacity:.25}
+.design .edge-light{fill:none;stroke:#e4fbf6;stroke-opacity:.17;stroke-width:1}
+.design .quiet-line{fill:none;stroke:#c7d3d1;stroke-opacity:.12;stroke-width:.8}
+.design .route{stroke:var(--accent);stroke-opacity:.5;stroke-width:1.3;fill:none}
+.design .junction-dot{fill:var(--accent)}
+.design .lens-rim{fill:#101916;stroke:url(#bezel);stroke-width:2}
+.design .lens{fill:url(#rightMaterial);stroke:#a4bca8;stroke-opacity:.28}
+.design .orbital-accent{stroke:var(--accent);stroke-width:6;stroke-linecap:round}
+.design .orbit-secondary{stroke:#bd9773;stroke-width:2;stroke-opacity:.5;stroke-linecap:round}
+.design .glass{fill:url(#leftMaterial);stroke:url(#bezel);stroke-width:1.2}
+.design .glass-back{fill:#142d32;stroke:#a7d6d4;stroke-opacity:.09}
+.design .stage-side{fill:#132731;stroke:#87b1bb;stroke-width:.75;stroke-opacity:.3}
+.design .stage-top{fill:url(#outerMaterial);stroke:url(#bezel);stroke-width:1.2}
+.design .inset{fill:#051219;stroke:#092e39;stroke-width:2}
+.design .obsidian-housing{fill:url(#outerMaterial);stroke:#d7bb6e;stroke-opacity:.17}
+.design .well{fill:#0b100f;stroke:#696348;stroke-width:1.1;stroke-opacity:.5}
+.design .renewable-well{fill:url(#rightMaterial);stroke:#b4984c;stroke-opacity:.3}
+.design .gold-ring{stroke:var(--accent);stroke-width:2.5;stroke-linecap:round}
+#introPlate{filter:url(#panelShadow)}
+.source-label{font-size:18px;letter-spacing:3px}
+.source-body{filter:url(#objectShadow)}
+#transitionArrow circle:first-child{stroke:var(--accent);stroke-opacity:.65;fill:#071c22}
+/* Modular: asymmetric bento cards with apricot/seafoam contrast. */
+.frame[data-style="1"]{background:radial-gradient(ellipse at 28% 0%,#46545480,transparent 66%),linear-gradient(145deg,#19252c,#080e15);--metal-light:#efd2bd;--metal-mid:#b18f79;--metal-dark:#433c38;--accent:#65d9c7;--mint-light:#d4fff0;--mint-mid:#81ebcd;--mint-deep:#17443e;--panel-top:#244944;--panel-bottom:#0d2529}
+.frame[data-style="1"] #leftMaterial stop{stop-color:#273a44}
+.frame[data-style="1"] #outerMaterial stop{stop-color:#273a44}
+.frame[data-style="1"] .source{color:#d4bda8}
+.frame[data-style="1"] .renewable{color:#a8f2db}
+.frame[data-style="1"] .headline{fill:#e3e8e5}
+/* Orbital: central circular lens, isolated satellite cards, sage and warm metal. */
+.frame[data-style="2"]{background:radial-gradient(ellipse at 100% 0%,#9a755255,transparent 68%),radial-gradient(ellipse at 40% 70%,#314b3b50,transparent 60%),linear-gradient(135deg,#252a26,#0d1211);--metal-light:#e3c9a8;--metal-mid:#9a8365;--metal-dark:#393a2d;--accent:#b7d893;--mint-light:#f4f7cc;--mint-mid:#b7d893;--mint-deep:#324e37;--panel-top:#405d46;--panel-bottom:#122c22}
+.frame[data-style="2"] #leftMaterial stop{stop-color:#333932}
+.frame[data-style="2"] .headline{fill:#e8e5d7;letter-spacing:2px}
+.frame[data-style="2"] .source{color:#c4b996}
+.frame[data-style="2"] .renewable{color:#d0e5b2}
+.frame[data-style="2"] .material-base{display:block}
+/* Glass cascade: taller offset panes, light travelling diagonally across their edges. */
+.frame[data-style="3"]{background:radial-gradient(ellipse at 0% 0%,#869d9570,transparent 65%),radial-gradient(ellipse at 80% 95%,#77604630,transparent 45%),linear-gradient(150deg,#243f41,#081716);--metal-light:#d6ddd0;--metal-mid:#8bafa7;--metal-dark:#264641;--accent:#92d3bf;--mint-light:#e8f4d7;--mint-mid:#9edbbf;--mint-deep:#264a3a;--panel-top:#345e57;--panel-bottom:#15302f}
+.frame[data-style="3"] #leftMaterial stop{stop-color:#365b59;stop-opacity:.48}
+.frame[data-style="3"] #rightMaterial stop{stop-opacity:.5}
+.frame[data-style="3"] .headline{fill:#e5e9de;letter-spacing:1px}
+.frame[data-style="3"] .source-label{fill:#ceded5}
+.frame[data-style="3"] .glass{stroke-width:1.5}
+/* Architectural: a cantilevered physical stage, recessed bays and an elevated gallery. */
+.frame[data-style="4"]{background:radial-gradient(ellipse at 50% 0%,#3e586a80,transparent 75%),linear-gradient(160deg,#172a33,#050d13);--metal-light:#c6d4df;--metal-mid:#688b9d;--metal-dark:#243d49;--accent:#59dacc;--mint-light:#d7fff6;--mint-mid:#8aeadc;--mint-deep:#1d5152;--panel-top:#285452;--panel-bottom:#0b2a30}
+.frame[data-style="4"] #outerMaterial stop{stop-color:#203945;stop-opacity:1}
+.frame[data-style="4"] #leftMaterial stop{stop-color:#1d333d;stop-opacity:1}
+.frame[data-style="4"] .headline{fill:#e4e9eb;letter-spacing:1.6px}
+.frame[data-style="4"] .material-base{display:block}
+.frame[data-style="4"] .source-label{fill:#b7d0d2;letter-spacing:4px}
+/* Aurum: an inset mechanical composition, warm ring light and an obsidian housing. */
+.frame[data-style="5"]{background:radial-gradient(ellipse at 50% -10%,#6f603f66,transparent 65%),linear-gradient(135deg,#202521,#070a09 85%);--metal-light:#d5c9a6;--metal-mid:#8a8267;--metal-dark:#30372c;--mint-light:#fff3c4;--mint-mid:#e8cb7a;--mint-deep:#5d461d;--accent:#dbb75d;--panel-top:#393826;--panel-bottom:#161e15}
+.frame[data-style="5"] #outerMaterial stop{stop-color:#191f1b;stop-opacity:1}
+.frame[data-style="5"] .source{color:#c5b68e}
+.frame[data-style="5"] .renewable{color:#ead48b}
+.frame[data-style="5"] #bezel stop{stop-color:#e3cb8c}
+.frame[data-style="5"] .headline{fill:#eee6ca;letter-spacing:3px}
+.frame[data-style="5"] .source-label{fill:#d0c8a8;letter-spacing:3px}
+.frame[data-style="5"] #arrowStroke{stroke:#ead49c}
+.frame[data-style="5"] #transitionArrow circle:first-child{fill:#172019}
 body.export-mode .style-picker,body.export-mode .render-tools{display:none!important}
-body.export-mode .frame[data-style]:not([data-style="1"]){background-color:transparent}
 @media(max-width:650px){.style-options{grid-template-columns:repeat(2,minmax(0,1fr))}.style-options button:last-child{grid-column:span 2}.picker-head{align-items:flex-start;flex-direction:column;gap:7px}#styleDescription{text-align:left}.style-picker{padding:14px}.render-tools{justify-content:flex-start}}
+
+.design .glass.green{fill:url(#rightMaterial)}

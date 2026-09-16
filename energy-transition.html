@@ -38,7 +38,6 @@ body{margin:0;background:#030c14;color:var(--paper);font-family:Rajdhani,sans-se
 .renewable .surface{fill:url(#mintMaterial)}
 .icon .facet{fill:#d5eeff;fill-opacity:.12;stroke:none}
 .ground{stroke:url(#groundLine);stroke-width:1;fill:none}
-#renewablePanel{transform-box:fill-box;transform-origin:right center}
 .edge{stroke-opacity:.5;stroke-width:1}
 .source-label{fill:#eef3fa;font-size:18px;font-weight:600;letter-spacing:3px;text-anchor:middle}
 .renewable .source-label{fill:#b4e4da}
@@ -70,7 +69,7 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 <div class="frame" id="frame" data-style="1">
 <svg class="chart-svg" id="chartSvg" viewBox="0 0 1200 750" role="img" aria-labelledby="sceneTitle sceneDesc">
 <title id="sceneTitle">The energy transition</title>
-<desc id="sceneDesc">A conceptual replacement sequence. Oil, gas and coal first appear across the frame, then compress into a left-hand panel. A central arrow introduces a mint panel containing wind and solar as the fossil sources dim. No quantities or dates are represented.</desc>
+<desc id="sceneDesc">A conceptual replacement sequence. Oil, gas and coal first appear across the frame, then move into the selected layout. A transition arrow introduces wind and solar as the fossil sources dim. No quantities or dates are represented.</desc>
 <defs>
  <linearGradient id="bezel" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#c5e2e5" stop-opacity=".38"/><stop offset=".3" stop-color="#c5e2e5" stop-opacity=".02"/><stop offset=".75" stop-color="#c5e2e5" stop-opacity=".04"/><stop offset="1" stop-color="#c5e2e5" stop-opacity=".22"/></linearGradient>
  <linearGradient id="lightSweep"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -86,21 +85,86 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
  <radialGradient id="halo"><stop stop-color="#04ffba" stop-opacity=".16"/><stop offset="1" stop-color="#04ffba" stop-opacity="0"/></radialGradient>
 </defs>
 <text id="headline" class="headline" x="600" y="158">The energy transition</text>
-<g id="panelShell">
- <rect id="outerPanel" x="30" y="229" width="1140" height="347" rx="34" fill="url(#outerMaterial)" stroke="#47738b" stroke-opacity=".7" stroke-width=".7"/>
- <rect id="fossilPanel" x="46" y="246" width="1108" height="315" rx="32" fill="url(#leftMaterial)" stroke="#3c627c" stroke-opacity=".5" stroke-width=".7"/>
- <rect id="renewablePanel" x="693" y="246" width="462" height="315" rx="32" fill="url(#rightMaterial)" stroke="#16b6ae" stroke-opacity=".65" stroke-width=".7"/>
- <g class="premium-detail" aria-hidden="true">
- <rect class="bezel-inner" x="36" y="235" width="1128" height="335" rx="30" fill="none" stroke="url(#bezel)" stroke-width="1"/>
- <path class="rim-light" d="M77 231 H1123" stroke="url(#lightSweep)" stroke-width="2"/>
- <path class="lower-light" d="M96 569 H1104" stroke="url(#lightSweep)" stroke-width="2"/>
+<g id="introPlate" aria-hidden="true"><rect x="85" y="257" width="1030" height="317" rx="35" fill="url(#outerMaterial)" stroke="url(#bezel)"/><path d="M135 512 H1065" stroke="url(#groundLine)"/></g>
+<g class="design" data-design="1" aria-hidden="true">
+ <g class="enter floating">
+ <rect class="tile" x="76" y="184" width="218" height="199" rx="22"/>
+ <rect class="tile" x="76" y="396" width="218" height="211" rx="22"/>
+ <rect class="tile" x="309" y="396" width="239" height="211" rx="22"/>
+ <rect class="tile green" x="650" y="186" width="240" height="421" rx="26"/>
+ <rect class="tile green" x="904" y="244" width="231" height="363" rx="26"/>
+ <path class="edge-light" d="M103 185 H267 M103 397 H267 M336 397 H521 M679 187 H861 M933 245 H1106"/>
  </g>
- <g class="architecture" aria-hidden="true" fill="none" stroke="url(#bezel)">
- <rect x="18" y="217" width="1164" height="371" rx="40"/>
- <path d="M84 596 H1116" stroke-opacity=".4"/>
+ <g class="enter" fill="none"><path class="route" d="M310 286 H614 Q628 286 628 302 V551 Q628 572 650 572"/>
+ <path class="quiet-line" d="M550 504 H598 V286 M295 504 H309"/>
+ <circle class="junction-dot" cx="615" cy="286" r="4"/>
+ <path class="quiet-line" d="M676 534 H863 M929 534 H1110"/>
  </g>
 </g>
-<ellipse id="renewableHalo" cx="948" cy="445" rx="194" ry="103" fill="url(#halo)"/>
+<g class="design" data-design="2" aria-hidden="true">
+ <g class="enter floating">
+ <circle cx="675" cy="418" r="242" class="lens-rim"/>
+ <circle cx="675" cy="418" r="227" class="lens"/>
+ <circle cx="675" cy="418" r="218" fill="none" stroke="url(#bezel)"/>
+ <rect class="tile" x="74" y="176" width="184" height="153" rx="23"/>
+ <rect class="tile" x="34" y="346" width="184" height="153" rx="23"/>
+ <rect class="tile" x="108" y="514" width="184" height="153" rx="23"/>
+ </g>
+ <g class="enter" fill="none">
+ <path class="route" d="M270 254 C407 254 326 419 427 419 M232 425 H427 M305 592 C412 592 327 419 427 419"/>
+ <path class="orbital-accent" d="M675 176 A242 242 0 0 1 914 455"/>
+ <path class="orbit-secondary" d="M675 660 A242 242 0 0 1 449 507"/>
+ <path class="quiet-line" d="M671 268 V567 M499 547 H841"/>
+ </g>
+</g>
+<g class="design" data-design="3" aria-hidden="true">
+ <g class="enter floating">
+ <rect x="116" y="178" width="250" height="522" rx="34" class="glass-back"/>
+ <rect x="101" y="162" width="250" height="522" rx="34" class="glass"/>
+ <rect x="487" y="195" width="307" height="365" rx="38" class="glass-back"/>
+ <rect x="470" y="179" width="307" height="365" rx="38" class="glass green"/>
+ <rect x="822" y="352" width="290" height="334" rx="36" class="glass-back"/>
+ <rect x="805" y="335" width="290" height="334" rx="36" class="glass green"/>
+ <path class="edge-light" d="M136 164 H314 M508 181 H739 M842 337 H1058"/>
+ </g>
+ <g class="enter" fill="none">
+ <path class="route" d="M351 399 H470 M777 430 C819 430 768 531 805 531"/>
+ <path class="quiet-line" d="M144 374 H307 M144 524 H307 M514 467 H733 M849 594 H1051"/>
+ </g>
+</g>
+<g class="design" data-design="4" aria-hidden="true">
+ <g class="enter floating">
+ <path d="M68 287 L1110 232 L1140 548 L1047 624 L93 624 L55 566 Z" fill="#020b11"/>
+ <path d="M55 278 L1110 222 L1140 538 L1047 605 L82 605 Z" class="stage-side"/>
+ <path d="M55 278 L1110 222 L1110 523 L55 568 Z" class="stage-top"/>
+ <rect x="75" y="308" width="555" height="231" rx="22" class="inset"/>
+ <rect x="734" y="209" width="372" height="295" rx="26" class="tile green"/>
+ <path class="edge-light" d="M764 211 H1076 M76 310 H610 M82 605 H1046"/>
+ </g>
+ <g class="enter" fill="none">
+ <path class="route" d="M632 413 H719 V279 H734"/>
+ <path class="quiet-line" d="M262 344 V517 M438 344 V517 M920 252 V475"/>
+ <path class="quiet-line" d="M110 575 L1050 548"/>
+ </g>
+</g>
+<g class="design" data-design="5" aria-hidden="true">
+ <g class="enter floating">
+ <rect x="62" y="195" width="1068" height="479" rx="40" class="obsidian-housing"/>
+ <rect x="71" y="204" width="1050" height="461" rx="34" fill="none" stroke="url(#bezel)"/>
+ <circle cx="182" cy="314" r="90" class="well"/>
+ <circle cx="356" cy="451" r="90" class="well"/>
+ <circle cx="182" cy="576" r="75" class="well"/>
+ <circle cx="785" cy="345" r="122" class="well renewable-well"/>
+ <circle cx="1000" cy="499" r="105" class="well renewable-well"/>
+ </g>
+ <g class="enter" fill="none">
+ <path class="route" d="M280 314 C473 314 359 418 525 418 M454 451 Q488 418 525 418 M265 576 C430 576 381 418 525 418 M616 418 C676 418 627 345 657 345 M616 418 C768 418 770 499 889 499"/>
+ <path class="gold-ring" d="M785 223 A122 122 0 1 1 692 423"/>
+ <path class="gold-ring" d="M1000 394 A105 105 0 1 1 922 570"/>
+ <path class="quiet-line" d="M125 230 H529 M125 638 H529"/>
+ </g>
+</g>
+<ellipse id="renewableHalo" cx="915" cy="440" rx="225" ry="190" fill="url(#halo)"/>
 <g id="transitionArrow" transform="translate(682 397)" aria-hidden="true">
  <circle r="43" fill="#031724" stroke="#71c9df" stroke-width="1.1"/>
  <circle r="40" fill="url(#outerMaterial)" stroke="#40758a" stroke-opacity=".12"/>
@@ -181,13 +245,13 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 <button class="replay" id="replayBtn" type="button" aria-label="Replay animation">↻ Replay</button>
 </div>
 <section class="style-picker" aria-label="Visual treatment">
- <div class="picker-head"><span>VISUAL TREATMENT</span><span id="styleDescription">The original navy and mint composition.</span></div>
+ <div class="picker-head"><span>VISUAL TREATMENT</span><span id="styleDescription">Five separate floating tiles and an asymmetric transition channel.</span></div>
  <div class="style-options">
- <button type="button" data-variant="1" aria-pressed="true"><span>01</span> Original</button>
- <button type="button" data-variant="2" aria-pressed="false"><span>02</span> Satin</button>
- <button type="button" data-variant="3" aria-pressed="false"><span>03</span> Copper &amp; jade</button>
- <button type="button" data-variant="4" aria-pressed="false"><span>04</span> Glass</button>
- <button type="button" data-variant="5" aria-pressed="false"><span>05</span> Obsidian gold</button>
+ <button type="button" data-variant="1" aria-pressed="true"><span>01</span> Modular</button>
+ <button type="button" data-variant="2" aria-pressed="false"><span>02</span> Orbital</button>
+ <button type="button" data-variant="3" aria-pressed="false"><span>03</span> Glass cascade</button>
+ <button type="button" data-variant="4" aria-pressed="false"><span>04</span> Architectural</button>
+ <button type="button" data-variant="5" aria-pressed="false"><span>05</span> Aurum</button>
  </div>
 </section>
 <div id="renderTools" class="render-tools" aria-label="Preview and export tools"></div>
@@ -227,24 +291,28 @@ body.export-mode{padding:0;height:100vh;display:flex;align-items:center;justify-
 
 <p class="page-note">A conceptual illustration of replacement, not a forecast or measured energy mix.<br><a href="explainers.html">← All explainers</a></p>
 </main>
+<script src="energy-layouts.js"></script>
 <script id="motion-plan">
 const ENERGY_DURATION = 12000;
-function buildEnergyTracks() {
+function buildEnergyTracks(variant=1) {
+ const layout=ENERGY_LAYOUTS[variant]||ENERGY_LAYOUTS[1];
+ const position=([x,y,scale])=>`translate(${x}px,${y}px) scale(${scale})`;
  const tracks=[];
  const add=(name,target,frames,delay,duration,easing='cubic-bezier(.22,.68,0,1)')=>tracks.push({name,target,frames,options:{delay,duration,easing,fill:'both'}});
  add('reveal','#headline',[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0px)'}],100,800);
- add('reveal','#panelShell',[{opacity:0},{opacity:1}],350,850);
- add('compress','#fossilPanel',[{width:'1108px'},{width:'610px'}],3500,1700);
- add('open','#renewablePanel',[{opacity:0,transform:'scaleX(.8)'},{opacity:1,transform:'scaleX(1)'}],4500,1300);
+ add('intro','#introPlate',[{opacity:0,offset:0},{opacity:1,offset:.15},{opacity:1,offset:.72},{opacity:0,offset:1}],200,4200);
+ add('architecture',`.design[data-design="${variant}"] .enter`,[{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'translateY(0px)'}],3500,1500);
  ['oil','gas','coal'].forEach((id,i)=>{
   add('reveal','#'+id,[{opacity:0},{opacity:1}],850+i*400,650);
-  add('reposition','#'+id,[{transform:`translate(${250+i*350}px,420px) scale(1.35)`},{transform:`translate(${[170,350,535][i]}px,420px) scale(1.02)`}],3500,1700);
+  add('reposition','#'+id,[{transform:position(layout.start[i])},{transform:position(layout.end[i])}],3500,1700);
   add('deplete','#'+id+' .source-body',[{opacity:1},{opacity:.78}],8000+i*160,1600);
  });
+ add('placement','#transitionArrow',[{transform:position(layout.arrow)},{transform:position(layout.arrow)}],0,1);
  add('reveal','#transitionArrow',[{opacity:0},{opacity:1}],5100,650);
  add('trace','#arrowStroke',[{strokeDashoffset:1},{strokeDashoffset:0}],5400,550);
  ['wind','solar'].forEach((id,i)=>{
   add('reveal','#'+id,[{opacity:0},{opacity:1}],6100+i*650,1050);
+  add('placement','#'+id,[{transform:position(layout.renew[i])},{transform:position(layout.renew[i])}],0,1);
   add('charge','#'+id+' .surface',[{fillOpacity:.1},{fillOpacity:1}],6200+i*650,1300);
  });
  add('reveal','#renewableHalo',[{opacity:0},{opacity:1}],6100,2400);
@@ -259,19 +327,30 @@ function buildEnergyTracks() {
 (() => {
  const exporting = new URLSearchParams(location.search).has('export');
  if(exporting){document.documentElement.classList.add('export-mode');document.body.classList.add('export-mode');}
- const tracks=buildEnergyTracks();
- const animations=[];
- for(const track of tracks){
-   document.querySelectorAll(track.target).forEach(element=>{
-     if(track.name==='trace'){element.style.strokeDasharray='1';element.style.strokeDashoffset='1';}
-     animations.push(element.animate(track.frames,track.options));
-   });
- }
- // One inert clock keeps UI time and the export's final hold on the same timeline.
+ let animations=[];
  const clock=document.querySelector('#chartSvg').animate([{opacity:1},{opacity:1}],{duration:ENERGY_DURATION,fill:'both'});
- animations.push(clock);
- const epoch=document.timeline.currentTime;
- animations.forEach(animation=>{animation.startTime=epoch;});
+ function install(variant,time=0,playing=true){
+  animations.filter(a=>a!==clock).forEach(a=>a.cancel());
+  animations=[];
+  const layout=ENERGY_LAYOUTS[variant];
+  const title=document.getElementById('headline');
+  title.setAttribute('x',layout.title[0]);title.setAttribute('y',layout.title[1]);
+  title.style.textAnchor=layout.title[2];title.style.fontSize=layout.title[3]+'px';
+  const halo=document.getElementById('renewableHalo');
+  halo.setAttribute('cx',(layout.renew[0][0]+layout.renew[1][0])/2);
+  halo.setAttribute('cy',(layout.renew[0][1]+layout.renew[1][1])/2);
+  for(const track of buildEnergyTracks(variant)){
+   document.querySelectorAll(track.target).forEach(element=>{
+    if(track.name==='trace'){element.style.strokeDasharray='1';element.style.strokeDashoffset='1';}
+    animations.push(element.animate(track.frames,track.options));
+   });
+  }
+  animations.push(clock);
+  const epoch=document.timeline.currentTime-time;
+  animations.forEach(a=>{a.pause();a.currentTime=time;if(playing){a.play();a.startTime=epoch;}});
+ }
+ const initialVariant=Number(new URLSearchParams(location.search).get('variant'));
+ install(ENERGY_LAYOUTS[initialVariant]?initialVariant:1);
  const slider=document.querySelector('#timeline');
  const readout=document.querySelector('#timeReadout');
  const play=document.querySelector('#playBtn');
@@ -286,7 +365,7 @@ function buildEnergyTracks() {
  slider.addEventListener('input',()=>seek(Number(slider.value)));
  document.querySelectorAll('[data-seek]').forEach(button=>button.addEventListener('click',()=>seek(Number(button.dataset.seek))));
  // The timer updates controls only; animation state is entirely native and seekable.
- window.energyPlayer={seek,resume,pause,now,isPlaying:isRunning};
+ window.energyPlayer={seek,resume,pause,now,isPlaying:isRunning,setVariant:(variant)=>{install(variant,now(),isRunning());refresh();}};
  if(!exporting){setInterval(refresh,100);if(matchMedia('(prefers-reduced-motion: reduce)').matches)seek(ENERGY_DURATION);}
  refresh();
 })();

@@ -38,3 +38,15 @@ Pumpjack and turbine loops run from time zero on the shared native timeline, inc
 The shared Render MOV and Ruler tools now appear below the video frame. Review & annotate is adapted from the battery explainer: numbered pins, timestamps, text notes, deletion and copy feedback. Notes include the treatment number and clicking a note restores its treatment and time. Notes remain in the current page session. All selectors, tools and review pins are hidden from export.
 
 Validation: `node --test test/*.test.cjs` passes ten checks covering sequence timing, continuous motion, review hooks, catalogue integration and safe per-treatment output selection. Browser security still blocks visual inspection and an actual render has not been performed.
+
+## Rebuilt compositions
+
+The five previous surface-only treatments have been replaced with independent SVG architectures and per-design choreography:
+
+1. Modular — asymmetric floating source tiles and a right-hand renewable gallery.
+2. Orbital — fossil satellite cards surrounding a central circular renewable lens.
+3. Glass cascade — three tall overlapping glass panes stepping diagonally through depth.
+4. Architectural — an elevated polygonal stage, inset fossil bays and a raised renewable gallery.
+5. Aurum — an obsidian housing with recessed fossil wells and gold renewable rings.
+
+`energy-layouts.js` owns independent title positions, opening and settled source positions, scales and arrow positions. Switching designs reconstructs the native animation tracks at the current playhead; review pins and export selection retain their existing treatment numbers. The icons, controls and narrative are shared, while the composition and source movement change for each option. Every design is drawn in HTML/SVG/CSS without generated background imagery.

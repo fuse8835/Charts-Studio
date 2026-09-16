@@ -6,19 +6,21 @@ const vm = require('node:vm');
 const root = path.join(__dirname, '..');
 function plan() {
   const html = fs.readFileSync(path.join(root, 'energy-transition.html'), 'utf8');
+  const layoutSource=fs.readFileSync(path.join(root,'energy-layouts.js'),'utf8');
   const script = html.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1];
-  return vm.runInNewContext(script + '; ({tracks: buildEnergyTracks(), duration: ENERGY_DURATION})');
+  return vm.runInNewContext(layoutSource+'\n'+script + '; ({tracks: buildEnergyTracks(), duration: ENERGY_DURATION})');
 }
-test('fossil sources establish a row before compressing into the left panel', () => {
-  const {tracks} = plan();
-  const moves = ['oil','gas','coal'].map(id => tracks.find(t => t.target === '#' + id && t.name === 'reposition'));
-  const starts = moves.map(t => t.frames[0].transform);
-  assert.equal(new Set(starts).size, 3);
-  assert.ok(starts.every(s => s.includes('420px')));
-  assert.ok(moves.every(t => t.options.delay >= 3000));
-  assert.ok(moves.every(t => t.frames.at(-1).transform.includes('420px')));
-  assert.ok(moves.every(t => Number(t.frames.at(-1).transform.match(/translate\((\d+)/)[1]) < 650));
-  assert.equal(new Set(moves.map(t => t.frames.at(-1).transform)).size, 3);
+test('each direction has distinct geometry and three staged fossil moves',()=>{
+ const html=fs.readFileSync(path.join(root,'energy-transition.html'),'utf8');
+ const code=fs.readFileSync(path.join(root,'energy-layouts.js'),'utf8')+'\n'+html.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1];
+ const layouts=vm.runInNewContext(code+'; ENERGY_LAYOUTS');
+ assert.equal(new Set(Object.values(layouts).map(l=>JSON.stringify(l.end))).size,5);
+ assert.equal(new Set(Object.values(layouts).map(l=>JSON.stringify(l.renew))).size,5);
+ for(let i=1;i<=5;i++){
+  const tracks=vm.runInNewContext(code+'; buildEnergyTracks('+i+')');
+  assert.equal(tracks.filter(t=>t.name==='reposition').length,3);
+  assert.ok(html.includes('data-design="'+i+'"'));
+ }
 });
 test('renewables appear only after fossil relocation and finish within export duration', () => {
   const {tracks,duration} = plan();
@@ -54,15 +56,6 @@ test('registered on Explainers and omitted from Charts with matching export dura
   }
 });
 
-test('panel opens before renewables arrive and remains rounded during compression', () => {
-  const {tracks}=plan();
-  const panel=tracks.find(t=>t.target==='#fossilPanel');
-  assert.equal(panel.frames[0].width,'1108px');
-  assert.equal(panel.frames.at(-1).width,'610px');
-  const open=tracks.find(t=>t.target==='#renewablePanel');
-  const wind=tracks.find(t=>t.target==='#wind');
-  assert.ok(open.options.delay+open.options.duration<=wind.options.delay);
-});
 test('turbine and pump run continuously on the shared seekable timeline',()=>{
  const {tracks}=plan();
  for(const selector of ['#rotor','#pumpBeam']) {
@@ -78,4 +71,13 @@ test('all five styles have export-safe selection and annotation tools',()=>{
  assert.ok(html.includes('energy-review.js'));
  const server=fs.readFileSync(path.join(root,'_render/server.js'),'utf8');
  assert.ok(server.includes('resolveRenderVariant'));
+});
+test('all five compositions keep sources within the export safe area',()=>{
+ const layouts=vm.runInNewContext(fs.readFileSync(path.join(root,'energy-layouts.js'),'utf8')+';ENERGY_LAYOUTS');
+ for(const layout of Object.values(layouts)){
+  for(const [x,y,scale] of [...layout.end,...layout.renew]){
+   assert.ok(x-95*scale>=24 && x+95*scale<=1176);
+   assert.ok(y-120*scale>=145 && y+115*scale<=710);
+  }
+ }
 });
