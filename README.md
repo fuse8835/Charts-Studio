@@ -10,7 +10,10 @@ For area charts, stacked-area charts, and similar filled curves, use the **appro
 
 ## Running it
 
+Open Terminal in the project folder first. For the Desktop checkout on Kevin’s Mac:
+
 ```bash
+cd ~/Desktop/Charts-Studio
 npm install --prefix _render
 node _render/server.js
 ```
