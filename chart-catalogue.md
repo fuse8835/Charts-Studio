@@ -348,4 +348,4 @@ Validation: `node --test test/*.test.cjs`; browser check: start the render serve
 - **Interpretation:** The empty circled region is an illustrative visual emphasis, not an official threshold for rich/poor. The chart supports association, not proof of causation or a universal claim across all possible definitions or missing economies.
 - **9B compatibility:** Old `9-electricity-prices.html` redirects to 9B. Render registry and feedback identify the electricity chart as 9b.
 
-- **9A styling revision:** Source credit is small and right aligned; the on-canvas placeholder badge is removed (research status remains in the menu and documentation). The highlight is a true 110-unit-radius circle, with Chart 8’s orange-to-burnt-orange translucent gradient and a large white “0” above “low energy,” / “high income countries”.
+- **9A styling revision:** Source credit is small and right aligned; the on-canvas placeholder badge is removed (research status remains in the menu and documentation). The highlight is a true 125-unit-radius circle, with Chart 8’s orange-to-burnt-orange translucent gradient and a large white “0” above “Low energy,” / “high income countries”.

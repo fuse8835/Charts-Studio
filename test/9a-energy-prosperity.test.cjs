@@ -5,7 +5,7 @@ test('9A preserves source snapshot, units and all in-range observations',()=>{
  const source=JSON.parse(fs.readFileSync(path.join(root,'data/9a-energy-prosperity-2023.json')));
  assert.equal(JSON.stringify(p.DATA),JSON.stringify(source));assert.equal(source.length,141);assert.equal(new Set(source.map(d=>d.code)).size,141);
  assert.ok(source.find(d=>d.code==='CAN').energy>80000,'energy already converted to kWh');
- for(const d of source){assert.ok(p.pointX(d.energy)>=130&&p.pointX(d.energy)<=1120);assert.ok(p.pointY(d.gdp)>=220&&p.pointY(d.gdp)<=600);assert.ok(((p.pointX(d.energy)-340)/110)**2+((p.pointY(d.gdp)-350)/110)**2>1,'highlighted circle contains no observations');}
+ for(const d of source){assert.ok(p.pointX(d.energy)>=130&&p.pointX(d.energy)<=1120);assert.ok(p.pointY(d.gdp)>=220&&p.pointY(d.gdp)<=600);assert.ok(((p.pointX(d.energy)-340)/125)**2+((p.pointY(d.gdp)-350)/125)**2>1,'highlighted circle contains no observations');}
 });
 test('9A finishes observations before circle and leaves a still editing hold',()=>{
  assert.ok(p.TIMING.ringStart>=p.pointStart(p.DATA.length-1)+p.TIMING.pointDuration+1);
