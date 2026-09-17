@@ -652,7 +652,7 @@ for(const v of [1000,2000,5000,10000,20000,50000,100000,200000]){
  svg('text',{x:pointX(v),y:631,'text-anchor':'middle',class:'energy-tick'},grid,(v/1000)+'k');
 }
 reveal(grid,1,.6);
-const labels={IND:['India',-12,-13,'end'],CHN:['China',-12,-13,'end'],CAN:['Canada',12,5,'start'],USA:['United States',-12,-14,'end'],NOR:['Norway',-12,-12,'end'],LUX:['Luxembourg',-12,-12,'end'],QAT:['Qatar',-12,-14,'end'],ETH:['Ethiopia',-12,-12,'end']};
+const labels={IND:['India',-12,-13,'end'],CHN:['China',-12,-13,'end'],CAN:['Canada',12,5,'start'],USA:['United States',-12,5,'end'],NOR:['Norway',-12,5,'end'],LUX:['Luxembourg',-12,5,'end'],QAT:['Qatar',-12,5,'end'],ETH:['Ethiopia',-12,-12,'end']};
 DATA.forEach((d,i)=>{
  const selected=Boolean(labels[d.code]);
  const dot=svg('circle',{cx:pointX(d.energy),cy:pointY(d.gdp),r:selected?5.5:4,fill:'#04ffba','fill-opacity':selected?.95:.6,stroke:selected?'#caffef':'#04ffba','stroke-width':selected?1.2:.6,'data-country':d.code},document.getElementById('dotsGroup'));
