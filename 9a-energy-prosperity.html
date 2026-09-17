@@ -585,6 +585,7 @@
 <text x="44" y="410" text-anchor="middle" transform="rotate(-90 44 410)" class="energy-unit">GDP per person (2021 international $, PPP)</text>
 <text x="625" y="665" text-anchor="middle" class="energy-unit">Energy use per person (kWh per year · logarithmic scale)</text>
 <defs>
+ <clipPath id="regionClip"><circle cx="340" cy="350" r="125"/></clipPath>
  <linearGradient id="regionGold" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#ffb21c" stop-opacity=".88"/>
   <stop offset=".55" stop-color="#bc6412" stop-opacity=".78"/>
@@ -593,6 +594,7 @@
 </defs>
 <g id="emptyRegion">
  <circle id="regionFill" cx="340" cy="350" r="125" fill="url(#regionGold)"/>
+ <g id="regionTexture" clip-path="url(#regionClip)" aria-hidden="true"></g>
  <circle id="regionRing" cx="340" cy="350" r="125" fill="none" stroke="#ffb21c" stroke-width="3" pathLength="1" stroke-dasharray="1"/>
  <g id="regionText" text-anchor="middle" font-family="Rajdhani, sans-serif">
   <text x="340" y="337" fill="#ffffff" font-size="88" font-weight="700">0</text>
@@ -661,6 +663,28 @@ DATA.forEach((d,i)=>{
  reveal(dot,pointStart(i),TIMING.pointDuration);
  if(selected){const [name,dx,dy,anchor]=labels[d.code];const label=svg('text',{x:pointX(d.energy)+dx,y:pointY(d.gdp)+dy,'text-anchor':anchor,fill:'#eef3fa',style:'font:600 19px Rajdhani,sans-serif;paint-order:stroke;stroke:#061724;stroke-width:3px;stroke-linejoin:round'},document.getElementById('countryLabels'),name);reveal(label,7,.6);}
 });
+// Match Chart 8's deterministic decorative contours and clipped inner rim.
+const texture=document.getElementById('regionTexture');
+for(let i=0;i<36;i++){
+ const points=[];
+ for(let j=0;j<=6;j++){
+  const x=210+j*44;
+  const y=220+i*7.5+Math.sin(j*1.5+i*.23)*13+Math.sin(j*2.13+i*.47)*5;
+  points.push([x,y]);
+ }
+ let d=`M${points[0].join(' ')}`;
+ for(let j=1;j<points.length;j++){
+  const [ax,ay]=points[j-1],[bx,by]=points[j];
+  d+=` C${ax+17} ${ay} ${bx-17} ${by} ${bx} ${by}`;
+ }
+ svg('path',{d,fill:'none',stroke:'#fff2d9','stroke-width':.7,
+  'stroke-opacity':.10+(Math.sin(i*2.4)+1)*.025},texture);
+}
+for(const [width,opacity] of [[12,.07],[8,.10],[5,.18]]){
+ svg('circle',{cx:340,cy:350,r:125,fill:'none',stroke:'#020a10',
+  'stroke-width':width,'stroke-opacity':opacity},texture);
+}
+reveal(texture,TIMING.ringStart,TIMING.ringDuration);
 reveal(document.getElementById('regionFill'),TIMING.ringStart,TIMING.ringDuration);
 const ring=document.getElementById('regionRing');
 animate(ring,[{offset:0,strokeDashoffset:1},{offset:TIMING.ringStart/DURATION,strokeDashoffset:1},{offset:(TIMING.ringStart+TIMING.ringDuration)/DURATION,strokeDashoffset:0},{offset:1,strokeDashoffset:0}]);
