@@ -328,10 +328,22 @@ Validation: `node --test test/*.test.cjs`; browser check: start the render serve
 - **Motion:** 0–2s establishes the chart; 2–9s reveals every band together from 1965 to 2024 with fixed axes; 9–11s holds the completed chart. The renderer adds its usual extra one-second final hold. No era transitions or separate source reveals.
 - **Validation:** `node --test test/*.test.cjs`; run the preview server, then `CHART_BASE_URL=http://localhost:8793 node _render/check-8b.cjs` for browser checks. Verifies all seven source polygons, gradient bounds during forward/backward seeks, identical completed-chart hold frames, landing-page discovery, timeline jumps, replay, render-button presence, and absence of browser errors.
 
-## 9 — Electricity Price Increases in Canada Since 2000
+## 9B — Electricity Price Increases in Canada Since 2000
 
-- **File:** `9-electricity-prices.html` · **Duration:** 14.5 seconds · **Export:** 1920 × 1200 ProRes 4444 alpha to `~/Desktop/Charts-Studio`.
+- **File:** `9b-electricity-prices.html` · **Duration:** 14.5 seconds · **Export:** 1920 × 1200 ProRes 4444 alpha to `~/Desktop/Charts-Studio`.
 - **Source:** supplied `Essay 09.svg`. Original order: CA, BC, AB, SK, MB, ON, QC, NB, NS, PE, NL. Values are reconstructed from the vector's bar heights using its 717.23-unit zero-to-200% grid span; no exact numeric bar labels or unsupported ending year are added. The overall-prices reference retains source y = 687.38 against axis zero y = 945.94 (approximately 72.1%). Manitoba is slightly above the reference and Quebec below; their source positions are preserved. The requested highlight does not imply both are below inflation.
 - **Style:** series navy panel and Rajdhani typography; mint bars with darker gradient bases; dotted source-red/magenta #e30063 reference and callout. Final MB and QC bars use gold #ffb21c to burnt orange, with matching golden abbreviation text and outlined tags.
 - **Motion:** Canada grows from 2–2.8s, followed by a 1.2s pause. Ten provincial bars grow sequentially from 4s at 0.35s intervals, each over 0.8s, ending at 7.95s. The dotted line draws at 9–10s; the overall-prices callout enters at 9.8–10.5s. MB and QC highlight together at 11.5–12.2s, holding through 14.5s. The renderer adds its standard extra final second.
 - **Validation:** `node --test test/*.test.cjs`; with the server running, `CHART_BASE_URL=http://localhost:8793 node _render/check-9.cjs` verifies Canada-first playback, reference timing, both highlights, still final frames, reverse seeking, menu inclusion, replay and render controls.
+
+
+## 9A — Energy Use and Prosperity (research placeholder)
+
+- **File:** `9a-energy-prosperity.html`; 14 seconds; 1920 × 1200 alpha export.
+- **Status:** Inferred from the narration, pending the intended SVG/reference. Uses real observations, not invented points.
+- **Source:** https://ourworldindata.org/grapher/energy-use-per-capita-vs-gdp-per-capita (CSV and metadata retrieved 2026-09-17). IEA via World Bank energy; Eurostat/OECD/IMF/World Bank GDP, processed by OWID. OWID chart/data reuse CC BY; source credited on canvas and linked below.
+- **Snapshot:** `data/9a-energy-prosperity-2023.json` contains all 141 three-letter-code countries/economies with both measures in 2023. Excludes missing values and aggregates. 2024 has only 41 matched observations, hence the broader 2023 snapshot. GDP is constant 2021 international dollars, PPP. The Grapher CSV already applies the energy conversion to kWh; do not multiply by metadata's 11.63 factor again. Source metadata is saved alongside.
+- **Axes:** Energy use on x, logarithmic 1,000–200,000 kWh/person/year; GDP/person on y, linear $0–$140,000. All matched observations are plotted, including outliers and territories; selected country labels only for readability. Equal-size dots except a slight emphasis on labeled economies; no population weighting.
+- **Motion:** Establish axes; dots fade at their measured coordinates from 2–6.6s in ascending energy order; labels at 7–7.6s; pause; upper-left ring draws 9–10.5s; annotation enters 10.5–11.1s; final hold to 14s. Native seekable animations match the renderer.
+- **Interpretation:** The empty circled region is an illustrative visual emphasis, not an official threshold for rich/poor. The chart supports association, not proof of causation or a universal claim across all possible definitions or missing economies.
+- **9B compatibility:** Old `9-electricity-prices.html` redirects to 9B. Render registry and feedback identify the electricity chart as 9b.

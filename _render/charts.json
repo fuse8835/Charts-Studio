@@ -180,12 +180,22 @@
     "height": 1200
   },
   {
-    "id": "9",
+    "id": "9b",
     "name": "Electricity Price Increases in Canada Since 2000",
     "subtitle": "Canada, then provinces, overall prices, and Manitoba/Quebec highlights",
-    "html": "9-electricity-prices.html",
-    "mov": "9-electricity-prices-alpha.mov",
+    "html": "9b-electricity-prices.html",
+    "mov": "9b-electricity-prices-alpha.mov",
     "duration": 14.5,
+    "width": 1920,
+    "height": 1200
+  },
+  {
+    "id": "9a",
+    "name": "Energy Use and Prosperity — Research Placeholder",
+    "subtitle": "2023 · Country scatterplot, then a low-energy / high-income region highlight",
+    "html": "9a-energy-prosperity.html",
+    "mov": "9a-energy-prosperity-alpha.mov",
+    "duration": 14,
     "width": 1920,
     "height": 1200
   }
