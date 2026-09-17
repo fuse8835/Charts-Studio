@@ -580,20 +580,27 @@
 <title id="chartTitle">Energy use and prosperity, 2023</title>
 <desc id="chartDesc">Research placeholder using 141 countries and economies with both energy and GDP data for 2023. Energy use per person is shown on a logarithmic horizontal axis and GDP per person on a linear vertical axis. Country dots appear first, then a circle highlights an empty low-energy, high-income region. Association does not establish causation.</desc>
 <text x="130" y="169" class="energy-unit">Countries and economies · 2023 · One dot per economy</text>
-<text x="1120" y="169" text-anchor="end" fill="#ffb21c" font-family="Rajdhani, sans-serif" font-size="17" font-weight="600">9A · RESEARCH PLACEHOLDER</text>
 <g id="gridGroup"></g><g id="dotsGroup"></g><g id="countryLabels"></g>
 <path d="M130 220V600H1120" fill="none" stroke="#a9c2d6" stroke-opacity=".5"/>
 <text x="44" y="410" text-anchor="middle" transform="rotate(-90 44 410)" class="energy-unit">GDP per person (2021 international $, PPP)</text>
 <text x="625" y="665" text-anchor="middle" class="energy-unit">Energy use per person (kWh per year · logarithmic scale)</text>
+<defs>
+ <linearGradient id="regionGold" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffb21c" stop-opacity=".88"/>
+  <stop offset=".55" stop-color="#bc6412" stop-opacity=".78"/>
+  <stop offset="1" stop-color="#652508" stop-opacity=".68"/>
+ </linearGradient>
+</defs>
 <g id="emptyRegion">
- <ellipse id="regionRing" cx="340" cy="350" rx="140" ry="100" fill="none" stroke="#ffb21c" stroke-width="3" pathLength="1" stroke-dasharray="1"/>
+ <circle id="regionFill" cx="340" cy="350" r="110" fill="url(#regionGold)"/>
+ <circle id="regionRing" cx="340" cy="350" r="110" fill="none" stroke="#ffb21c" stroke-width="3" pathLength="1" stroke-dasharray="1"/>
  <g id="regionText" text-anchor="middle" font-family="Rajdhani, sans-serif">
-  <text x="340" y="323" fill="#ffb21c" font-size="26" font-weight="600">Low energy</text>
-  <text x="340" y="351" fill="#ffb21c" font-size="26" font-weight="600">High income</text>
-  <text x="340" y="389" fill="#eef3fa" font-size="19">No observations in this region</text>
+  <text x="340" y="337" fill="#ffffff" font-size="76" font-weight="700">0</text>
+  <text x="340" y="372" fill="#ffffff" font-size="19" font-weight="600">low energy,</text>
+  <text x="340" y="399" fill="#ffffff" font-size="19" font-weight="600">high income countries</text>
  </g>
 </g>
-<text x="130" y="704" class="energy-unit" style="font-size:16px">Source: Our World in Data · IEA / World Bank · GDP adjusted for prices and purchasing power</text>
+<text x="1120" y="711" text-anchor="end" class="energy-unit" style="font-size:12px">Source: Our World in Data · IEA / World Bank · GDP adjusted for prices and purchasing power</text>
 </svg><div class="pins-layer" id="pinsLayer"></div></div></div>
 <div class="stage-wrap review-panel">
   <div class="review-head">
@@ -653,6 +660,7 @@ DATA.forEach((d,i)=>{
  reveal(dot,pointStart(i),TIMING.pointDuration);
  if(selected){const [name,dx,dy,anchor]=labels[d.code];const label=svg('text',{x:pointX(d.energy)+dx,y:pointY(d.gdp)+dy,'text-anchor':anchor,fill:'#eef3fa',style:'font:600 19px Rajdhani,sans-serif;paint-order:stroke;stroke:#061724;stroke-width:3px;stroke-linejoin:round'},document.getElementById('countryLabels'),name);reveal(label,7,.6);}
 });
+reveal(document.getElementById('regionFill'),TIMING.ringStart,TIMING.ringDuration);
 const ring=document.getElementById('regionRing');
 animate(ring,[{offset:0,strokeDashoffset:1},{offset:TIMING.ringStart/DURATION,strokeDashoffset:1},{offset:(TIMING.ringStart+TIMING.ringDuration)/DURATION,strokeDashoffset:0},{offset:1,strokeDashoffset:0}]);
 reveal(document.getElementById('regionText'),TIMING.textStart,TIMING.textDuration);
