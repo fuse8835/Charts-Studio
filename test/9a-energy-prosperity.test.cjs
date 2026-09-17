@@ -9,6 +9,8 @@ test('9A preserves source snapshot, units and all in-range observations',()=>{
 });
 test('9A finishes observations before circle and leaves a still editing hold',()=>{
  assert.ok(p.TIMING.ringStart>=p.pointStart(p.DATA.length-1)+p.TIMING.pointDuration+1);
+ assert.ok(p.TIMING.fillStart>=p.TIMING.ringStart+p.TIMING.ringDuration);
+ assert.ok(p.TIMING.textStart>=p.TIMING.fillStart+p.TIMING.fillDuration);
  assert.ok(p.DURATION>=p.TIMING.textStart+p.TIMING.textDuration+1);
  const registry=JSON.parse(fs.readFileSync(path.join(root,'_render/charts.json')));
  assert.equal(registry.find(d=>d.id==='9a').duration,p.DURATION);assert.ok(registry.find(d=>d.id==='9b'));assert.ok(!registry.find(d=>d.id==='9'));

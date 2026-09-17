@@ -7,6 +7,7 @@ const {chromium}=require('playwright-core');const assert=require('node:assert/st
  await seek(1.8);assert.equal(await page.locator('[data-country]').first().evaluate(e=>getComputedStyle(e).opacity),'0');
  await seek(8);assert.equal(await page.locator('[data-country]').last().evaluate(e=>getComputedStyle(e).opacity),'1');assert.equal(await page.locator('#regionText').evaluate(e=>getComputedStyle(e).opacity),'0');
  const early=await page.screenshot();await page.screenshot({path:path.join(os.tmpdir(),'9a-8.png')});
+ await seek(9.9);assert.equal(await page.locator('#regionFill').evaluate(e=>getComputedStyle(e).opacity),'0');assert.equal(await page.locator('#regionRing').evaluate(e=>parseFloat(getComputedStyle(e).strokeDashoffset)),0);
  await seek(12);assert.equal(await page.locator('#regionText').evaluate(e=>getComputedStyle(e).opacity),'1');const end=await page.screenshot();
  await seek(14);assert.ok(end.equals(await page.screenshot()),'final hold');await page.screenshot({path:path.join(os.tmpdir(),'9a-final.png')});
  await seek(8);assert.ok(early.equals(await page.screenshot()),'reverse seeking');
