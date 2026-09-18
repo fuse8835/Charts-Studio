@@ -349,3 +349,20 @@ Validation: `node --test test/*.test.cjs`; browser check: start the render serve
 - **9B compatibility:** Old `9-electricity-prices.html` redirects to 9B. Render registry and feedback identify the electricity chart as 9b.
 
 - **9A styling revision:** Source credit is small and right aligned; the on-canvas placeholder badge is removed (research status remains in the menu and documentation). The highlight is a true 125-unit-radius circle, with Chart 8’s orange-to-burnt-orange translucent gradient and a large white “0” above “Low energy,” / “high income countries”.
+
+## 10A — Policy Priorities among Africans
+
+- **File:** `10a-african-priorities.html` · **Duration:** 22s · **Export:** 1920 × 1920 ProRes 4444 alpha to the standard Desktop/Charts-Studio folder. A square frame gives all 34 ranked rows readable space.
+- **Source:** User-supplied `Essay 10-A.svg`, Figure 10.1, “Policy Priorities among Africans from 39 Countries, 2021–2023”; source credit Lomborg, 2025c. All 34 printed labels and exact one-decimal percentages are retained in `data/10a-source-values.json`. Labels and values are paired by vertical coordinate, not XML order (the gender-issues label appears last in the file but belongs at rank 25).
+- **Script context:** The supplied Human Welfare DOCX asks for the full ranking, then names unemployment, economy, health, electricity and education, then highlights climate change at rank 31 of 34. Only the chart-relevant cues are implemented; the rest of the script is context.
+- **Motion:** Background/title, then axes; ranked bars stagger 2–6s, followed by a still beat. Brief gold accents follow narration at 8s, 9.4s, 10.8s, 12.2s and 13.6s. Climate change’s row and 0.6% turn gold at 16–16.7s. The payoff circle draws its outline at 17–17.8s, its gradient/waves/inner shadow arrive 18–18.6s, and text arrives 18.6–19.1s; hold through 22s. The renderer adds its usual final second.
+- **Style:** Navy frame, Rajdhani, mint gradient bars, gold focus and final callout; source small at bottom right. Values and ranking are not reinterpreted or independently researched.
+
+## 10B — Canada’s Climate-Related Foreign Aid
+
+- **File:** `10b-climate-foreign-aid.html` · **Duration:** 12.5s · **Export:** 1920 × 1200 ProRes 4444 alpha.
+- **Source:** User-supplied `Essay 10-B.svg`, Figure 10.2, 2012–2023; source credit OECD, 2025. `data/10b-source-values.json` stores geometry-derived amounts, not purported exact underlying data. Segment heights are calibrated with the 0–2500 axis spanning SVG y=199 to y=34.12. The source’s 2022 adaptation bar has a tiny baseline gap; stacked reconstruction aligns all years to zero while retaining each source segment’s height. No numeric bar labels are invented.
+- **Script limitation:** The provided DOCX includes no specific Chart 2/10B narration or animation cue. First-pass staging is therefore inferred from the comparison: show adaptation first, then add emissions reduction. This is documented in the page caption for editorial review.
+- **Motion:** Adaptation grows chronologically from 2s, staggered 0.18s with 0.8s growth, finishing 4.78s. Hold until 6s, then emissions-reduction segments grow above their existing adaptation bases, finishing 8.78s. Hold to 12.5s; renderer adds a final second. Legends enter ahead of each series.
+- **Style:** Adaptation uses approved gold/orange, emissions reduction uses mint, both fading to dark accents with translucent fills, thin top edges, clipped inner shadows and organic fine waves. Source small at bottom right.
+- **Validation for both:** `node --test test/*.test.cjs` and `node _render/check-10.cjs` (default preview server port 23861, override CHART_BASE_URL). Checks source snapshots, rank and narrated order, stack sequencing, final holds, deterministic backwards seeking, and render/scrub controls.
