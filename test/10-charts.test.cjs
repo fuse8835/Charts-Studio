@@ -19,5 +19,5 @@ test('10B preserves 12 annual stacks, adds emissions after adaptation settles',(
 });
 test('both chart exports have matching durations and readable canvas sizes',()=>{
  const r=JSON.parse(fs.readFileSync(path.join(root,'_render/charts.json')));
- for(const id of ['10a','10b']){const e=r.find(c=>c.id===id);assert.ok(e);const p=plan(e.html,'{DURATION}');assert.equal(e.duration,p.DURATION);assert.equal(e.width,1920);assert.equal(e.height,id==='10a'?1920:1200);}
+ for(const id of ['10a','10b']){const e=r.find(c=>c.id===id);assert.ok(e);const p=plan(e.html,'{DURATION}');assert.equal(e.duration,p.DURATION);assert.equal(e.width,1920);assert.equal(e.height,1200);}
 });

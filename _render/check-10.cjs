@@ -1,6 +1,6 @@
 const {chromium}=require('playwright-core'),assert=require('node:assert/strict'),path=require('node:path'),os=require('node:os');
 (async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
- for(const [id,file,duration,height] of [['10a','10a-african-priorities.html',22,1200],['10b','10b-climate-foreign-aid.html',12.5,750]]){
+ for(const [id,file,duration,height] of [['10a','10a-african-priorities.html',22,750],['10b','10b-climate-foreign-aid.html',12.5,750]]){
  const page=await browser.newPage({viewport:{width:1200,height}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto((process.env.CHART_BASE_URL||'http://localhost:23861')+'/'+file+'?export');await page.evaluate(()=>document.fonts.ready);
  const seek=async t=>page.evaluate(t=>document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000}),t);

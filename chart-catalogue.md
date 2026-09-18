@@ -352,7 +352,7 @@ Validation: `node --test test/*.test.cjs`; browser check: start the render serve
 
 ## 10A — Policy Priorities among Africans
 
-- **File:** `10a-african-priorities.html` · **Duration:** 22s · **Export:** 1920 × 1920 ProRes 4444 alpha to the standard Desktop/Charts-Studio folder. A square frame gives all 34 ranked rows readable space.
+- **File:** `10a-african-priorities.html` · **Duration:** 22s · **Export:** 1920 × 1200 ProRes 4444 alpha to the standard Desktop/Charts-Studio folder. Uses the standard 16:10 format: compact labels and 34 rows, with a wider horizontal bar field.
 - **Source:** User-supplied `Essay 10-A.svg`, Figure 10.1, “Policy Priorities among Africans from 39 Countries, 2021–2023”; source credit Lomborg, 2025c. All 34 printed labels and exact one-decimal percentages are retained in `data/10a-source-values.json`. Labels and values are paired by vertical coordinate, not XML order (the gender-issues label appears last in the file but belongs at rank 25).
 - **Script context:** The supplied Human Welfare DOCX asks for the full ranking, then names unemployment, economy, health, electricity and education, then highlights climate change at rank 31 of 34. Only the chart-relevant cues are implemented; the rest of the script is context.
 - **Motion:** Background/title, then axes; ranked bars stagger 2–6s, followed by a still beat. Brief gold accents follow narration at 8s, 9.4s, 10.8s, 12.2s and 13.6s. Climate change’s row and 0.6% turn gold at 16–16.7s. The payoff circle draws its outline at 17–17.8s, its gradient/waves/inner shadow arrive 18–18.6s, and text arrives 18.6–19.1s; hold through 22s. The renderer adds its usual final second.
