@@ -795,7 +795,7 @@
   }
 
   const DATA = [
-    { label: 'Northern\nAmerica', cold: 173000, heat: 32000 },
+    { label: 'North\nAmerica', cold: 173000, heat: 32000 },
     { label: 'Latin\nAmerica', cold: 166000, heat: 39000 },
     { label: 'Europe', cold: 658000, heat: 184000 },
     { label: 'Africa', cold: 1189000, heat: 30000 },
@@ -820,7 +820,7 @@
   const barTopY = v => PAD.top + plotH - (v / maxVal) * plotH;
 
   // Each region is its own beat (cold then heat, 0.09s apart). Indices 0-2
-  // (Northern America, Latin America, Europe) overlap slightly with each
+  // (North America, Latin America, Europe) overlap slightly with each
   // other; the gaps after index 2 (Europe) and index 3 (Africa) are
   // deliberate pauses. Edit these six start times directly to time-remap
   // against narration.
