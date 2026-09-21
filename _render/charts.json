@@ -90,6 +90,14 @@
     "duration": 10.2
   },
   {
+    "id": "4a-restyle",
+    "name": "The Expanding Bull's Eye Effect (Restyle)",
+    "subtitle": "Alternate version: 8A/8B-style darker terrain, wider 2-line headline, taller panels",
+    "html": "4a-bullseye-effect-restyle.html",
+    "mov": "4a-bullseye-effect-restyle-alpha.mov",
+    "duration": 10.2
+  },
+  {
     "id": "4b",
     "name": "Global Disaster Database",
     "subtitle": "Two decades of major earthquakes, floods, storms, fires, droughts, and eruptions, plotted where they struck",
