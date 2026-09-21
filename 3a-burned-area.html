@@ -246,11 +246,11 @@
 
   .trend-line {
     fill: none;
-    stroke: var(--paper-100);
-    stroke-opacity: .55;
-    stroke-width: 3;
+    stroke: #ffffff;
+    stroke-opacity: 1;
+    stroke-width: 4;
     stroke-linecap: round;
-    stroke-dasharray: .1 13;
+    stroke-dasharray: .1 9;
   }
 
   .point-highlight {
@@ -1174,8 +1174,12 @@
   }
 
   copyNotesBtn.addEventListener('click', async () => {
-    const lines = pins.map(p => `${p.num}. [t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
-    const text = lines.length ? lines.join('\n') : 'No notes added yet.';
+    const chartTag = document.querySelector('script[data-chart-id]');
+    const chartId = (chartTag && chartTag.getAttribute('data-chart-id')) || '?';
+    const chartName = document.title.split(' — ')[0].trim();
+    const header = `${chartName} (${chartId})`;
+    const lines = pins.map(p => `${p.num}. [${chartId} · t=${(p.timeMs / 1000).toFixed(1)}s · ${regionLabel(p.xPct, p.yPct)}, x=${p.xPct.toFixed(0)}%/y=${p.yPct.toFixed(0)}%] ${p.text.trim() || '(no note text)'}`);
+    const text = lines.length ? `${header}\n${lines.join('\n')}` : `${header}\nNo notes added yet.`;
     feedbackOut.value = text;
     autoGrow(feedbackOut);
     const original = copyNotesBtn.textContent;
