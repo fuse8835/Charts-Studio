@@ -8,6 +8,14 @@
     "duration": 15.3
   },
   {
+    "id": "6a-codex",
+    "name": "No Low Electricity Rates — Codex copy",
+    "subtitle": "Country-label and connector cleanup; original 6A preserved",
+    "html": "6a-solar-wind-price-codex.html",
+    "mov": "6a-solar-wind-price-codex-alpha.mov",
+    "duration": 15.3
+  },
+  {
     "id": "1a",
     "name": "Cooling Curve",
     "subtitle": "Worldwide climate-related mortality decline",

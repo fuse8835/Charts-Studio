@@ -8,6 +8,8 @@
     const frame = document.getElementById('frame');
     if (!replayBtn || !frame) return;
 
+    initNavigation(frame);
+
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:absolute; top:6%; right:6%; z-index:5; display:flex; gap:8px; align-items:center;';
     replayBtn.parentNode.insertBefore(wrap, replayBtn);
@@ -56,6 +58,36 @@
     });
 
     initRuler(wrap, frame);
+  }
+
+  function initNavigation(frame) {
+    if (new URLSearchParams(window.location.search).has('export') ||
+        document.body.classList.contains('export-mode')) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .studio-navigation { display:flex; gap:10px; flex-wrap:wrap; margin:0 0 14px; }
+      .studio-navigation a {
+        display:inline-flex; align-items:center; gap:7px; padding:8px 13px;
+        border:1px solid rgba(169,194,214,.25); border-radius:999px;
+        background:rgba(255,255,255,.04); color:#dceaf4;
+        font:600 14px/1.2 Rajdhani,sans-serif; text-decoration:none;
+      }
+      .studio-navigation a:hover { background:rgba(4,255,186,.09); color:#04ffba; }
+      .studio-navigation a:focus-visible { outline:2px solid #04ffba; outline-offset:3px; }
+      .studio-navigation svg { width:15px; height:15px; }
+      body.export-mode .studio-navigation { display:none !important; }
+    `;
+    document.head.appendChild(style);
+    const nav = document.createElement('nav');
+    nav.className = 'studio-navigation';
+    nav.setAttribute('aria-label', 'Charts Studio');
+    nav.innerHTML =
+      '<a href="index.html" title="Charts Studio home — all charts">' +
+      '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></svg>Home</a>' +
+      '<a href="explainers.html">Explainers</a>';
+    frame.parentNode.insertBefore(nav, frame);
   }
 
   // ---- dev-only pixel ruler: click to drop an anchor, then move the mouse to
@@ -149,7 +181,11 @@
         const duy = toUnit(yPx - anchor.yPx, rect.height, uh);
         text = 'Δx ' + dux + unitLabel + '  Δy ' + duy + unitLabel + '\n' + text;
       }
-      return text;
+      // Prefixed with this chart's own id so a copied/pasted pin is
+      // self-identifying -- without it, a pin note with no other chart
+      // context (e.g. no header line naming the chart) is ambiguous the
+      // moment more than one chart has a similarly-positioned element.
+      return chartId + ' · ' + text;
     }
 
     function showTag(text, xPx, yPx, rect) {
