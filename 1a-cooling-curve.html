@@ -1079,8 +1079,19 @@
   }
 
   const pts = DATA.map((d, i) => [x(PERIOD_MID[i]), y(d.value)]);
-  const lineD = catmullRom2bezier(pts);
-  const areaD = lineD + ` L ${pts[pts.length - 1][0]} ${PAD.top + plotH} L ${pts[0][0]} ${PAD.top + plotH} Z`;
+  const curveD = catmullRom2bezier(pts);
+  // The first/last dots sit at their own period's midpoint (1924.5, 2022.5),
+  // not the chart's own edges -- extend the curve flat from each into its
+  // own period's true boundary (1920 on the left, 2025 -- the real end of
+  // the short final period -- on the right) so the line visually spans the
+  // chart's full stated 1920-2025 range, not just dot-to-dot. Straight L
+  // segments (not part of the Catmull-Rom spline) keep these perfectly flat
+  // rather than risking the spline curving oddly with only one neighbor.
+  const firstY = pts[0][1], lastY = pts[pts.length - 1][1];
+  const lineD = `M ${x(DOMAIN_START)} ${firstY} L ${pts[0][0]} ${firstY} `
+    + curveD.slice(curveD.indexOf('C'))
+    + ` L ${x(DOMAIN_END)} ${lastY}`;
+  const areaD = lineD + ` L ${x(DOMAIN_END)} ${PAD.top + plotH} L ${x(DOMAIN_START)} ${PAD.top + plotH} Z`;
 
   const linePath = document.getElementById('linePath');
   const areaPath = document.getElementById('areaPath');
@@ -1217,6 +1228,33 @@
     axisXGroup.appendChild(label);
     xLabelIndex++;
   });
+
+  // The axis's true right edge (2025) isn't any DATA entry's own `year`
+  // (which only ever marks a period's START) -- added explicitly so the
+  // last number the viewer sees matches the chart's actual stated range,
+  // continuing the same stagger the decade ticks above left off at.
+  const gxEnd = x(DOMAIN_END);
+  const vlineEnd = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  vlineEnd.setAttribute('x1', gxEnd);
+  vlineEnd.setAttribute('x2', gxEnd);
+  vlineEnd.setAttribute('y1', PAD.top + plotH);
+  vlineEnd.setAttribute('y2', PAD.top);
+  vlineEnd.classList.add('gridline');
+  vlineEnd.style.animationDelay = `calc(var(--start-grid) + ${0.05 + xLabelIndex * 0.35}s)`;
+  gridGroup.appendChild(vlineEnd);
+
+  const labelEnd = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  labelEnd.setAttribute('x', gxEnd);
+  labelEnd.setAttribute('y', PAD.top + plotH + 55);
+  // 2020 and 2025 are only 5 years apart (vs. 20 between every other pair of
+  // ticks) -- a centered label here collides with "2020"'s. Anchor to start
+  // instead so it extends rightward into the existing right-margin space
+  // (PAD.right) rather than growing left over its neighbor.
+  labelEnd.setAttribute('text-anchor', 'start');
+  labelEnd.classList.add('tick-label', 'x');
+  labelEnd.style.animationDelay = `calc(var(--start-axis) + ${0.2 + xLabelIndex * 0.55}s)`;
+  labelEnd.textContent = DOMAIN_END;
+  axisXGroup.appendChild(labelEnd);
 
   const pointsGroup = document.getElementById('pointsGroup');
   const drawDurSec = 1.7, drawStartSec = 5.35, firstDotPause = 0.4;
