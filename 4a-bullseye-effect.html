@@ -265,17 +265,20 @@
        29px at true 1920px export width) -- the old 17px max was also
        quietly clamping this down below its own preferred 1.05cqw value
        at export size, the same clamp-max-too-small bug documented for
-       other charts. */
-    font-size: clamp(11px, 1.52cqw, 32px);
+       other charts. Then bumped further still (~15% past that match)
+       per Kevin's own follow-up ask, so this now exceeds every other
+       chart's legend rather than just matching the largest. */
+    font-size: clamp(13px, 1.75cqw, 37px);
     color: var(--mist-300);
     white-space: nowrap;
   }
 
   .legend-swatch {
     /* Raised to match the largest legend swatch across the series (2A's
-       22px at true 1920px export width). */
-    width: clamp(11px, 1.15cqw, 24px);
-    height: clamp(11px, 1.15cqw, 24px);
+       22px at true 1920px export width), then bumped further still
+       (~15% past that match) per Kevin's own follow-up ask. */
+    width: clamp(13px, 1.32cqw, 28px);
+    height: clamp(13px, 1.32cqw, 28px);
     border-radius: 3px;
     flex: none;
   }
