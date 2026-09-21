@@ -152,7 +152,7 @@
 
   .headline {
     position: absolute;
-    top: 5%;
+    top: 2.5%;
     left: 3.5%;
     right: 3.5%;
     max-width: none;
@@ -1479,36 +1479,22 @@
     bg.classList.add('panel-bg');
     inner.appendChild(bg);
 
-    // terrain texture, flood band, river -- same authored geometry, same size, every panel
-    const mapLayer = document.createElementNS(svgNS, 'g');
-    mapLayer.setAttribute('transform', MAP_TRANSFORM);
+    // terrain -- same authored geometry, same size, every panel
+    const terrainLayer = document.createElementNS(svgNS, 'g');
+    terrainLayer.setAttribute('transform', MAP_TRANSFORM);
 
     const terrainUse = document.createElementNS(svgNS, 'use');
     terrainUse.setAttribute('href', '#terrainFull');
     terrainUse.setAttribute('fill', 'var(--rural-400)');
     terrainUse.classList.add('panel-terrain');
-    mapLayer.appendChild(terrainUse);
+    terrainLayer.appendChild(terrainUse);
 
-    const floodUse = document.createElementNS(svgNS, 'use');
-    floodUse.setAttribute('href', '#floodFull');
-    floodUse.setAttribute('fill', 'var(--flood-200)');
-    floodUse.setAttribute('opacity', '0.65');
-    floodUse.setAttribute('mask', 'url(#floodReveal)');
-    floodUse.classList.add('panel-flood');
-    mapLayer.appendChild(floodUse);
+    inner.appendChild(terrainLayer);
 
-    const riverUse = document.createElementNS(svgNS, 'use');
-    riverUse.setAttribute('href', '#riverFull');
-    riverUse.setAttribute('fill', 'var(--water-400)');
-    riverUse.classList.add('panel-river');
-    mapLayer.appendChild(riverUse);
-
-    inner.appendChild(mapLayer);
-
-    // Darker vignette + faint wave texture over the terrain/river/flood, borrowed from 8A/8B's
-    // filled-area treatment (see panelVignette/panelWaves defs below) -- sits above the map
-    // layer but still under the city and rings, so it reads as atmosphere over the land rather
-    // than tinting the data itself.
+    // Darker vignette + faint wave texture, borrowed from 8A/8B's filled-area treatment (see
+    // panelVignette/panelWaves defs below) -- deliberately sits ONLY over the terrain (between
+    // it and the flood/river layer below), not over the whole map, so the water stays at its
+    // own full, undimmed color instead of being muted by the same overlay meant for the land.
     const vignetteRect = document.createElementNS(svgNS, 'rect');
     vignetteRect.setAttribute('width', panelW);
     vignetteRect.setAttribute('height', panelH);
@@ -1520,6 +1506,26 @@
     waveRect.setAttribute('height', panelH);
     waveRect.setAttribute('fill', 'url(#panelWaves)');
     inner.appendChild(waveRect);
+
+    // flood band + river, painted after the vignette so they read at full, undimmed clarity
+    const waterLayer = document.createElementNS(svgNS, 'g');
+    waterLayer.setAttribute('transform', MAP_TRANSFORM);
+
+    const floodUse = document.createElementNS(svgNS, 'use');
+    floodUse.setAttribute('href', '#floodFull');
+    floodUse.setAttribute('fill', 'var(--flood-200)');
+    floodUse.setAttribute('opacity', '0.85');
+    floodUse.setAttribute('mask', 'url(#floodReveal)');
+    floodUse.classList.add('panel-flood');
+    waterLayer.appendChild(floodUse);
+
+    const riverUse = document.createElementNS(svgNS, 'use');
+    riverUse.setAttribute('href', '#riverFull');
+    riverUse.setAttribute('fill', 'var(--water-400)');
+    riverUse.classList.add('panel-river');
+    waterLayer.appendChild(riverUse);
+
+    inner.appendChild(waterLayer);
 
     // city: the same authored city.svg for every panel, masked down with a rectangle at the
     // street grid's own angle (CITY_MASK_ANGLE) rather than a circle -- a perfectly round
@@ -1905,4 +1911,4 @@
   });
 })();
 </script>
-<script src="render-client.js" data-chart-id="4a"></script>
+<script src="render-client.js" data-chart-id="4a-restyle"></script>
