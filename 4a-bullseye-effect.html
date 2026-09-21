@@ -261,14 +261,21 @@
     gap: 6px;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    font-size: clamp(9px, 1.05cqw, 17px);
+    /* Raised to match the largest legend text across the series (5A's
+       29px at true 1920px export width) -- the old 17px max was also
+       quietly clamping this down below its own preferred 1.05cqw value
+       at export size, the same clamp-max-too-small bug documented for
+       other charts. */
+    font-size: clamp(11px, 1.52cqw, 32px);
     color: var(--mist-300);
     white-space: nowrap;
   }
 
   .legend-swatch {
-    width: clamp(10px, 1.1cqw, 18px);
-    height: clamp(10px, 1.1cqw, 18px);
+    /* Raised to match the largest legend swatch across the series (2A's
+       22px at true 1920px export width). */
+    width: clamp(11px, 1.15cqw, 24px);
+    height: clamp(11px, 1.15cqw, 24px);
     border-radius: 3px;
     flex: none;
   }
