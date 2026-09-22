@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>Crop Yields in Canada by Decade — Animated Line Chart</title>
-<meta name="description" content="A single-act animated five-line chart showing Canadian crop yields (barley, canola, corn for grain, oats, wheat) by decade, 1910-2020, with start/end value labels and per-crop multiplier callouts, matching the series' design system, built as separate keyframeable layers.">
+<meta name="description" content="A single-act animated five-line chart showing Canadian crop yields (barley, canola, corn for grain, oats, wheat) by decade, 1910-2020, with a growth-factor callout per crop (e.g. '4.0X') instead of raw start/end numbers, matching the series' design system, built as separate keyframeable layers.">
 <style>
   @font-face {
     font-family: 'Rajdhani';
@@ -58,7 +58,6 @@
     --dur-line: 1.6s;
     --dur-label: .5s;
     --dur-callout: .5s;
-    --dur-badge: .6s;
     --ease-soft: cubic-bezier(.16,1,.3,1);
 
     /* line-draw order: Barley, Corn, Oats, Wheat, Canola -- fully sequential
@@ -69,10 +68,6 @@
     --start-line-oats: 7.9s;
     --start-line-wheat: 10.1s;
     --start-line-canola: 12.3s;
-
-    /* canola's multiplier is shown as a circled callout hanging off its own
-       end point on the chart -- appears shortly after its line settles at 13.9s. */
-    --start-canola-badge: 14.3s;
 
     --total: 26s;
 
@@ -241,8 +236,11 @@
   }
 
   .legend-swatch {
-    width: 16px;
-    height: 16px;
+    /* was a fixed 16px -- switched to a cqw clamp() (like the label below)
+       so it scales with the swatch's own larger export size too, not just
+       the label text next to it. */
+    width: clamp(16px, 1.4cqw, 26px);
+    height: clamp(16px, 1.4cqw, 26px);
     border-radius: 4px;
     flex: none;
     box-shadow: 0 0 8px 0 currentColor;
@@ -257,52 +255,19 @@
   .legend-label {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    font-size: calc(clamp(13px, 1.3cqw, 24px) + 5px);
+    /* Raised per the client's review note asking for a more readable/visible
+       legend -- was already the series' own largest at 29px (1920px export
+       width), bumped further still to ~37px. */
+    font-size: calc(clamp(14px, 1.5cqw, 30px) + 8px);
     color: var(--mist-300);
   }
 
-  /* canola's multiplier: a short leader line down from its own end point,
-     ending in a circle badge with "3.0X" -- instead of the shared top-right
-     callout box, since it's the very last line and gets its own moment. */
-  .canola-badge-line {
-    stroke: var(--canola);
-    stroke-width: 2;
-    opacity: 0;
-    animation: badgeLineIn var(--dur-badge) var(--ease-soft) forwards;
-    animation-delay: var(--start-canola-badge);
-  }
-
-  @keyframes badgeLineIn { to { opacity: .85; } }
-
-  .canola-badge-circle {
-    fill: rgba(5,19,31,.85);
-    stroke: var(--canola);
-    stroke-width: 2;
-    opacity: 0;
-    transform: scale(.6);
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: badgeCircleIn var(--dur-badge) var(--ease-soft) forwards;
-    animation-delay: calc(var(--start-canola-badge) + .15s);
-  }
-
-  @keyframes badgeCircleIn {
-    from { opacity: 0; transform: scale(.6); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .canola-badge-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    /* fixed px, same reasoning as .value-label above -- this one happened to
-       render correctly this time only because it's created later in the JS
-       (after layout had caught up), not because cqw is reliable here. */
-    font-size: 20px;
-    fill: var(--canola);
-    text-anchor: middle;
-    opacity: 0;
-    animation: fadeUp .4s ease-out forwards;
-    animation-delay: calc(var(--start-canola-badge) + .3s);
+  /* Canola's multiplier used to hang below its end point in a separate
+     circled badge; now sits in-line with the other four's end-of-line
+     labels for a consistent look, just larger since it's the narration's
+     final, capstone figure. */
+  .value-label.canola {
+    font-size: 30px;
   }
 
   .chart-svg {
@@ -360,8 +325,10 @@
        JS at page load, and cqw resolved wildly (~2x) too large in the real
        Playwright-rendered pipeline, a container-query timing race the static
        HTML text elsewhere in this file never hits. Matches .tick-label's own
-       working fixed-px convention instead. */
-    font-size: 14px;
+       working fixed-px convention instead. Sized up (14px->24px, exceeding
+       even canola's own 20px badge) now that these are the chart's primary
+       growth-factor callouts, not incidental raw-value labels anymore. */
+    font-size: 24px;
     opacity: 0;
     transform: translateY(4px);
     transform-box: fill-box;
@@ -801,6 +768,7 @@
 
     <h1 class="headline">Crop Yields in Canada by Decade, 1910-2020</h1>
     <div class="axis-title">Bushels per acre</div>
+    <div class="source-note">Source: Statistics Canada, 2025</div>
 
     <div class="legend">
       <div class="legend-row" style="animation-delay: var(--start-legend)"><span class="legend-swatch barley"></span><span class="legend-label">Barley</span></div>
@@ -855,7 +823,7 @@
   <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
-<p class="caption">A single-act animated five-line trend chart, built as separate layers &mdash; backdrop, grid, axis, legend, five crop lines with start/end value labels, five multiplier callouts &mdash; the same structure you'd key in Jitter or After Effects. Swap the <b>CROPS</b> array in the source for real figures. Append <b>?export</b> to the URL for a transparent-background version ready to capture with alpha for Premiere.</p>
+<p class="caption">A single-act animated five-line trend chart, built as separate layers &mdash; backdrop, grid, axis, legend, five crop lines with a growth-factor callout each &mdash; the same structure you'd key in Jitter or After Effects. Swap the <b>CROPS</b> array in the source for real figures. Append <b>?export</b> to the URL for a transparent-background version ready to capture with alpha for Premiere.</p>
 
 <script>
 (function(){
@@ -877,7 +845,10 @@
       mult: '3.2x', labelOffset: { startDx: 8, startDy: -4, endDx: 12, endDy: 0 } },
     { key: 'canola', label: 'Canola', startIdx: 3,
       values: [12.9,14.1,16.3,18.9,22.1,24.1,29.1,37.6,38.7],
-      mult: '3.0x', labelOffset: { startDx: 8, startDy: 19, endDx: 12, endDy: 0 } },
+      // endDy pushed down (0->24) -- canola's end value (38.7) sits close
+      // enough to wheat's (48.8) that its now-larger 30px label collided
+      // with wheat's 24px one at the old offset.
+      mult: '3.0x', labelOffset: { startDx: 8, startDy: 19, endDx: 12, endDy: 24 } },
     { key: 'corn', label: 'Corn for grain', startIdx: 0,
       values: [52.7,40.3,39.8,42.1,56.4,75.8,83.5,95.2,112.2,128.5,152.4,161.0],
       mult: '4.0x', labelOffset: { startDx: 8, startDy: 0, endDx: 12, endDy: 0 } },
@@ -890,7 +861,10 @@
   ];
 
   const W = 1200, H = 750;
-  const PAD = { top: 177.5, right: 110, bottom: 142.5, left: 170 };
+  // right margin widened (110->142) per a ruler-measured pin ask to shrink the
+  // plot and free up room for much bigger multiplier labels past each line's
+  // own end point (below), without them running off the frame's right edge.
+  const PAD = { top: 177.5, right: 142, bottom: 142.5, left: 170 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
   const maxVal = 180;
@@ -938,10 +912,8 @@
   const valueLabelGroup = document.getElementById('valueLabelGroup');
   const svgNS = 'http://www.w3.org/2000/svg';
 
-  function fmt(v) { return v.toFixed(1); }
-
   function buildSeries(crop) {
-    const { key, values, startIdx, labelOffset } = crop;
+    const { key, values, startIdx } = crop;
     const pts = values.map((v, i) => [x(startIdx + i), y(v)]);
 
     const d = 'M ' + pts.map(p => p[0] + ' ' + p[1]).join(' L ');
@@ -954,50 +926,30 @@
     const lenStyle = document.createElement('style');
     lenStyle.textContent = `.line-path.${key}{stroke-dasharray:${len};stroke-dashoffset:${len};}`;
     document.head.appendChild(lenStyle);
-
-    const startPt = pts[0], endPt = pts[pts.length - 1];
-    const startLabel = document.createElementNS(svgNS, 'text');
-    startLabel.setAttribute('x', startPt[0] + labelOffset.startDx);
-    startLabel.setAttribute('y', startPt[1] + labelOffset.startDy);
-    startLabel.classList.add('value-label', 'start', key);
-    startLabel.style.animationDelay = `calc(var(--start-line-${key}) + .15s)`;
-    startLabel.textContent = fmt(values[0]);
-    valueLabelGroup.appendChild(startLabel);
-
-    const endLabel = document.createElementNS(svgNS, 'text');
-    endLabel.setAttribute('x', endPt[0] + labelOffset.endDx);
-    endLabel.setAttribute('y', endPt[1] + labelOffset.endDy);
-    endLabel.classList.add('value-label', 'end', key);
-    endLabel.style.animationDelay = `calc(var(--start-line-${key}) + var(--dur-line) - .15s)`;
-    endLabel.textContent = fmt(values[values.length - 1]);
-    valueLabelGroup.appendChild(endLabel);
   }
 
   CROPS.forEach(buildSeries);
 
-  // canola's multiplier gets its own circled callout hanging off its end
-  // point on the chart, instead of a row in the shared top-right box.
-  const canola = CROPS.find(c => c.key === 'canola');
-  const canolaEnd = [x(canola.startIdx + canola.values.length - 1), y(canola.values[canola.values.length - 1])];
-  const badgeDrop = 38, badgeR = 28;
-  const badgeCx = canolaEnd[0], badgeCy = canolaEnd[1] + badgeDrop + badgeR;
-  const badgeLine = document.createElementNS(svgNS, 'line');
-  badgeLine.setAttribute('x1', canolaEnd[0]); badgeLine.setAttribute('y1', canolaEnd[1] + 10);
-  badgeLine.setAttribute('x2', badgeCx); badgeLine.setAttribute('y2', badgeCy - badgeR);
-  badgeLine.classList.add('canola-badge-line');
-  linesGroup.parentNode.insertBefore(badgeLine, linesGroup.nextSibling);
-
-  const badgeCircle = document.createElementNS(svgNS, 'circle');
-  badgeCircle.setAttribute('cx', badgeCx); badgeCircle.setAttribute('cy', badgeCy); badgeCircle.setAttribute('r', badgeR);
-  badgeCircle.classList.add('canola-badge-circle');
-  badgeLine.parentNode.insertBefore(badgeCircle, badgeLine.nextSibling);
-
-  const badgeText = document.createElementNS(svgNS, 'text');
-  badgeText.setAttribute('x', badgeCx); badgeText.setAttribute('y', badgeCy + 2);
-  badgeText.setAttribute('dominant-baseline', 'middle');
-  badgeText.classList.add('canola-badge-text');
-  badgeText.textContent = canola.mult.toUpperCase();
-  badgeCircle.parentNode.insertBefore(badgeText, badgeCircle.nextSibling);
+  // Growth-factor labels ("4.0X" etc.) replace the old raw start/end value
+  // numbers for every crop, per the client's own review note ("eliminate the
+  // labels and instead add a factor increase... like Phil did for our
+  // animated video"), reusing each crop's already-tuned `endDx/endDy` since
+  // that offset was clear of the line's own end point either way. Canola
+  // used to get a separate circled badge hanging below its end point --
+  // replaced with the same in-line style as the rest (just larger, via the
+  // `.value-label.canola` override below), per a follow-up ask to keep it
+  // consistent with the others instead of visually singled out.
+  CROPS.forEach(crop => {
+    const { key, values, startIdx, labelOffset, mult } = crop;
+    const endPt = [x(startIdx + values.length - 1), y(values[values.length - 1])];
+    const multLabel = document.createElementNS(svgNS, 'text');
+    multLabel.setAttribute('x', endPt[0] + labelOffset.endDx);
+    multLabel.setAttribute('y', endPt[1] + labelOffset.endDy);
+    multLabel.classList.add('value-label', 'end', key);
+    multLabel.style.animationDelay = `calc(var(--start-line-${key}) + var(--dur-line) - .15s)`;
+    multLabel.textContent = mult.toUpperCase();
+    valueLabelGroup.appendChild(multLabel);
+  });
 
   const ruler = document.getElementById('ruler');
   const totalSec = 26;
