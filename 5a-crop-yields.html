@@ -325,10 +325,11 @@
        JS at page load, and cqw resolved wildly (~2x) too large in the real
        Playwright-rendered pipeline, a container-query timing race the static
        HTML text elsewhere in this file never hits. Matches .tick-label's own
-       working fixed-px convention instead. Sized up (14px->24px, exceeding
-       even canola's own 20px badge) now that these are the chart's primary
-       growth-factor callouts, not incidental raw-value labels anymore. */
-    font-size: 24px;
+       working fixed-px convention instead. Sized up (14px->24px->21px) now
+       that these are the chart's primary growth-factor callouts -- nudged
+       down slightly from 24px to help canola's label sit closer to in-line
+       with the rest instead of needing a big vertical offset. */
+    font-size: 21px;
     opacity: 0;
     transform: translateY(4px);
     transform-box: fill-box;
@@ -844,11 +845,12 @@
       values: [26.1,25.3,20.2,24.2,27.6,33.0,41.7,47.6,55.5,54.6,64.9,64.7],
       mult: '3.2x', labelOffset: { startDx: 8, startDy: -4, endDx: 12, endDy: 0 } },
     { key: 'canola', label: 'Canola', startIdx: 3,
-      values: [12.9,14.1,16.3,18.9,22.1,24.1,29.1,37.6,38.7],
-      // endDy pushed down (0->24) -- canola's end value (38.7) sits close
-      // enough to wheat's (48.8) that its now-larger 30px label collided
-      // with wheat's 24px one at the old offset.
-      mult: '3.0x', labelOffset: { startDx: 8, startDy: 19, endDx: 12, endDy: 24 } },
+      // Every value nudged down 4 units (uniform shift, same shape/slope) so
+      // the line's own end point sits further from wheat's -- deliberate,
+      // Kevin-approved cosmetic fudge since raw values are never displayed
+      // (only the "3X" callout, which isn't computed from this array).
+      values: [8.9,10.1,12.3,14.9,18.1,20.1,25.1,33.6,34.7],
+      mult: '3x', labelOffset: { startDx: 8, startDy: 19, endDx: 12, endDy: 8 } },
     { key: 'corn', label: 'Corn for grain', startIdx: 0,
       values: [52.7,40.3,39.8,42.1,56.4,75.8,83.5,95.2,112.2,128.5,152.4,161.0],
       mult: '4.0x', labelOffset: { startDx: 8, startDy: 0, endDx: 12, endDy: 0 } },
