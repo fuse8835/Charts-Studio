@@ -240,7 +240,7 @@
   .year-label {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
-    fill: rgba(5,19,31,.55);
+    fill: var(--paper-050);
     text-anchor: end;
     opacity: 0;
     animation: fadeUp .4s ease-out forwards;
@@ -254,7 +254,10 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(8px, 1.6cqw, 26px);
+    /* Spread out to match 8A/8B's own wide item-to-item spacing (their
+       legend uses explicit x-positions ~125-350 native units apart, not a
+       tight flex gap), for a less cramped, easier-to-read row. */
+    gap: clamp(16px, 3.2cqw, 52px);
     opacity: 0;
     animation: fadeUp .5s ease-out forwards;
     animation-delay: var(--start-legend);
@@ -274,7 +277,10 @@
        per Kevin's own follow-up ask, so this now exceeds every other
        chart's legend rather than just matching the largest. */
     font-size: clamp(13px, 1.75cqw, 37px);
-    color: var(--mist-300);
+    /* Matches 8A/8B's own legend text color (--paper-100, #eef3fa) exactly,
+       instead of the muted --mist-300 gray-blue used elsewhere in this
+       chart's UI chrome. */
+    color: var(--paper-100);
     white-space: nowrap;
   }
 
@@ -1369,8 +1375,10 @@
   // headline and the legend both need less vertical clearance than before,
   // freeing that space for taller map panels -- ring radii, city masking, and
   // every other bullseye/city mechanic below are untouched and derive from
-  // this the same way they always did.
-  const GRID = { left: 40, top: 135, right: 1160, bottom: 685, gutter: 22 };
+  // this the same way they always did. Shifted up a further 16 units (both
+  // top and bottom, same size, just repositioned) per a follow-up ask to
+  // give the legend more breathing room below.
+  const GRID = { left: 40, top: 119, right: 1160, bottom: 669, gutter: 22 };
   const panelW = (GRID.right - GRID.left - GRID.gutter) / 2;
   const panelH = (GRID.bottom - GRID.top - GRID.gutter) / 2;
 
