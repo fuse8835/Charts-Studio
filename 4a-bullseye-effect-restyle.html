@@ -221,8 +221,11 @@
   .ring-urban { stroke: var(--urban-500); stroke-width: 6; filter: drop-shadow(0 0 5px rgba(242,201,76,.5)); }
 
   /* authored city asset (Kevin's Map components/city.svg): streets + buildings, muted to sit under the rings */
-  .city-street { fill: none; stroke: #7d9188; stroke-width: 3.4px; stroke-linecap: square; opacity: .5; }
-  .city-building { fill: #65756e; opacity: .62; }
+  /* Lightened so the street grid/buildings actually read against the (also
+     lightened, Round 18) darker terrain, reusing the existing mist tokens
+     instead of inventing new colors. */
+  .city-street { fill: none; stroke: var(--mist-400); stroke-width: 3.4px; stroke-linecap: square; opacity: .65; }
+  .city-building { fill: var(--mist-300); opacity: .8; }
 
   /* flood zone starts invisible (exactly hugging the river) and dilates outward to its full
      authored extent before the rings arrive -- a mask whose content is the river's own path,
