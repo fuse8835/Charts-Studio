@@ -207,7 +207,7 @@
 
   .tick-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: 500;
     fill: var(--mist-300);
     opacity: 0;
@@ -226,9 +226,12 @@
     bottom: 4%;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
-    font-size: clamp(10px, 1cqw, 16px);
+    /* 150% of the old clamp(10px,1cqw,16px), and switched from the muted
+       --mist-400 to white for contrast -- piloting here first before this
+       goes out to every chart with a source note. */
+    font-size: clamp(15px, 1.5cqw, 24px);
     letter-spacing: .02em;
-    color: var(--mist-400);
+    color: var(--paper-050);
     opacity: 0;
     animation: fadeUp .5s ease-out forwards;
     animation-delay: var(--start-axis);
@@ -245,7 +248,7 @@
 
   @keyframes areaWipe {
     from { width: 0; }
-    to { width: var(--area-fill-width, 870px); }
+    to { width: 870px; }
   }
 
   .line-path {
@@ -920,15 +923,8 @@
             <stop offset="100%" stop-color="#04ffba" stop-opacity="0"/>
           </linearGradient>
           <clipPath id="areaWipeClip">
-            <!-- x and the @keyframes areaWipe target width are both set from
-                 PAD.left/plotW in JS (below) rather than left hardcoded here --
-                 a PAD change previously desynced this silently, leaving the
-                 widened plot's rightmost stretch never revealed. -->
             <rect id="areaWipeRect" x="260" y="0" width="0" height="750"/>
           </clipPath>
-          <!-- Same shape as areaPath, kept in sync via JS -- lets the shadow/wave
-               layer below clip to the actual curve silhouette, not just a box. -->
-          <clipPath id="areaShapeClip"><path id="areaShapeClipPath"/></clipPath>
         </defs>
 
         <g id="gridGroup"></g>
@@ -936,17 +932,6 @@
         <g id="axisXGroup"></g>
 
         <path id="areaPath" class="area-fill" fill="url(#areaGradient)" clip-path="url(#areaWipeClip)"></path>
-        <!-- 8A's approved filled-area treatment (see cooling-curve-style-guide.md
-             #1A), ported to the mint gradient here: a soft inner shadow hugging
-             just beneath the curve, plus faint organic wave texture -- both
-             clipped to the curve's own shape and riding the same left-to-right
-             wipe reveal as the fill itself. -->
-        <g id="areaTextureGroup" clip-path="url(#areaWipeClip)">
-          <g clip-path="url(#areaShapeClip)">
-            <g id="areaShadowGroup"></g>
-            <rect id="areaWaveRect" x="260" y="0" width="870" height="750" fill="url(#areaWaves)"></rect>
-          </g>
-        </g>
         <path id="linePath" class="line-path"></path>
         <g id="pointsGroup"></g>
         <circle id="leadDot" class="leading-dot" r="6"></circle>
@@ -959,7 +944,6 @@
       <div class="duo">
         <div class="duo-col duo-col-hero">
           <div class="hero-num">
-            <div class="hero-less-than">Less than</div>
             <div class="hero-num-value">
               <span class="hero-counting"></span>
               <span class="hero-final">10,000</span>
@@ -1044,38 +1028,16 @@
   ];
 
   const W = 1200, H = 750;
-  const PAD = { top: 210, right: 70, bottom: 130, left: 200 };
+  const PAD = { top: 210, right: 70, bottom: 130, left: 260 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
   const maxVal = 500000;
 
-  // Full data period is 1920-2025. Every DATA entry's `year` is its decadal
-  // period's START (1920-1929, ..., 2010-2019), except the final period,
-  // which is a short 6-year stub (2020-2025) since the data doesn't extend
-  // to a full decade yet. Each period's own average is plotted at its own
-  // midpoint (below), not its boundary.
-  const DOMAIN_START = 1920, DOMAIN_END = 2025;
-  const PERIOD_MID = DATA.map((d, i) => {
-    const periodEnd = i === DATA.length - 1 ? DOMAIN_END : d.year + 9;
-    return (d.year + periodEnd) / 2;
-  });
-
-  // A true linear 1920-2025 scale gives the final 5-year stub only ~5% of
-  // the axis's width -- not enough room for a legible, centered "2025" tick
-  // beside "2020" once every decade gets its own label (below). Kevin's own
-  // call: deliberately compress the regular 10-year spacing a hair (10
-  // "true" years -> 9 scale-units each) so the freed-up room can go to the
-  // final stub instead, which keeps its own proportionally larger 5
-  // scale-units for 5 real years. Purely a label-legibility device -- every
-  // point still lands at its own correct chronological position *within*
-  // whichever of the two regions it falls in, just via two different rates.
-  const REGULAR_END_UNITS = 90; // 1920 -> 2020, 10 decades * 9 units each
-  const TOTAL_UNITS = 95;       // + 2020 -> 2025, 5 years * 1 unit each
-  const unitForYear = year => year <= 2020
-    ? (year - DOMAIN_START) / (2020 - DOMAIN_START) * REGULAR_END_UNITS
-    : REGULAR_END_UNITS + (year - 2020) / (DOMAIN_END - 2020) * (TOTAL_UNITS - REGULAR_END_UNITS);
-
-  const x = year => PAD.left + (unitForYear(year) / TOTAL_UNITS) * plotW;
+  // Divisor is 10.5, not DATA.length-1 (10) -- the real decade points (1920-2020,
+  // indices 0-10) occupy only the first 10/10.5 of the plot width, leaving a
+  // trailing half-column (5 years' worth of space) blank and unlabeled so the
+  // chart visually continues to 2025 without an explicit "2025" tick.
+  const x = i => PAD.left + (i / 10.5) * plotW;
   const y = v => PAD.top + plotH - (v / maxVal) * plotH;
 
   function catmullRom2bezier(pts) {
@@ -1094,87 +1056,20 @@
     return d;
   }
 
-  const pts = DATA.map((d, i) => [x(PERIOD_MID[i]), y(d.value)]);
+  const pts = DATA.map((d, i) => [x(i), y(d.value)]);
   const curveD = catmullRom2bezier(pts);
-  // The first/last dots sit at their own period's midpoint (1924.5, 2022.5),
-  // not the chart's own edges -- extend the curve flat from each into its
-  // own period's true boundary (1920 on the left, 2025 -- the real end of
-  // the short final period -- on the right) so the line visually spans the
-  // chart's full stated 1920-2025 range, not just dot-to-dot. Straight L
-  // segments (not part of the Catmull-Rom spline) keep these perfectly flat
-  // rather than risking the spline curving oddly with only one neighbor.
-  const firstY = pts[0][1], lastY = pts[pts.length - 1][1];
-  const lineD = `M ${x(DOMAIN_START)} ${firstY} L ${pts[0][0]} ${firstY} `
-    + curveD.slice(curveD.indexOf('C'))
-    + ` L ${x(DOMAIN_END)} ${lastY}`;
-  const areaD = lineD + ` L ${x(DOMAIN_END)} ${PAD.top + plotH} L ${x(DOMAIN_START)} ${PAD.top + plotH} Z`;
-
-  // Keep the area-wipe reveal rect (see areaWipeRect/areaWipe above) in sync
-  // with the plot's real bounds instead of a hardcoded pixel width that
-  // silently desyncs the moment PAD changes.
-  document.getElementById('areaWipeRect').setAttribute('x', x(DOMAIN_START));
-  document.documentElement.style.setProperty('--area-fill-width', (x(DOMAIN_END) - x(DOMAIN_START)) + 'px');
+  // Flat extension from 2020's own value out to the frame's true right edge
+  // (the trailing half-column reserved above) -- a plain L segment, not part
+  // of the Catmull-Rom spline, so it stays perfectly flat rather than the
+  // curve bending with only one flanking neighbor near the edge.
+  const lastY = pts[pts.length - 1][1];
+  const lineD = curveD + ` L ${PAD.left + plotW} ${lastY}`;
+  const areaD = lineD + ` L ${PAD.left + plotW} ${PAD.top + plotH} L ${pts[0][0]} ${PAD.top + plotH} Z`;
 
   const linePath = document.getElementById('linePath');
   const areaPath = document.getElementById('areaPath');
   linePath.setAttribute('d', lineD);
   areaPath.setAttribute('d', areaD);
-
-  // Ported from 8A's approved filled-area style (cooling-curve-style-guide.md
-  // #1A): a soft inner shadow hugging just beneath the curve, plus faint
-  // organic wave texture inside the fill. Both clip to the curve's own
-  // silhouette (areaShapeClip, kept in sync with areaD here) and sit inside
-  // the same wipe-reveal clip as the fill itself, so they appear in lockstep
-  // with the area as it draws in rather than needing their own reveal logic.
-  document.getElementById('areaShapeClipPath').setAttribute('d', areaD);
-  const areaShadowGroup = document.getElementById('areaShadowGroup');
-  [[8, .07], [5, .10], [3, .18]].forEach(([width, opacity]) => {
-    const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    shadow.setAttribute('d', lineD);
-    shadow.setAttribute('fill', 'none');
-    shadow.setAttribute('stroke', '#020a10');
-    shadow.setAttribute('stroke-width', width);
-    shadow.setAttribute('stroke-opacity', opacity);
-    shadow.setAttribute('stroke-linejoin', 'round');
-    shadow.setAttribute('vector-effect', 'non-scaling-stroke');
-    areaShadowGroup.appendChild(shadow);
-  });
-
-  // Deterministic (no Math.random()) sine-perturbed contours, same technique
-  // as 8A -- so replay, reverse scrubbing, and an exported hold all render
-  // identically. Tuned down from 8A's 36 lines / cream tint to suit this
-  // chart's smaller, softer area: 24 lines in a pale mint.
-  const waveDefs = document.querySelector('#chartSvg defs');
-  const wavePattern = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-  wavePattern.setAttribute('id', 'areaWaves');
-  wavePattern.setAttribute('width', 1);
-  wavePattern.setAttribute('height', 1);
-  wavePattern.setAttribute('patternUnits', 'objectBoundingBox');
-  wavePattern.setAttribute('viewBox', `${PAD.left} 0 ${plotW} ${H}`);
-  wavePattern.setAttribute('preserveAspectRatio', 'none');
-  for (let i = 0; i < 24; i++) {
-    const base = PAD.top + 10 + i * (plotH / 22);
-    const points = [];
-    for (let j = 0; j <= 6; j++) {
-      const px = PAD.left + j * (plotW / 6);
-      const py = base + Math.sin(j * 1.5 + i * .23) * 20 + Math.sin(j * 2.13 + i * .47) * 6;
-      points.push([px, py]);
-    }
-    let waveD = `M${points[0].join(' ')}`;
-    for (let j = 1; j < points.length; j++) {
-      const [ax, ay] = points[j - 1], [bx, by] = points[j];
-      const cx = (bx - ax) / 2.5;
-      waveD += ` C${ax + cx} ${ay} ${bx - cx} ${by} ${bx} ${by}`;
-    }
-    const wave = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    wave.setAttribute('d', waveD);
-    wave.setAttribute('fill', 'none');
-    wave.setAttribute('stroke', '#6dffdb');
-    wave.setAttribute('stroke-width', 1.1);
-    wave.setAttribute('stroke-opacity', .07 + (Math.sin(i * 2.4) + 1) * .02);
-    wavePattern.appendChild(wave);
-  }
-  waveDefs.appendChild(wavePattern);
 
   const len = linePath.getTotalLength();
   linePath.style.strokeDasharray = len;
@@ -1224,15 +1119,11 @@
     axisYGroup.appendChild(label);
   });
 
-  // Every decade gets its own tick now (the client's own stated periods are
-  // 1920-1929, ..., 2010-2019, 2020-2025) rather than only every 20 years --
-  // twice as many ticks as before, so the per-tick stagger below is roughly
-  // halved to keep the whole axis settled before the line starts drawing at
-  // --start-line (5.35s), same as it always was.
   const axisXGroup = document.getElementById('axisXGroup');
   let xLabelIndex = 0;
   DATA.forEach((d, i) => {
-    const gx = x(d.year); // decade-boundary gridline, not the plotted period average
+    if (i % 2 !== 0) return;
+    const gx = x(i);
     const xi = xLabelIndex;
 
     const vline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1241,7 +1132,7 @@
     vline.setAttribute('y1', PAD.top + plotH);
     vline.setAttribute('y2', PAD.top);
     vline.classList.add('gridline');
-    vline.style.animationDelay = `calc(var(--start-grid) + ${0.05 + xi * 0.16}s)`;
+    vline.style.animationDelay = `calc(var(--start-grid) + ${0.05 + xi * 0.35}s)`;
     gridGroup.appendChild(vline);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -1249,63 +1140,24 @@
     label.setAttribute('y', PAD.top + plotH + 55);
     label.setAttribute('text-anchor', 'middle');
     label.classList.add('tick-label', 'x');
-    label.style.animationDelay = `calc(var(--start-axis) + ${0.2 + xi * 0.25}s)`;
+    label.style.animationDelay = `calc(var(--start-axis) + ${0.2 + xi * 0.55}s)`;
     label.textContent = d.year;
     axisXGroup.appendChild(label);
     xLabelIndex++;
   });
 
-  // The axis's true right edge (2025) isn't any DATA entry's own `year`
-  // (which only ever marks a period's START) -- added explicitly so the
-  // last number the viewer sees matches the chart's actual stated range,
-  // continuing the same stagger the decade ticks above left off at. The
-  // compressed scale above (unitForYear) gives 2020-2025 a genuinely wider
-  // gap than a true-linear scale would, so this centers normally like every
-  // other tick instead of needing the sideways nudge a cramped gap forced
-  // before.
-  const gxEnd = x(DOMAIN_END);
-  const vlineEnd = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  vlineEnd.setAttribute('x1', gxEnd);
-  vlineEnd.setAttribute('x2', gxEnd);
-  vlineEnd.setAttribute('y1', PAD.top + plotH);
-  vlineEnd.setAttribute('y2', PAD.top);
-  vlineEnd.classList.add('gridline');
-  vlineEnd.style.animationDelay = `calc(var(--start-grid) + ${0.05 + xLabelIndex * 0.16}s)`;
-  gridGroup.appendChild(vlineEnd);
-
-  const labelEnd = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  labelEnd.setAttribute('x', gxEnd);
-  labelEnd.setAttribute('y', PAD.top + plotH + 55);
-  labelEnd.setAttribute('text-anchor', 'middle');
-  labelEnd.classList.add('tick-label', 'x');
-  labelEnd.style.animationDelay = `calc(var(--start-axis) + ${0.2 + xLabelIndex * 0.25}s)`;
-  labelEnd.textContent = DOMAIN_END;
-  axisXGroup.appendChild(labelEnd);
-
   const pointsGroup = document.getElementById('pointsGroup');
   const drawDurSec = 1.7, drawStartSec = 5.35, firstDotPause = 0.4;
-
-  // A dedicated marker at the chart's true start (1920, at the first
-  // period's own value) pops in alone and holds for firstDotPause before
-  // anything else moves. It sits at the very start of the flat lead-in
-  // segment (above), distinct from DATA[0]'s own dot at its period midpoint
-  // (1924.5), which now animates in-sequence with every other dot below.
-  const edgeDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  edgeDot.setAttribute('cx', x(DOMAIN_START));
-  edgeDot.setAttribute('cy', firstY);
-  edgeDot.setAttribute('r', 5.5);
-  edgeDot.classList.add('datapoint');
-  edgeDot.style.animationDelay = (drawStartSec - firstDotPause) + 's';
-  pointsGroup.appendChild(edgeDot);
-
   DATA.forEach((d, i) => {
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', x(PERIOD_MID[i]));
+    c.setAttribute('cx', x(i));
     c.setAttribute('cy', y(d.value));
     c.setAttribute('r', 5.5);
     c.classList.add('datapoint');
-    const frac = i === DATA.length - 1 ? 1 : lengthFractionForX(x(PERIOD_MID[i]));
-    c.style.animationDelay = (drawStartSec + frac * drawDurSec) + 's';
+    // the first dot lands early and holds; the line (and every other dot) waits for it
+    const frac = i === 0 ? 0 : (i === DATA.length - 1 ? 1 : lengthFractionForX(x(i)));
+    const delay = i === 0 ? (drawStartSec - firstDotPause) : (drawStartSec + frac * drawDurSec);
+    c.style.animationDelay = delay + 's';
     pointsGroup.appendChild(c);
   });
 
