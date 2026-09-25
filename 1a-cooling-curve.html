@@ -166,7 +166,7 @@
 
   .headline {
     position: absolute;
-    top: 6%;
+    top: 3.6%;
     left: 6%;
     right: 6%;
     max-width: 78%;
@@ -226,10 +226,9 @@
     bottom: 4%;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
-    /* 150% of the old clamp(10px,1cqw,16px), and switched from the muted
-       --mist-400 to white for contrast -- piloting here first before this
-       goes out to every chart with a source note. */
-    font-size: clamp(15px, 1.5cqw, 24px);
+    /* 150% of the old clamp(10px,1cqw,16px) (piloted here before rolling out
+       to every chart with a source note), bumped a little further still. */
+    font-size: clamp(17px, 1.7cqw, 27px);
     letter-spacing: .02em;
     color: var(--paper-050);
     opacity: 0;
@@ -923,7 +922,7 @@
             <stop offset="100%" stop-color="#04ffba" stop-opacity="0"/>
           </linearGradient>
           <clipPath id="areaWipeClip">
-            <rect id="areaWipeRect" x="260" y="0" width="0" height="750"/>
+            <rect id="areaWipeRect" x="230" y="0" width="0" height="750"/>
           </clipPath>
         </defs>
 
@@ -1028,7 +1027,10 @@
   ];
 
   const W = 1200, H = 750;
-  const PAD = { top: 210, right: 70, bottom: 130, left: 260 };
+  // Shifted up-left by (30, 17) native units -- both left/right and both
+  // top/bottom moved together so plotW/plotH stay exactly the same size,
+  // just repositioned, rather than resizing the plot.
+  const PAD = { top: 193, right: 100, bottom: 147, left: 230 };
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
   const maxVal = 500000;
