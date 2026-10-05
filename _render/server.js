@@ -48,10 +48,30 @@ function serveStatic(req, res, pathname) {
 
 let rendering = false;
 
-async function renderChart(chart, send) {
+// Per-render overrides, honoured only when the caller passes them (today: the CO2 overlay
+// explainer, whose duration/resolution/fps are user controls rather than fixed in charts.json).
+// Every existing chart renders with opts = {} and is completely unaffected.
+function parseRenderOpts(searchParams) {
+  const num = (k, lo, hi) => {
+    const v = parseFloat(searchParams.get(k));
+    return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : undefined;
+  };
+  const rawName = (searchParams.get('name') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60);
+  return {
+    duration: num('duration', 0.5, 180),
+    fps: [24, 25, 30, 50, 60].includes(+searchParams.get('fps')) ? +searchParams.get('fps') : undefined,
+    width: num('w', 320, 7680),
+    height: num('h', 320, 7680),
+    name: rawName || undefined,
+    cfg: (searchParams.get('cfg') || '').slice(0, 20000) || undefined,
+  };
+}
+
+async function renderChart(chart, send, opts = {}) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.accessSync(OUTPUT_DIR, fs.constants.W_OK);
-  const outPath = path.join(OUTPUT_DIR, chart.mov);
+  const duration = opts.duration || chart.duration;
+  const outPath = path.join(OUTPUT_DIR, opts.name ? `${opts.name}-alpha.mov` : chart.mov);
   send(`Saving export to ${outPath}`);
   const { chromium } = require('playwright-core');
   const outDir = path.join(__dirname, `frames_${chart.id}`);
@@ -61,23 +81,44 @@ async function renderChart(chart, send) {
   send('Launching headless Chrome...');
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   const page = await browser.newPage({
-    viewport: { width: chart.width || 1920, height: chart.height || 1200 },
+    viewport: { width: opts.width || chart.width || 1920, height: opts.height || chart.height || 1200 },
     deviceScaleFactor: 1,
   });
 
-  await page.goto(`http://localhost:${PORT}/${chart.html}?export`, { waitUntil: 'networkidle' });
-  await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
+  const cfgQuery = opts.cfg ? `&cfg=${encodeURIComponent(opts.cfg)}` : '';
+  await page.goto(`http://localhost:${PORT}/${chart.html}?export${cfgQuery}`, { waitUntil: 'networkidle' });
 
-  const fps = 30;
-  const holdSec = 1.0;
-  const totalFrames = Math.round((chart.duration + holdSec) * fps);
-  const animEndMs = chart.duration * 1000;
+  // Pages that animate with something other than CSS/Web Animations (e.g. a WebGL particle
+  // simulation) expose window.__chartSeek(tMs): a synchronous, deterministic "draw the frame at
+  // this time" function, plus an optional window.__chartReady promise. Everything else keeps the
+  // original getAnimations() seeking untouched.
+  const seekHook = await page.evaluate(async () => {
+    if (typeof window.__chartSeek !== 'function') return false;
+    if (window.__chartReady) {
+      await Promise.race([
+        window.__chartReady,
+        new Promise((_, rej) => setTimeout(() => rej(new Error('page never became ready (check the browser console for script errors)')), 30000)),
+      ]);
+    }
+    return true;
+  });
+  if (!seekHook) await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
+
+  const fps = opts.fps || 30;
+  // Seek-hook pages render exactly [0, duration) with no hold, so a looping clip stays seamless.
+  const holdSec = seekHook ? 0 : 1.0;
+  const totalFrames = Math.round((duration + holdSec) * fps);
+  const animEndMs = duration * 1000;
 
   for (let i = 0; i < totalFrames; i++) {
-    const tMs = Math.min(i * (1000 / fps), animEndMs);
-    await page.evaluate((t) => {
-      document.getAnimations().forEach(a => { a.currentTime = t; });
-    }, tMs);
+    const tMs = seekHook ? i * (1000 / fps) : Math.min(i * (1000 / fps), animEndMs);
+    if (seekHook) {
+      await page.evaluate((t) => window.__chartSeek(t), tMs);
+    } else {
+      await page.evaluate((t) => {
+        document.getAnimations().forEach(a => { a.currentTime = t; });
+      }, tMs);
+    }
     await page.screenshot({
       path: path.join(outDir, `frame_${String(i).padStart(5, '0')}.png`),
       omitBackground: true,
@@ -125,7 +166,7 @@ async function renderChart(chart, send) {
   // files than the old hardware-encoder defaults.
   await new Promise((resolve, reject) => {
     const ff = spawn('ffmpeg', [
-      '-y', '-r', '30', '-i', path.join(outDir, 'frame_%05d.png'),
+      '-y', '-r', String(fps), '-i', path.join(outDir, 'frame_%05d.png'),
       '-c:v', 'prores_ks', '-profile:v', '4444', '-pix_fmt', 'yuva444p10le',
       '-bits_per_mb', '1222', '-alpha_bits', '8', '-vf', 'setsar=1:1', outPath,
     ]);
@@ -143,6 +184,11 @@ const server = http.createServer((req, res) => {
   if (u.pathname === '/api/charts') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(getCharts()));
+  }
+
+  if (u.pathname === '/api/capabilities') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ seekHook: true, renderParams: ['duration', 'fps', 'w', 'h', 'name', 'cfg'] }));
   }
 
   if (u.pathname === '/api/render') {
@@ -168,7 +214,7 @@ const server = http.createServer((req, res) => {
       return;
     }
     rendering = true;
-    renderChart(chart, send)
+    renderChart(chart, send, parseRenderOpts(u.searchParams))
       .catch((err) => send(`Render failed: ${err.message}`, true))
       .finally(() => { rendering = false; });
     return;

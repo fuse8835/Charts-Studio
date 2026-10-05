@@ -234,5 +234,13 @@
     "duration": 12.5,
     "width": 1920,
     "height": 1200
+  },
+  {
+    "id": "co2-overlay",
+    "name": "CO₂ Molecule Overlay",
+    "subtitle": "3D particle explainer — transparent overlay with live controls (render uses the page's own settings)",
+    "html": "co2-molecule-overlay.html",
+    "mov": "co2-molecules-alpha.mov",
+    "duration": 10
   }
 ]
