@@ -2,9 +2,12 @@ const {test}=require('node:test');const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.join(__dirname,'..');
 function plan(){const s=fs.readFileSync(path.join(root,'9b-electricity-prices.html'),'utf8');return vm.runInNewContext(s.match(/<script id="motion-plan">([\s\S]*?)<\/script>/)[1]+';({DATA,DURATION,TIMING,barStart})');}
-test('Canada finishes before provincial bars; inflation and highlights follow',()=>{
+test('Canada and the provinces animate in at one even pace; inflation and highlights follow',()=>{
  const {DATA,DURATION,TIMING:t,barStart}=plan();assert.equal(DATA[0].label,'CA');
- assert.ok(barStart(1)>=barStart(0)+t.barDuration+1);
+ const gaps=DATA.slice(1).map((_,i)=>+(barStart(i+1)-barStart(i)).toFixed(6));
+ assert.ok(gaps.every(g=>g===gaps[0]&&g>0),'every bar, including Canada, uses the same stagger (no pause after Canada)');
+ assert.ok(barStart(0)<barStart(1),'Canada still leads');
+ assert.ok(DATA[0].label==='CA');
  assert.ok(t.lineStart>=barStart(DATA.length-1)+t.barDuration);
  assert.ok(t.highlightStart>=t.calloutStart+t.calloutDuration);
  assert.ok(DURATION>=t.highlightStart+t.highlightDuration+1);

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Electricity Price Increases in Canada Since 2000 — Chart 9B</title>
-<meta name="description" content="Electricity price increases since 2000. Canada reveals first, then provinces, then the overall-prices reference and Manitoba/Quebec highlights.">
+<meta name="description" content="Electricity price increases since 2000. Canada (in red) and the provinces grow in one after another at an even pace, then the overall-prices reference and Manitoba/Quebec highlights.">
 <style>
   @font-face {
     font-family: 'Rajdhani';
@@ -192,9 +192,9 @@
     bottom: 4%;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
-    font-size: clamp(10px, 1cqw, 16px);
+    font-size: clamp(17px, 1.7cqw, 27px);
     letter-spacing: .02em;
-    color: var(--mist-400);
+    color: var(--paper-050);
     opacity: 0;
     animation: fadeUp .5s ease-out forwards;
     animation-delay: var(--start-axis);
@@ -576,11 +576,13 @@
 
 
 <h1 class="headline">Electricity price increases<br>in Canada since 2000</h1>
+<div class="source-note">Source: Statistics Canada, 2026</div>
 <svg class="chart-svg" viewBox="0 0 1200 750" role="img" aria-labelledby="chartTitle chartDesc">
 <title id="chartTitle">Electricity price increases in Canada since 2000</title>
-<desc id="chartDesc">Canada appears first, followed by its ten provinces. A dotted white line shows the increase in overall prices. Manitoba and Quebec finish highlighted in gold.</desc>
+<desc id="chartDesc">Canada, in red, appears first, followed by its ten provinces at the same pace. A dotted white line shows the increase in overall prices. Manitoba and Quebec finish highlighted in gold.</desc>
 <defs>
  <linearGradient id="mintBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04ffba" stop-opacity=".88"/><stop offset="1" stop-color="#064a3e" stop-opacity=".68"/></linearGradient>
+ <linearGradient id="redBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e30063" stop-opacity=".9"/><stop offset=".55" stop-color="#9b0847" stop-opacity=".8"/><stop offset="1" stop-color="#490c2c" stop-opacity=".72"/></linearGradient>
  <linearGradient id="goldBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb21c" stop-opacity=".95"/><stop offset=".55" stop-color="#bc6412" stop-opacity=".82"/><stop offset="1" stop-color="#652508" stop-opacity=".75"/></linearGradient>
  <clipPath id="referenceClip"><rect id="referenceWipe" x="130" y="190" width="0" height="430"/></clipPath>
 </defs>
@@ -593,7 +595,6 @@
 </g>
 <path d="M130 225V600H1120" fill="none" stroke="#a9c2d6" stroke-opacity=".5"/>
 <g id="labelsGroup"></g>
-<text x="130" y="698" class="energy-unit">CA · Canada</text>
 </svg><div class="pins-layer" id="pinsLayer"></div></div></div>
 <div class="stage-wrap review-panel">
   <div class="review-head">
@@ -612,21 +613,21 @@
     <span id="scrubTime" class="scrub-time">0.0s</span>
   </div>
 
-  <div class="era-jumps"><button class="pill-btn" data-seek="3000">Canada</button><button class="pill-btn" data-seek="8200">All provinces</button><button class="pill-btn" data-seek="10800">Overall prices</button><button class="pill-btn" data-seek="12500">MB &amp; QC</button></div><ol id="notesList" class="notes-list"></ol>
+  <div class="era-jumps"><button class="pill-btn" data-seek="2800">Canada</button><button class="pill-btn" data-seek="6400">All provinces</button><button class="pill-btn" data-seek="8900">Overall prices</button><button class="pill-btn" data-seek="10600">MB &amp; QC</button></div><ol id="notesList" class="notes-list"></ol>
 
   <textarea id="feedbackOut" class="feedback-out" readonly rows="1" placeholder="Your copied feedback will also appear here, in case clipboard copy is blocked &mdash; select and copy manually if so."></textarea>
 </div>
 
 
-<p class="caption">Chart 9B · Canada first, then provincial bars, the dotted overall-prices reference and callout, and finally golden-orange highlights for Manitoba and Quebec. Bar proportions and the reference level follow <b>Essay 09.svg</b>. The SVG supplies no final year or exact numeric data labels. Append <b>?export</b> for alpha capture.</p>
+<p class="caption">Chart 9B · Canada (red) first, then the provincial bars at the same pace, the dotted overall-prices reference and callout, and finally golden-orange highlights for Manitoba and Quebec. Bar proportions and the reference level follow <b>Essay 09.svg</b>. The SVG supplies no final year or exact numeric data labels; the values match Statistics Canada's electricity CPI, 2000 to 2025 annual averages (Table 18-10-0005-01), and the dotted line is the all-items CPI rise over the same period (72.1%). Append <b>?export</b> for alpha capture.</p>
 <script id="motion-plan">
-const DURATION=14.5;
-const TIMING={barDuration:.8,lineStart:9,lineDuration:1,calloutStart:9.8,calloutDuration:.7,highlightStart:11.5,highlightDuration:.7};
+const DURATION=12.85;
+const TIMING={barDuration:.8,lineStart:7.35,lineDuration:1,calloutStart:8.15,calloutDuration:.7,highlightStart:9.85,highlightDuration:.7};
 // Source heights divided by the SVG's zero-to-200% grid span. Values retain
 // vector precision; no rounded numeric labels are invented for the bars.
 const DATA=[{"label":"CA","value":88.44582630397501,"highlight":false},{"label":"BC","value":104.46579200535393,"highlight":false},{"label":"AB","value":189.43714010847287,"highlight":false},{"label":"SK","value":121.87722209054277,"highlight":false},{"label":"MB","value":74.16588820880332,"highlight":true},{"label":"ON","value":108.9915368849602,"highlight":false},{"label":"QC","value":33.768804985848334,"highlight":true},{"label":"NB","value":90.18585391018223,"highlight":false},{"label":"NS","value":97.15154134656943,"highlight":false},{"label":"PE","value":91.92867002216862,"highlight":false},{"label":"NL","value":111.42869093596197,"highlight":false}];
 const OVERALL_PRICES=(945.94-687.38)/717.23*200;
-function barStart(index){return index===0?2:4+(index-1)*.35;}
+function barStart(index){return 2+index*.35;}
 </script>
 <script>
 (function(){
@@ -646,7 +647,7 @@ reveal(grid,1,.7);
 DATA.forEach((d,i)=>{
  const cx=175+i*90,width=46,height=375*d.value/200;
  const group=svg('g',{'data-province':d.label,style:`transform-origin:${cx}px 600px`},document.getElementById('barsGroup'));
- svg('rect',{x:cx-width/2,y:600-height,width,height,fill:'url(#mintBar)',stroke:'#04ffba','stroke-width':1},group);
+ svg('rect',{x:cx-width/2,y:600-height,width,height,fill:i===0?'url(#redBar)':'url(#mintBar)',stroke:i===0?'#e30063':'#04ffba','stroke-width':1},group);
  const start=barStart(i);
  animate(group,[{offset:0,transform:'scaleY(0)'},{offset:start/DURATION,transform:'scaleY(0)',easing:'cubic-bezier(.22,.7,.3,1)'},{offset:(start+TIMING.barDuration)/DURATION,transform:'scaleY(1)'},{offset:1,transform:'scaleY(1)'}]);
  const labelGroup=svg('g',{'data-label':d.label},document.getElementById('labelsGroup'));
