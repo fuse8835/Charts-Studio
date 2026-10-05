@@ -2,6 +2,15 @@
 
 Approved by Kevin on October 5, 2026 as the default style reference for all future Charts Studio charts and explainers. Read this guide and inspect the corresponding example in [the visual sampler](style-sampler.html) before each new build or requested restyle. Explicit user instructions take precedence; this guide supersedes conflicting visual rules in older references. Existing production charts are not automatically restyled. Examples use illustrative data, not research findings.
 
+## Client continuity and colour hierarchy
+
+The first five charts already seen by the client establish the visual identity. Keep future builds recognisably consistent with them. Chart 8A contributes gradient depth, thin edges, shadows and restrained texture; it is not a replacement brand palette.
+
+- **Mint #04FFBA:** main highlight colour and primary emphasis.
+- **Ocean #07669E:** main supporting colour for ordinary series, fills and comparisons.
+- **Gold orange #FFB21C:** secondary accent when warranted by the story or explicitly requested; never the default highlight.
+- Preserve approved energy-category mappings in existing charts. Do not recolour them merely to enforce a two-colour palette.
+
 ## Shared treatment
 
 - Canvas: 1200 × 750 (16:10); production export 1920 × 1200. Content inset approximately 6%.
@@ -26,7 +35,7 @@ Approved by Kevin on October 5, 2026 as the default style reference for all futu
 | Forest / hydro | #0F875F | #08553F | #043128 |
 | Ocean / modern biofuels | #07669E | #08436D | #06283F |
 
-Retain those meanings for energy charts. For unrelated subjects, use mint as primary and gold as emphasis. Use labels, markers or dashes in addition to colour. Forest and Ocean are intended for large fills, not small marks on navy.
+Retain those meanings for energy charts. For unrelated subjects, use ocean for supporting data and mint for the major highlight. Use labels, markers or dashes in addition to colour. Small ocean marks need clear outlines against navy.
 
 ## Chart recipes
 
@@ -35,7 +44,7 @@ Retain those meanings for energy charts. For unrelated subjects, use mint as pri
 A single quantity through time. The fill makes magnitude visible while the bright upper edge carries the exact shape.
 
 - Family: Time & trends
-- Colours: Gold orange
+- Colours: Mint
 - Motion: Trace left to right; anchor the gradient to the highest revealed value. Hold for one second at narration breaks.
 
 ### Stacked area — How a total accumulates
@@ -43,7 +52,7 @@ A single quantity through time. The fill makes magnitude visible while the brigh
 The closest relative of 8A. Give each band its own dark accent, thin edge and clipped waves. Keep category order consistent.
 
 - Family: Time & trends
-- Colours: Gold orange · Orchid · Mint
+- Colours: Ocean · Orchid · Mint
 - Motion: Reveal all bands together through time; expand axes only at explicit era boundaries.
 
 ### Line — The change is the story
@@ -59,7 +68,7 @@ Use a crisp mint stroke with restrained glow and an endpoint marker. Keep the pl
 Use distinct colours and dash patterns, plus direct labels. Avoid several overlapping gradient fills.
 
 - Family: Time & trends
-- Colours: Gold orange · Mint · Coral
+- Colours: Ocean · Mint · Coral
 - Motion: Introduce series in voiceover order, then hold the complete comparison.
 
 ### Uncertainty band — Show the range honestly
@@ -75,7 +84,7 @@ Use a faint band behind a solid central estimate. Decorative waves stay off here
 Use square-ended bars, bright caps and individual gradients. Start the value axis at zero; keep category gaps even.
 
 - Family: Comparison
-- Colours: Gold orange · Mint highlight
+- Colours: Ocean · Mint highlight
 - Motion: Grow each bar from the baseline in sequence; introduce the highlight after the comparison.
 
 ### Horizontal bar — Rank long labels
@@ -83,7 +92,7 @@ Use square-ended bars, bright caps and individual gradients. Start the value axi
 Leave room for labels, use equal bar thickness and put values just beyond the ends. Fade colour downward within each bar.
 
 - Family: Comparison
-- Colours: Mint · Gold orange emphasis
+- Colours: Ocean · Mint emphasis
 - Motion: Reveal top to bottom. Highlight a narrated category after the ranking settles.
 
 ### Grouped bar — Side-by-side categories
@@ -91,7 +100,7 @@ Leave room for labels, use equal bar thickness and put values just beyond the en
 Use consistent left/right order and a shared baseline. Give related bars matching widths and avoid unnecessary outlines on all four sides.
 
 - Family: Comparison
-- Colours: Gold orange · Mint
+- Colours: Ocean · Mint
 - Motion: Reveal each pair together so the comparison is immediately readable.
 
 ### Stacked bar — Parts of a total
@@ -99,7 +108,7 @@ Use consistent left/right order and a shared baseline. Give related bars matchin
 Apply a separate gradient to every segment. Thin boundaries keep the dark bases from merging; use a stable legend order.
 
 - Family: Composition
-- Colours: Gold orange · Orchid · Mint
+- Colours: Ocean · Orchid · Mint
 - Motion: Build the base category first, then add each layer without shifting the baseline.
 
 ### Diverging bar — Above and below a reference
@@ -107,7 +116,7 @@ Apply a separate gradient to every segment. Thin boundaries keep the dark bases 
 Make the zero line unmistakable. Put labels outside each end, and use colour plus position to distinguish direction.
 
 - Family: Comparison
-- Colours: Gold orange · Mint
+- Colours: Ocean · Mint
 - Motion: Extend bars outward from zero. Never animate through values that change the sign.
 
 ### Waterfall — Explain a net change
@@ -115,7 +124,7 @@ Make the zero line unmistakable. Put labels outside each end, and use colour plu
 Floating bars connect successive totals. Use neutral dotted connectors; reserve a full baseline bar for the start and finish.
 
 - Family: Comparison
-- Colours: Gold orange · Mint · Coral
+- Colours: Ocean · Mint · Coral
 - Motion: Introduce each change, update the running total, then reveal the final total.
 
 ### Scatter — Individual observations
@@ -123,7 +132,7 @@ Floating bars connect successive totals. Use neutral dotted connectors; reserve 
 Small solid points use bright outlines and minimal glow. Label selected observations; keep texture in large callouts, not behind every point.
 
 - Family: Relationships
-- Colours: Mint · Gold orange focus
+- Colours: Ocean · Mint focus
 - Motion: Populate points in a deliberate order; bring in interpretation only after the observations.
 
 ### Bubble — Add a third quantity
@@ -131,7 +140,7 @@ Small solid points use bright outlines and minimal glow. Label selected observat
 Scale circle area, not radius, to the third variable. Use translucent gradients and thin outlines; label sizes explicitly.
 
 - Family: Relationships
-- Colours: Gold orange · Mint · Orchid
+- Colours: Ocean · Mint · Orchid
 - Motion: Place centres first, then grow bubbles to their correct area without an overshoot.
 
 ### Dumbbell — Before and after
@@ -139,7 +148,7 @@ Scale circle area, not radius, to the third variable. Use translucent gradients 
 Connect two observations with a quiet line. Make endpoint colours and labels explicit; the connector shows distance, not intermediate measurements.
 
 - Family: Comparison
-- Colours: Gold orange · Mint
+- Colours: Ocean · Mint
 - Motion: Reveal the first point, extend the connector, then reveal the second point.
 
 ### Histogram — Show the shape of a population
@@ -147,7 +156,7 @@ Connect two observations with a quiet line. Make endpoint colours and labels exp
 Touching bars represent equal-width bins. Use one hue so the silhouette carries the distribution; waves stay very subtle.
 
 - Family: Distribution
-- Colours: Gold orange
+- Colours: Ocean
 - Motion: Reveal bins left to right while keeping their widths and boundaries fixed.
 
 ### Box plot — Compare spread and median
@@ -163,7 +172,7 @@ Use gradients inside the interquartile boxes only. White medians and thin whiske
 Keep category count small and include percentages. Use bright rim strokes and dark accented fills; a bar is better for close comparisons.
 
 - Family: Composition
-- Colours: Gold orange · Mint · Orchid
+- Colours: Ocean · Mint · Orchid
 - Motion: Reveal sectors clockwise from twelve o’clock, then settle labels and the centre total.
 
 ### Heatmap — Find patterns in a matrix
@@ -179,15 +188,15 @@ Colour intensity encodes value, so use a single sequential scale and no decorati
 Rectangle area represents share. Use gradients within each region, thin boundaries and direct labels. Avoid this for precise ranking.
 
 - Family: Composition
-- Colours: Gold orange · Mint · Orchid · Coral
+- Colours: Ocean · Mint · Orchid · Coral
 - Motion: Reveal parent groups first, then their children; keep final areas fixed during comparison.
 
 ### Callout circle — Circle the conclusion
 
-Use a true circle with gold-to-burnt-orange fill, clipped waves and an inner rim shadow. Keep the headline number large and the text centred.
+Use a true circle with mint-to-deep-teal fill, clipped waves and an inner rim shadow. Keep the headline number large and the text centred.
 
 - Family: Annotation
-- Colours: Gold orange · White
+- Colours: Mint · White
 - Motion: Draw the outline first in about 0.8 seconds, then fill, then text. Hold the final state still.
 
 ## Extending the library

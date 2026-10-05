@@ -4,6 +4,8 @@
 
 Kevin approved the Style Sampler on October 5, 2026 as the default design standard for **all new charts and explainers**, and for requested restyles.
 
+**Client continuity:** The first five charts already seen by the client are the visual baseline. Mint (#04FFBA) and ocean (#07669E) are the main colours, with mint as the major highlight and ocean supporting it. Use 8A’s gradients, shadows and waves as refinements to that identity. Gold orange is a secondary accent, not the default highlight. Preserve approved energy-category colours and existing chart designs unless explicitly asked to change them.
+
 Before designing or implementing a new build:
 
 1. Read [style-sampler-guide.md](style-sampler-guide.md).

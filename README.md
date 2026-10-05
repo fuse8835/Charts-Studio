@@ -12,6 +12,8 @@ The standard extends Chart 8A’s visual language to bars, lines, areas, points,
 
 This reference supersedes conflicting visual rules in the older [Cooling Curve guide](cooling-curve-style-guide.md). Explicit user directions take precedence. Existing charts are not automatically restyled; apply the standard to new builds and requested restyles. See [AGENTS.md](AGENTS.md) for contributor instructions.
 
+**Client continuity:** The first five charts already seen by the client are the visual baseline. Mint (#04FFBA) and ocean (#07669E) are the main colours, with mint as the major highlight and ocean supporting it. Use 8A’s gradients, shadows and waves as refinements to that identity. Gold orange is a secondary accent, not the default highlight. Preserve approved energy-category colours and existing chart designs unless explicitly asked to change them.
+
 ## Running it
 
 Open Terminal in the project folder first. For the Desktop checkout on Kevin’s Mac:
