@@ -3,7 +3,7 @@ const {chromium}=require('playwright-core');const assert=require('node:assert/st
  const page=await browser.newPage({viewport:{width:1200,height:750}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const base=process.env.CHART_BASE_URL||'http://localhost:8793';await page.goto(base+'/9a-energy-prosperity.html?export');await page.evaluate(()=>document.fonts.ready);
  const seek=async t=>page.evaluate(t=>document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000}),t);
- assert.equal(await page.locator('[data-country]').count(),141);
+ assert.equal(await page.locator('[data-country]').count(),188);
  await seek(1.8);assert.equal(await page.locator('[data-country]').first().evaluate(e=>getComputedStyle(e).opacity),'0');
  await seek(8);assert.equal(await page.locator('[data-country]').last().evaluate(e=>getComputedStyle(e).opacity),'1');assert.equal(await page.locator('#regionText').evaluate(e=>getComputedStyle(e).opacity),'0');
  const early=await page.screenshot();await page.screenshot({path:path.join(os.tmpdir(),'9a-8.png')});
@@ -12,5 +12,5 @@ const {chromium}=require('playwright-core');const assert=require('node:assert/st
  await seek(14);assert.ok(end.equals(await page.screenshot()),'final hold');await page.screenshot({path:path.join(os.tmpdir(),'9a-final.png')});
  await seek(8);assert.ok(early.equals(await page.screenshot()),'reverse seeking');
  await page.goto(base+'/9a-energy-prosperity.html');await page.locator('[data-seek="12000"]').click();assert.equal(await page.locator('#scrubber').inputValue(),'12000');assert.equal(await page.getByRole('button',{name:'Render .mov',exact:true}).count(),1);
- assert.deepEqual(errors,[]);console.log('PASS: 141 points, reveal, ring, holds, reverse seeking and controls');
+ assert.deepEqual(errors,[]);console.log('PASS: 188 points, reveal, ring, holds, reverse seeking and controls');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
