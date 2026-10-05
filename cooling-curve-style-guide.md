@@ -1,5 +1,7 @@
 # "Cooling Curve" Chart Series — Visual & Motion Style Guide
 
+> **Current standard:** For all future builds, use the [Style Sampler](style-sampler.html) and [written style reference](style-sampler-guide.md), approved October 5, 2026. They supersede conflicting visual rules below. This document remains a historical template and motion reference.
+
 Reference template: worldwide climate-mortality decline chart, built as a two-act animated data-reveal. This guide captures the design language established for that piece so future charts in the series stay consistent. **Status: design is provisional — not yet signed off by the client.** Treat the original template values below as "current," not "final," until confirmed locked. **Exception: the Chart 8A gradient treatment in section 1A is approved by Kevin and is the default for similar filled-area charts.**
 
 ---

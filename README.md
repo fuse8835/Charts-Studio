@@ -6,7 +6,11 @@ See [chart-catalogue.md](chart-catalogue.md) for the full list of charts, their 
 
 ## Design reference
 
-For area charts, stacked-area charts, and similar filled curves, use the **approved Chart 8A gradient style**: vibrant colours blending into darker accents, transparency, thin top lines with subtle inner shadows, and fine organic wave texture. Gradients follow the highest point revealed so far. See the [filled-area design standard](cooling-curve-style-guide.md#1a-approved-filled-area-gradient-style--chart-8a) for details.
+**All future charts and explainers must use the [Style Sampler](style-sampler.html) and [written style reference](style-sampler-guide.md) as the default design standard**, approved by Kevin on October 5, 2026. Open the sampler through the local Charts Studio menu to compare chart types, colours, fills, edges, shadows and textures.
+
+The standard extends Chart 8A’s visual language to bars, lines, areas, points, distributions, composition charts and annotations. Read the applicable recipe before starting a build. Preserve truthful data encoding: reduce decorative effects where they impair readability. For a chart type not illustrated, apply the shared rules and the guide’s extension guidance.
+
+This reference supersedes conflicting visual rules in the older [Cooling Curve guide](cooling-curve-style-guide.md). Explicit user directions take precedence. Existing charts are not automatically restyled; apply the standard to new builds and requested restyles. See [AGENTS.md](AGENTS.md) for contributor instructions.
 
 ## Running it
 
@@ -34,7 +38,7 @@ Two smaller alternatives were tried (HEVC-with-alpha via Apple's `avconvert`, Go
 
 ## Adding a new chart
 
-1. Build the chart as a new `.html` file following the existing files' structure (CSS timing vars in `:root`, a `<g>`-based SVG chart, the review/timeline panel markup, a `replayBtn`).
+1. Read the [style reference](style-sampler-guide.md), choose the relevant [sampler](style-sampler.html) recipe, then build the chart as a new `.html` file following the existing files' structure (CSS timing vars in `:root`, a `<g>`-based SVG chart, the review/timeline panel markup, a `replayBtn`).
 2. Add an entry to `_render/charts.json` (`id`, `name`, `subtitle`, `html`, `mov`, `duration` in seconds).
 3. Add `<script src="render-client.js" data-chart-id="..."></script>` at the end of the file to get a working "Render .mov" button on that chart's own page.
 4. It'll show up automatically on the landing page.
