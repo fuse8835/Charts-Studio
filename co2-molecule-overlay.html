@@ -270,8 +270,11 @@ const DEFAULTS = {
   cone: 22, diffusion: 2.2, turb: 2.2, turbFreq: 0.35, depth: 28,
   // molecule
   cCol: '#dfe4ea', oCol: '#f2b3a8', bCol: '#b8c2ce',
-  size: 4.6, sizeVar: 0.45, atomSize: 0.72, bonds: 'double', bondThick: 0.085, endScale: 1.15,
+  size: 4.6, sizeVar: 0.45, atomSize: 0.62, bonds: 'double', bondThick: 0.085, bondAngle: 104, endScale: 1.15, molShow: true,
   orient: 'tumble', tumble: 0.9,
+  // glowing network
+  netOn: false, netNodes: 'molecule', netDist: 15, netMax: 3, netDelay: 0.15, netCol: '#6dffdb',
+  netWidth: 0.22, netNode: 1, netGlow: 1, netOpacity: 0.85, netPulse: 0.5, netPulseSpeed: 0.8,
   // opacity & lighting
   opacity: 0.95, fadeIn: 0.6, fadeOut: 1.8, gloss: 0.55, lightAngle: 125, key: 2.4, ambient: 1.5, rim: 1.2, fov: 28,
   // output
@@ -282,7 +285,7 @@ const DEFAULTS = {
 const DEFAULT_SOURCES = [{ x: 0.80, y: 0.33, z: 0 }];
 
 const MOTION_KEYS = ['rate','qty','burst','life','lifeVar','emitR','warm','angle','tilt','speed','speedVar','drag','buoy',
-  'windStr','windAngle','cone','diffusion','turb','turbFreq','depth','size','sizeVar','atomSize','bonds','bondThick',
+  'windStr','windAngle','cone','diffusion','turb','turbFreq','depth','size','sizeVar','atomSize','bonds','bondThick','bondAngle',
   'endScale','orient','tumble','opacity','fadeIn','fadeOut'];
 
 const PRESETS = {
@@ -291,7 +294,7 @@ const PRESETS = {
   'Exhaust puffs':     { rate: 0.7, qty: 16, burst: 0, life: 5, speed: 22, speedVar: 0.5, drag: 1.4, cone: 38, diffusion: 3, turb: 1.5, buoy: 0.4, windStr: 1, size: 4.2, fadeIn: 0.25, fadeOut: 1.6, tumble: 1.8, emitR: 1.2 },
   'Rising column':     { angle: 90, rate: 6, qty: 2, speed: 11, cone: 9, diffusion: 1.4, turb: 1.6, buoy: 2.2, windStr: 0, drag: 0.1, life: 6, tumble: 0.8 },
   'Dense cloud':       { rate: 12, qty: 4, burst: 1, life: 8, speed: 7, cone: 30, diffusion: 3.4, turb: 2.4, size: 3.6, sizeVar: 0.75, opacity: 0.9, fadeOut: 2.2, depth: 46 },
-  'Flat labels (2D feel)': { orient: 'fixed', tumble: 0, depth: 14, fov: 14, size: 5, sizeVar: 0.6, bonds: 'none', atomSize: 0.7, gloss: 0.2, key: 1.6, ambient: 2.2, rim: 0.4 },
+  'Flat labels (2D feel)': { bondAngle: 180, orient: 'fixed', tumble: 0, depth: 14, fov: 14, size: 5, sizeVar: 0.6, bonds: 'none', atomSize: 0.7, gloss: 0.2, key: 1.6, ambient: 2.2, rim: 0.4 },
 };
 
 /* ---------------------------------------------------------------- state */
@@ -352,19 +355,27 @@ const keyL = new THREE.DirectionalLight(0xffffff, 1);
 const rimL = new THREE.DirectionalLight(0xdbe8ff, 1);
 scene.add(hemi, keyL, rimL);
 
-function patchAlpha(mat) {
+function patchAlpha(mat, clip) {
   mat.onBeforeCompile = (sh) => {
-    sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float instanceAlpha;\nvarying float vIA;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvIA = instanceAlpha;');
-    sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vIA;')
+    let vs = sh.vertexShader, fs = sh.fragmentShader;
+    vs = vs
+      .replace('#include <common>', '#include <common>\nattribute float instanceAlpha;\nvarying float vIA;' +
+        (clip ? '\nattribute vec3 iCA;\nattribute vec3 iCB;\nattribute vec2 iRad;\nvarying vec3 vWP;\nvarying vec3 vCA;\nvarying vec3 vCB;\nvarying vec2 vRad;' : ''))
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvIA = instanceAlpha;' +
+        (clip ? '\nvWP = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;\nvCA = iCA; vCB = iCB; vRad = iRad;' : ''));
+    fs = fs
+      .replace('#include <common>', '#include <common>\nvarying float vIA;' + (clip ? '\nvarying vec3 vWP;\nvarying vec3 vCA;\nvarying vec3 vCB;\nvarying vec2 vRad;' : ''))
       .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.a *= vIA;');
+    // Bonds run centre-to-centre, then every fragment that lies inside either atom is discarded, so a
+    // bond ends exactly on the atom surface and never shows through a see-through atom.
+    if (clip) fs = fs.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\nif (distance(vWP, vCA) < vRad.x || distance(vWP, vCB) < vRad.y) discard;');
+    sh.vertexShader = vs; sh.fragmentShader = fs;
   };
+  mat.customProgramCacheKey = () => (clip ? 'co2-clip' : 'co2-plain');
   return mat;
 }
-const mkMat = () => patchAlpha(new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0, transparent: true, depthWrite: true }));
-const matC = mkMat(), matO = mkMat(), matB = mkMat();
+const mkMat = (clip) => patchAlpha(new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0, transparent: true, depthWrite: true }), clip);
+const matC = mkMat(false), matO = mkMat(false), matB = mkMat(true);
 
 function mkInstanced(geo, mat, cap) {
   geo.setAttribute('instanceAlpha', new THREE.InstancedBufferAttribute(new Float32Array(cap).fill(1), 1));
@@ -379,7 +390,100 @@ function mkInstanced(geo, mat, cap) {
 const sphere = () => new THREE.SphereGeometry(1, 28, 18);
 const meshC = mkInstanced(sphere(), matC, MAXM);
 const meshO = mkInstanced(sphere(), matO, MAXM * 2);
-const meshB = mkInstanced(new THREE.CylinderGeometry(1, 1, 1, 14, 1, false).rotateZ(Math.PI / 2), matB, MAXM * 4);
+const BONDCAP = MAXM * 4;
+const meshB = mkInstanced(new THREE.CylinderGeometry(1, 1, 1, 14, 1, false).rotateZ(Math.PI / 2), matB, BONDCAP);
+[['iCA', 3], ['iCB', 3], ['iRad', 2]].forEach(([name, size]) => {
+  const at = new THREE.InstancedBufferAttribute(new Float32Array(BONDCAP * size), size);
+  at.setUsage(THREE.DynamicDrawUsage);
+  meshB.geometry.setAttribute(name, at);
+});
+
+/* ---------------------------------------------------------------- glowing network (links + nodes) */
+const LINKCAP = 9000, NODECAP = MAXM * 3;
+const netU = {
+  uColor: { value: new THREE.Color('#6dffdb') }, uGlow: { value: 1 }, uPulse: { value: 0.5 },
+  uTime: { value: 0 }, uSpeed: { value: 0.8 }, uFreq: { value: 1 / 6 }, uHalf: { value: 1 },
+};
+const netBlend = {
+  transparent: true, depthWrite: false, depthTest: true, blending: THREE.CustomBlending,
+  blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+  side: THREE.DoubleSide,   // the link quads are built facing away from the camera, so culling would remove them all
+};
+// Output is premultiplied alpha, so the glow composites correctly over any footage.
+const linkMat = new THREE.ShaderMaterial({
+  uniforms: netU, ...netBlend,
+  vertexShader: `
+    attribute vec3 iA; attribute vec3 iB; attribute vec2 iD;
+    uniform float uHalf;
+    varying vec2 vC; varying float vAlpha; varying float vPhase;
+    void main() {
+      vec3 P = mix(iA, iB, position.x);
+      vec3 dir = iB - iA; float len = length(dir);
+      dir = len > 1e-5 ? dir / len : vec3(1.0, 0.0, 0.0);
+      vec3 toCam = normalize(cameraPosition - P);
+      vec3 side = cross(dir, toCam); float sl = length(side);
+      side = sl > 1e-4 ? side / sl : vec3(0.0, 1.0, 0.0);
+      P += side * position.y * uHalf;
+      vC = vec2(position.x * len, position.y); vAlpha = iD.x; vPhase = iD.y;
+      gl_Position = projectionMatrix * viewMatrix * vec4(P, 1.0);
+    }`,
+  fragmentShader: `
+    uniform vec3 uColor; uniform float uGlow; uniform float uPulse; uniform float uTime; uniform float uSpeed; uniform float uFreq;
+    varying vec2 vC; varying float vAlpha; varying float vPhase;
+    void main() {
+      float d = abs(vC.y);
+      float core = exp(-pow(d / 0.24, 2.0));
+      float halo = exp(-pow(d / 0.72, 2.0)) * 0.55 * uGlow * (1.0 - smoothstep(0.6, 1.0, d));
+      float I = core + halo;
+      float ph = fract(vC.x * uFreq - uTime * uSpeed + vPhase);
+      float pulse = pow(0.5 + 0.5 * sin(6.2831853 * ph), 4.0);
+      I *= mix(1.0, 0.35 + 1.5 * pulse, uPulse);
+      I = clamp(I * vAlpha, 0.0, 1.0);
+      gl_FragColor = vec4(uColor * I, I);
+    }`,
+});
+const nodeMat = new THREE.ShaderMaterial({
+  uniforms: netU, ...netBlend,
+  vertexShader: `
+    attribute vec3 iP; attribute vec2 iD;
+    varying vec2 vC; varying float vAlpha;
+    void main() {
+      vec4 mv = viewMatrix * vec4(iP, 1.0);
+      mv.z += iD.y * 0.5;            // sit just in front of the atom so the glow isn't hidden inside it
+      mv.xy += position.xy * iD.y;
+      vC = position.xy; vAlpha = iD.x;
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `
+    uniform vec3 uColor; uniform float uGlow;
+    varying vec2 vC; varying float vAlpha;
+    void main() {
+      float r = length(vC);
+      float core = exp(-r * r * 22.0);
+      float halo = exp(-r * r * 5.0) * 0.6 * uGlow;
+      float I = clamp((core * 1.3 + halo) * (1.0 - smoothstep(0.7, 1.0, r)) * vAlpha, 0.0, 1.0);
+      gl_FragColor = vec4(mix(uColor, vec3(1.0), core * 0.5) * I, I);
+    }`,
+});
+function mkNetGeo(quad, attrs, cap) {
+  const g = new THREE.InstancedBufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(quad), 3));
+  g.setIndex([0, 1, 2, 0, 2, 3]);
+  const arrays = {};
+  attrs.forEach(([name, size]) => {
+    const a = new Float32Array(cap * size);
+    const at = new THREE.InstancedBufferAttribute(a, size); at.setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute(name, at); arrays[name] = a;
+  });
+  g.instanceCount = 0;
+  return { g, arrays };
+}
+const linkG = mkNetGeo([0, -1, 0, 1, -1, 0, 1, 1, 0, 0, 1, 0], [['iA', 3], ['iB', 3], ['iD', 2]], LINKCAP);
+const nodeG = mkNetGeo([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0], [['iP', 3], ['iD', 2]], NODECAP);
+const linkMesh = new THREE.Mesh(linkG.g, linkMat), nodeMesh = new THREE.Mesh(nodeG.g, nodeMat);
+[linkMesh, nodeMesh].forEach((m, i) => { m.frustumCulled = false; m.renderOrder = 2 + i; scene.add(m); });
+
 
 function applyLook() {
   matC.color.set(S.cCol); matO.color.set(S.oCol); matB.color.set(S.bCol);
@@ -418,7 +522,7 @@ function hash4(a, b, c, d) {
 const M = {
   x: new Float32Array(MAXM), y: new Float32Array(MAXM), z: new Float32Array(MAXM),
   qx: new Float32Array(MAXM), qy: new Float32Array(MAXM), qz: new Float32Array(MAXM), qw: new Float32Array(MAXM),
-  s: new Float32Array(MAXM), a: new Float32Array(MAXM),
+  s: new Float32Array(MAXM), a: new Float32Array(MAXM), u: new Float32Array(MAXM), e: new Float32Array(MAXM),
 };
 const ss = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const posMod = (a, n) => ((a % n) + n) % n;
@@ -538,7 +642,7 @@ function collect(t) {
 
     M.x[n] = px; M.y[n] = py; M.z[n] = pz;
     M.qx[n] = quat[0]; M.qy[n] = quat[1]; M.qz[n] = quat[2]; M.qw[n] = quat[3];
-    M.s[n] = sz; M.a[n] = alpha;
+    M.s[n] = sz; M.a[n] = alpha; M.u[n] = u; M.e[n] = fi * fo;
     n++;
   };
 
@@ -582,6 +686,16 @@ function putMat(arr, i, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, sx, sy, sz,
   arr[o + 12] = tx; arr[o + 13] = ty; arr[o + 14] = tz; arr[o + 15] = 1;
 }
 
+const bCA = meshB.geometry.attributes.iCA.array, bCB = meshB.geometry.attributes.iCB.array, bRad = meshB.geometry.attributes.iRad.array;
+const NP = new Float32Array(NODECAP * 3), NW = new Float32Array(NODECAP), NSZ = new Float32Array(NODECAP), NM = new Int32Array(NODECAP);
+let nodeN = 0, lastLinks = 0;
+
+function pushNode(x, y, z, w, size, mol) {
+  if (nodeN >= NODECAP) return;
+  NP[nodeN * 3] = x; NP[nodeN * 3 + 1] = y; NP[nodeN * 3 + 2] = z; NW[nodeN] = w; NSZ[nodeN] = size; NM[nodeN] = mol;
+  nodeN++;
+}
+
 function writeInstances(n) {
   const idx = new Array(n);
   for (let i = 0; i < n; i++) idx[i] = i;
@@ -589,6 +703,11 @@ function writeInstances(n) {
 
   const rC = S.atomSize * 0.60, rO = S.atomSize * 0.53;
   const bonds = S.bonds === 'none' ? 0 : (S.bonds === 'double' ? 2 : 1);
+  // Molecule frame: carbon at the origin, the two oxygens at ±(bond angle / 2) either side of local -y,
+  // all in the local xy plane. 180° gives the textbook straight O=C=O along x.
+  const half = S.bondAngle * 0.5 * D2R, sH = Math.sin(half), cH = Math.cos(half);
+  const atoms = S.netNodes === 'atoms';
+  nodeN = 0;
   let ib = 0;
   for (let j = 0; j < n; j++) {
     const i = idx[j];
@@ -599,36 +718,129 @@ function writeInstances(n) {
     const c2x = 2 * (xz + wy), c2y = 2 * (yz - wx), c2z = 1 - 2 * (xx + yy);
     const d = M.s[i] * 0.5, px = M.x[i], py = M.y[i], pz = M.z[i], al = M.a[i];
 
+    // world-space offsets of the two oxygens from the carbon
+    const o1x = (c0x * sH - c1x * cH) * d, o1y = (c0y * sH - c1y * cH) * d, o1z = (c0z * sH - c1z * cH) * d;
+    const o2x = (-c0x * sH - c1x * cH) * d, o2y = (-c0y * sH - c1y * cH) * d, o2z = (-c0z * sH - c1z * cH) * d;
+
     putMat(mC, j, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d * rC, d * rC, d * rC, px, py, pz);
     aC[j] = al;
-    putMat(mO, 2 * j, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d * rO, d * rO, d * rO, px + c0x * d, py + c0y * d, pz + c0z * d);
-    putMat(mO, 2 * j + 1, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d * rO, d * rO, d * rO, px - c0x * d, py - c0y * d, pz - c0z * d);
+    putMat(mO, 2 * j, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d * rO, d * rO, d * rO, px + o1x, py + o1y, pz + o1z);
+    putMat(mO, 2 * j + 1, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d * rO, d * rO, d * rO, px + o2x, py + o2y, pz + o2z);
     aO[2 * j] = al; aO[2 * j + 1] = al;
 
     if (bonds) {
       const rb = S.bondThick * d;
       const off = bonds === 2 ? rb * 1.3 : 0;
-      for (let side = -1; side <= 1; side += 2) {
-        for (let b = 0; b < bonds; b++) {
-          const lo = bonds === 2 ? (b === 0 ? -off : off) : 0;
-          const mx = px + c0x * d * 0.5 * side + c1x * lo, my = py + c0y * d * 0.5 * side + c1y * lo, mz = pz + c0z * d * 0.5 * side + c1z * lo;
-          putMat(mB, ib, c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z, d, rb, rb, mx, my, mz);
-          aB[ib] = al; ib++;
+      for (let s2 = 0; s2 < 2; s2++) {
+        const ux = s2 === 0 ? sH : -sH, uy = -cH;              // bond direction in the molecule's plane
+        const vx = -uy, vy = ux;                               // in-plane perpendicular (spaces a double bond)
+        const Xx = c0x * ux + c1x * uy, Xy = c0y * ux + c1y * uy, Xz = c0z * ux + c1z * uy;
+        const Yx = c0x * vx + c1x * vy, Yy = c0y * vx + c1y * vy, Yz = c0z * vx + c1z * vy;
+        const ox = s2 === 0 ? o1x : o2x, oy = s2 === 0 ? o1y : o2y, oz = s2 === 0 ? o1z : o2z;
+        for (let b2 = 0; b2 < bonds; b2++) {
+          const lo = bonds === 2 ? (b2 === 0 ? -off : off) : 0;
+          const mx = px + Xx * d * 0.5 + Yx * lo, my = py + Xy * d * 0.5 + Yy * lo, mz = pz + Xz * d * 0.5 + Yz * lo;
+          putMat(mB, ib, Xx, Xy, Xz, Yx, Yy, Yz, c2x, c2y, c2z, d, rb, rb, mx, my, mz);
+          aB[ib] = al;
+          bCA[ib * 3] = px; bCA[ib * 3 + 1] = py; bCA[ib * 3 + 2] = pz;
+          bCB[ib * 3] = px + ox; bCB[ib * 3 + 1] = py + oy; bCB[ib * 3 + 2] = pz + oz;
+          bRad[ib * 2] = d * rC * 0.985; bRad[ib * 2 + 1] = d * rO * 0.985;
+          ib++;
+        }
+      }
+    }
+
+    if (S.netOn) {
+      const wgt = M.e[i] * ss(S.netDelay, S.netDelay + 0.2, M.u[i]);
+      if (wgt > 0.01) {
+        if (atoms) {
+          const sz = d * 0.9 * S.netNode;
+          pushNode(px, py, pz, wgt, sz, i);
+          pushNode(px + o1x, py + o1y, pz + o1z, wgt, sz, i);
+          pushNode(px + o2x, py + o2y, pz + o2z, wgt, sz, i);
+        } else {
+          pushNode(px, py, pz, wgt, M.s[i] * 0.7 * S.netNode, i);
         }
       }
     }
   }
-  meshC.count = n; meshO.count = n * 2; meshB.count = ib;
+  const show = S.molShow;
+  meshC.count = show ? n : 0; meshO.count = show ? n * 2 : 0; meshB.count = show ? ib : 0;
   meshC.instanceMatrix.needsUpdate = meshO.instanceMatrix.needsUpdate = meshB.instanceMatrix.needsUpdate = true;
-  meshC.geometry.attributes.instanceAlpha.needsUpdate = true;
-  meshO.geometry.attributes.instanceAlpha.needsUpdate = true;
-  meshB.geometry.attributes.instanceAlpha.needsUpdate = true;
+  for (const m of [meshC, meshO, meshB]) m.geometry.attributes.instanceAlpha.needsUpdate = true;
+  for (const nm of ['iCA', 'iCB', 'iRad']) meshB.geometry.attributes[nm].needsUpdate = true;
+}
+
+// Proximity graph over the nodes: each node links to its nearest few neighbours inside the reach, and a
+// link's brightness falls off smoothly with distance, so the web drifts and re-forms without popping.
+function buildNetwork(t) {
+  let ln = 0;
+  const lA = linkG.arrays.iA, lB = linkG.arrays.iB, lD = linkG.arrays.iD;
+  if (S.netOn && nodeN > 1) {
+    const reach = Math.max(0.5, S.netDist), r2 = reach * reach, K = Math.min(8, Math.max(1, S.netMax | 0));
+    const cell = new Map();
+    for (let i = 0; i < nodeN; i++) {
+      const key = (Math.floor(NP[i * 3] / reach) + 2048) * 4096 + (Math.floor(NP[i * 3 + 1] / reach) + 2048);
+      let a = cell.get(key); if (!a) { a = []; cell.set(key, a); } a.push(i);
+    }
+    const seen = new Set(), bj = new Int32Array(8), bd = new Float32Array(8);
+    for (let i = 0; i < nodeN && ln < LINKCAP; i++) {
+      const xi = NP[i * 3], yi = NP[i * 3 + 1], zi = NP[i * 3 + 2];
+      const cx = Math.floor(xi / reach), cy = Math.floor(yi / reach);
+      let nb = 0;
+      for (let ox = -1; ox <= 1; ox++) for (let oy = -1; oy <= 1; oy++) {
+        const a = cell.get((cx + ox + 2048) * 4096 + (cy + oy + 2048)); if (!a) continue;
+        for (let q = 0; q < a.length; q++) {
+          const j = a[q]; if (j === i || NM[j] === NM[i]) continue;
+          const dx = NP[j * 3] - xi, dy = NP[j * 3 + 1] - yi, dz = (NP[j * 3 + 2] - zi) * 0.3;   // depth counts for less, so the web reads as flat as the picture
+          const d2 = dx * dx + dy * dy + dz * dz; if (d2 >= r2) continue;
+          if (nb < K || d2 < bd[nb - 1]) {
+            let p = nb < K ? nb++ : nb - 1;
+            while (p > 0 && bd[p - 1] > d2) { bd[p] = bd[p - 1]; bj[p] = bj[p - 1]; p--; }
+            bd[p] = d2; bj[p] = j;
+          }
+        }
+      }
+      for (let k = 0; k < nb && ln < LINKCAP; k++) {
+        const j = bj[k], key = i < j ? i * 16384 + j : j * 16384 + i;
+        if (seen.has(key)) continue; seen.add(key);
+        const la = Math.min(NW[i], NW[j]) * ss(reach, reach * 0.55, Math.sqrt(bd[k])) * S.netOpacity;
+        if (la < 0.01) continue;
+        lA[ln * 3] = xi; lA[ln * 3 + 1] = yi; lA[ln * 3 + 2] = zi;
+        lB[ln * 3] = NP[j * 3]; lB[ln * 3 + 1] = NP[j * 3 + 1]; lB[ln * 3 + 2] = NP[j * 3 + 2];
+        lD[ln * 2] = la; lD[ln * 2 + 1] = (key * 0.6180339887) % 1;
+        ln++;
+      }
+    }
+  }
+  lastLinks = ln;
+  linkG.g.instanceCount = ln;
+  for (const nm of ['iA', 'iB', 'iD']) linkG.g.attributes[nm].needsUpdate = true;
+  let nn = 0;
+  if (S.netOn) {
+    const nP = nodeG.arrays.iP, nD = nodeG.arrays.iD;
+    for (let i = 0; i < nodeN; i++) {
+      nP[i * 3] = NP[i * 3]; nP[i * 3 + 1] = NP[i * 3 + 1]; nP[i * 3 + 2] = NP[i * 3 + 2];
+      nD[i * 2] = Math.min(1, NW[i] * S.netOpacity * 1.15); nD[i * 2 + 1] = NSZ[i];
+    }
+    nn = nodeN;
+  }
+  nodeG.g.instanceCount = nn;
+  for (const nm of ['iP', 'iD']) nodeG.g.attributes[nm].needsUpdate = true;
+
+  // pulses must complete a whole number of cycles per clip for the loop to stay seamless
+  const T = S.duration;
+  netU.uColor.value.set(S.netCol).convertLinearToSRGB();
+  netU.uGlow.value = S.netGlow; netU.uPulse.value = S.netPulse; netU.uTime.value = t;
+  netU.uSpeed.value = S.loop ? Math.max(1, Math.round(S.netPulseSpeed * T)) / T : S.netPulseSpeed;
+  netU.uHalf.value = Math.max(0.02, S.netWidth) * 4;
 }
 
 function renderFrame(t) {
   tNow = t;
   lastCount = collect(t);
   writeInstances(lastCount);
+  buildNetwork(t);
   renderer.render(scene, camera);
 }
 const renderNow = () => renderFrame(tNow);
@@ -972,14 +1184,30 @@ function buildPanel() {
 
   b = section('Molecule', true);
   rowColors(b, [{ k: 'cCol', label: 'Carbon' }, { k: 'oCol', label: 'Oxygen' }, { k: 'bCol', label: 'Bonds' }]);
-  rowRange(b, { k: 'size', label: 'Size', min: 1, max: 16, step: 0.1, unit: '%', help: 'Length of the molecule as a percentage of the frame height.' });
+  rowRange(b, { k: 'size', label: 'Size', min: 1, max: 16, step: 0.1, unit: '%', help: 'Roughly the width of the molecule as a percentage of the frame height.' });
   rowRange(b, { k: 'sizeVar', label: 'Size variation', min: 0, max: 1, step: 0.01 });
   rowRange(b, { k: 'endScale', label: 'Size over lifetime', min: 0.2, max: 2.5, step: 0.01, unit: '×', help: '1 = constant. Above 1 molecules swell as they disperse, below 1 they shrink.' });
   rowRange(b, { k: 'atomSize', label: 'Atom size', min: 0.3, max: 1.1, step: 0.01, help: 'Low = ball-and-stick, high = space-filling.' });
   rowSelect(b, { k: 'bonds', label: 'Bonds', options: [['none', 'None'], ['single', 'Single'], ['double', 'Double (O=C=O)']] });
   rowRange(b, { k: 'bondThick', label: 'Bond thickness', min: 0.03, max: 0.25, step: 0.005 });
+  rowRange(b, { k: 'bondAngle', label: 'Bond angle', min: 90, max: 180, step: 1, unit: '°', help: 'About 104° gives the classic bent ball-and-stick look. Real CO₂ is straight, which is 180°.' });
   rowSelect(b, { k: 'orient', label: 'Orientation', options: [['tumble', 'Tumble in 3D'], ['screen', 'Spin flat to the screen'], ['flow', 'Point along the flow'], ['fixed', 'Fixed, horizontal']] });
   rowRange(b, { k: 'tumble', label: 'Spin speed', min: 0, max: 6, step: 0.05, unit: 'rad/s' });
+
+  b = section('Glowing network', false);
+  rowCheck(b, { k: 'netOn', label: 'Link the molecules with a glowing network', help: 'Nodes follow the molecules and connect to their neighbours with glowing lines, so the plume looks like it is knitting together into pollution.' });
+  rowCheck(b, { k: 'molShow', label: 'Show molecules', help: 'Turn off to see (and export) the network on its own, e.g. as a separate layer.' });
+  rowSelect(b, { k: 'netNodes', label: 'Nodes sit on', options: [['molecule', 'Each molecule'], ['atoms', 'Each atom']] });
+  rowRange(b, { k: 'netDist', label: 'Link reach', min: 2, max: 40, step: 0.5, unit: '%', help: 'Molecules closer than this get connected; links fade out as they near the limit.' });
+  rowRange(b, { k: 'netMax', label: 'Links per node', min: 1, max: 8, step: 1 });
+  rowRange(b, { k: 'netDelay', label: 'Network forms after', min: 0, max: 0.8, step: 0.01, help: 'Share of each molecule’s life before it joins the web, so the network builds as the plume spreads.' });
+  rowColors(b, [{ k: 'netCol', label: 'Network colour' }]);
+  rowRange(b, { k: 'netWidth', label: 'Line thickness', min: 0.05, max: 1, step: 0.01 });
+  rowRange(b, { k: 'netNode', label: 'Node size', min: 0, max: 3, step: 0.05 });
+  rowRange(b, { k: 'netGlow', label: 'Glow', min: 0, max: 2, step: 0.05 });
+  rowRange(b, { k: 'netOpacity', label: 'Network opacity', min: 0.05, max: 1, step: 0.01 });
+  rowRange(b, { k: 'netPulse', label: 'Light pulses', min: 0, max: 1, step: 0.01, help: 'Pulses of light travelling along the links.' });
+  rowRange(b, { k: 'netPulseSpeed', label: 'Pulse speed', min: 0.1, max: 3, step: 0.05, unit: '/s', help: 'With Seamless loop on this is rounded to whole cycles per clip.' });
 
   b = section('Opacity & lighting', false);
   rowRange(b, { k: 'opacity', label: 'Opacity', min: 0.1, max: 1, step: 0.01 });
@@ -1002,9 +1230,9 @@ const btnPlay = $('#btnPlay');
 function updateTime() {
   scrub.value = tNow;
   timeReadout.textContent = `${tNow.toFixed(2)} / ${S.duration.toFixed(2)} s`;
-  statsEl.textContent = `${lastCount} molecules`;
+  statsEl.textContent = `${lastCount} molecules` + (S.netOn ? ` · ${lastLinks} links` : '');
   statsEl.classList.toggle('warn', capHit);
-  if (capHit) statsEl.textContent = `${lastCount} molecules (cap reached)`;
+  if (capHit) statsEl.textContent += ' (cap reached)';
 }
 function setPlaying(p) {
   playing = p; btnPlay.textContent = p ? 'Pause' : 'Play';
