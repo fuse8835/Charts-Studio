@@ -578,7 +578,7 @@
 <h1 class="headline">Canada’s Climate-Related Foreign Aid, 2012-2023</h1>
 <svg class="chart-svg" viewBox="0 0 1200 750" role="img" aria-labelledby="chartTitle chartDesc"><title id="chartTitle">Canada’s Climate-Related Foreign Aid, 2012-2023</title><desc id="chartDesc">Stacked annual spending bars for 2012 to 2023. Gold adaptation spending grows first, then mint emissions-reduction spending is added above it.</desc>
 <defs id="chartDefs"><linearGradient id="mintBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04ffba" stop-opacity=".88"/><stop offset=".55" stop-color="#079b79" stop-opacity=".78"/><stop offset="1" stop-color="#064a3e" stop-opacity=".68"/></linearGradient><linearGradient id="goldBar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb21c" stop-opacity=".88"/><stop offset=".55" stop-color="#bc6412" stop-opacity=".78"/><stop offset="1" stop-color="#652508" stop-opacity=".68"/></linearGradient></defs><g id="gridGroup"></g><g id="barsGroup"></g><g id="labelsGroup"></g>
-<text x="45" y="410" text-anchor="middle" transform="rotate(-90 45 410)" class="energy-unit">CA $2023 (millions)</text>
+<text x="45" y="376" text-anchor="middle" transform="rotate(-90 45 376)" class="energy-unit">CA $2023 (millions)</text>
 <g id="adaptLegend"><rect x="285" y="666" width="16" height="16" rx="2" fill="#ffb21c"/><text x="311" y="680" class="energy-legend">Adaptation spending</text></g>
 <g id="emissionsLegend"><rect x="590" y="666" width="16" height="16" rx="2" fill="#04ffba"/><text x="616" y="680" class="energy-legend">Emissions-reduction spending</text></g>
 <text x="1128" y="714" text-anchor="end" class="energy-unit" style="font-size:17px;fill:#f8fbff">Source: OECD, 2025</text>
@@ -621,11 +621,11 @@ const svgNS='http://www.w3.org/2000/svg';
 function svg(tag,attrs,parent,text){const el=document.createElementNS(svgNS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=text;parent.appendChild(el);return el;}
 function animate(el,frames){return el.animate(frames,{duration:DURATION*1000,fill:'both',easing:'linear'});}
 function reveal(el,start,duration){return animate(el,[{offset:0,opacity:0},{offset:start/DURATION,opacity:0},{offset:(start+duration)/DURATION,opacity:1},{offset:1,opacity:1}]);}
-const left=130,right=1120,bottom=600,top=225;
+const left=130,right=1120,bottom=600,top=152;
 const y=v=>bottom-(bottom-top)*v/2500;
 const grid=document.getElementById('gridGroup');
 for(let v=0;v<=2500;v+=500){svg('line',{x1:left,y1:y(v),x2:right,y2:y(v),class:'energy-grid'},grid);svg('text',{x:left-16,y:y(v)+7,'text-anchor':'end',class:'energy-tick'},grid,v.toLocaleString('en-US'));}
-svg('path',{d:'M130 225V600H1120',fill:'none',stroke:'#a9c2d6','stroke-opacity':.5},grid);reveal(grid,1,.6);
+svg('path',{d:'M130 152V600H1120',fill:'none',stroke:'#a9c2d6','stroke-opacity':.5},grid);reveal(grid,1,.6);
 reveal(document.getElementById('adaptLegend'),1.5,.5);reveal(document.getElementById('emissionsLegend'),5.5,.5);
 DATA.forEach((d,i)=>{
  const cx=171+i*82.5,width=44;
