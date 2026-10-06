@@ -624,7 +624,7 @@ const svgNS='http://www.w3.org/2000/svg';
 function svg(tag,attrs,parent,text){const el=document.createElementNS(svgNS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=text;parent.appendChild(el);return el;}
 function animate(el,frames){return el.animate(frames,{duration:DURATION*1000,fill:'both',easing:'linear'});}
 function reveal(el,start,duration){return animate(el,[{offset:0,opacity:0},{offset:start/DURATION,opacity:0},{offset:(start+duration)/DURATION,opacity:1},{offset:1,opacity:1}]);}
-const left=240,right=1100,top=163,step=14.57;
+const left=259,right=1100,top=121,step=15.85;
 const x=v=>left+(right-left)*v/35;
 const grid=document.getElementById('gridGroup');
 for(let v=0;v<=35;v+=5){svg('line',{x1:x(v),y1:top-9,x2:x(v),y2:655,class:'energy-grid'},grid);svg('text',{x:x(v),y:680,'text-anchor':'middle',class:'energy-tick',style:'font-size:16px'},grid,v+'%');}
@@ -632,19 +632,19 @@ svg('text',{x:(left+right)/2,y:706,'text-anchor':'middle',class:'energy-unit',st
 DATA.forEach((d,i)=>{
  const cy=top+i*step,w=x(d.value)-left;
  const row=svg('g',{'data-priority':d.label},document.getElementById('rowsGroup'));
- const label=svg('text',{x:left-12,y:cy+4,'text-anchor':'end',fill:'#eef3fa',style:'font:500 12.5px Rajdhani,sans-serif'},row,d.label);
- const bar=svg('rect',{x:left,y:cy-4,width:w,height:8,fill:'url(#mintBar)',stroke:'#04ffba','stroke-width':.8,style:`transform-origin:${left}px ${cy}px`},row);
+ const label=svg('text',{x:left-12,y:cy+5,'text-anchor':'end',fill:'#eef3fa',style:'font:500 14px Rajdhani,sans-serif'},row,d.label);
+ const bar=svg('rect',{x:left,y:cy-4.75,width:w,height:9.5,fill:'url(#mintBar)',stroke:'#04ffba','stroke-width':.8,style:`transform-origin:${left}px ${cy}px`},row);
  const st=barStart(i);animate(bar,[{offset:0,transform:'scaleX(0)'},{offset:st/DURATION,transform:'scaleX(0)',easing:'cubic-bezier(.22,.7,.3,1)'},{offset:(st+TIMING.barDuration)/DURATION,transform:'scaleX(1)'},{offset:1,transform:'scaleX(1)'}]);
- const value=svg('text',{x:x(d.value)+10,y:cy+4,fill:'#a9c2d6',style:'font:600 12px Rajdhani,sans-serif'},row,d.value.toFixed(1)+'%');
+ const value=svg('text',{x:x(d.value)+10,y:cy+5,fill:'#a9c2d6',style:'font:600 13.5px Rajdhani,sans-serif'},row,d.value.toFixed(1)+'%');
  reveal(label,st,.3);reveal(value,st+TIMING.barDuration,.25);
  const focus=FOCUS.find(f=>f.label===d.label);
  if(focus){
-  const accent=svg('rect',{x:left,y:cy-4,width:w,height:8,fill:'url(#goldBar)',stroke:'#ffb21c','stroke-width':1},row);
+  const accent=svg('rect',{x:left,y:cy-4.75,width:w,height:9.5,fill:'url(#goldBar)',stroke:'#ffb21c','stroke-width':1},row);
   animate(accent,[{offset:0,opacity:0},{offset:focus.start/DURATION,opacity:0},{offset:(focus.start+.25)/DURATION,opacity:1},{offset:(focus.start+.95)/DURATION,opacity:1},{offset:(focus.start+1.25)/DURATION,opacity:0},{offset:1,opacity:0}]);
  }
  if(d.label==='Climate change'){
-  const box=svg('rect',{x:66,y:cy-6.3,width:225,height:12.6,rx:2,fill:'#ffb21c','fill-opacity':.10,stroke:'#ffb21c','stroke-width':1.5},row);row.insertBefore(box,label);reveal(box,TIMING.highlightStart,TIMING.highlightDuration);
-  const accent=svg('rect',{x:left,y:cy-4,width:w,height:8,fill:'url(#goldBar)',stroke:'#ffb21c','stroke-width':1.5},row);reveal(accent,TIMING.highlightStart,TIMING.highlightDuration);
+  const box=svg('rect',{x:66,y:cy-7.5,width:258,height:15,rx:2,fill:'#ffb21c','fill-opacity':.10,stroke:'#ffb21c','stroke-width':1.5},row);row.insertBefore(box,label);reveal(box,TIMING.highlightStart,TIMING.highlightDuration);
+  const accent=svg('rect',{x:left,y:cy-4.75,width:w,height:9.5,fill:'url(#goldBar)',stroke:'#ffb21c','stroke-width':1.5},row);reveal(accent,TIMING.highlightStart,TIMING.highlightDuration);
   for(const el of [label,value])animate(el,[{offset:0,fill:el.getAttribute('fill')},{offset:TIMING.highlightStart/DURATION,fill:el.getAttribute('fill')},{offset:(TIMING.highlightStart+TIMING.highlightDuration)/DURATION,fill:'#ffb21c'},{offset:1,fill:'#ffb21c'}]);
  }
 });
