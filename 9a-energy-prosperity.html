@@ -675,11 +675,15 @@ DATA.map((d,i)=>({d,i,r:dotRadius(d.population)})).sort((a,b)=>b.r-a.r).forEach(
 });
 // Match Chart 8's deterministic decorative contours and clipped inner rim.
 const texture=document.getElementById('regionTexture');
+// The texture and inner shadow are built from the highlight circle itself, so moving or resizing the
+// circle in the markup can never leave them behind at old coordinates.
+const RING=document.getElementById('regionRing');
+const rg={cx:+RING.getAttribute('cx'),cy:+RING.getAttribute('cy'),r:+RING.getAttribute('r')};
 for(let i=0;i<36;i++){
  const points=[];
  for(let j=0;j<=6;j++){
-  const x=210+j*44;
-  const y=220+i*7.5+Math.sin(j*1.5+i*.23)*13+Math.sin(j*2.13+i*.47)*5;
+  const x=rg.cx-rg.r-5+j*44;
+  const y=rg.cy-rg.r-5+i*7.5+Math.sin(j*1.5+i*.23)*13+Math.sin(j*2.13+i*.47)*5;
   points.push([x,y]);
  }
  let d=`M${points[0].join(' ')}`;
@@ -691,7 +695,7 @@ for(let i=0;i<36;i++){
   'stroke-opacity':.10+(Math.sin(i*2.4)+1)*.025},texture);
 }
 for(const [width,opacity] of [[12,.07],[8,.10],[5,.18]]){
- svg('circle',{cx:340,cy:350,r:125,fill:'none',stroke:'#020a10',
+ svg('circle',{cx:rg.cx,cy:rg.cy,r:rg.r,fill:'none',stroke:'#020a10',
   'stroke-width':width,'stroke-opacity':opacity},texture);
 }
 reveal(texture,TIMING.fillStart,TIMING.fillDuration);
