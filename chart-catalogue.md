@@ -382,6 +382,8 @@ Validation: `node --test test/*.test.cjs`; browser check: start the render serve
 - **Last revised:** 2026-10-05
 - **Round 3 (2026-10-05) -- client reference wording:** the client's version titles the chart "Growth in Residential Electricity Prices in Canada and the Provinces, 2000-2025" (their copy misspells "Residential"; ours is spelled correctly) and credits "Source: Statistics Canada, 2025". Both adopted: the headline now wraps to two lines, and the source year changes from 2026 to 2025. **This confirms the Round 2 source inference** (Statistics Canada electricity CPI, annual averages 2000-2025) -- the client names the same source and the same 2000-2025 range. Bar values, the 72.1% overall-prices line, Canada in red, pacing and everything else are unchanged. Verified at the final frame at 1920x1200.
 - **Last revised:** 2026-10-05
+- **Round 4 (2026-10-06) -- taller graph:** [pin, t=12.8s] "Increase the height of the graph a bit" (measured dy -31u, ending at y 194u). The 200% gridline moves from y 225 to y 194 with the baseline unchanged at 600: the vertical scale (`y()` and the matching bar-height formula) goes from 375 to 406 units per 200%, so all eleven bars, the dotted overall-prices line (now at y 454 instead of 465) and the callout arrow follow automatically. The hard-coded axis path (`M130 225V600H1120`) was updated and the "Percentage change" title recentred (y 408 -> 397). The callout text, which is positioned independently, still sits clear above the QC bar. Timing is unchanged. Verified at 6.4s and 12.85s at 1920x1200 and with `node _render/check-9.cjs`.
+- **Last revised:** 2026-10-06
 
 ## 9A — Energy Use and GDP per Capita by Country, 2024
 
