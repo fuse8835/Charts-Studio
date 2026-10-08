@@ -1,0 +1,22 @@
+const {chromium}=require('playwright-core');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
+ const page=await browser.newPage({viewport:{width:1200,height:750}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const base=process.env.CHART_BASE_URL||'http://localhost:8793';await page.goto(base+'/11a-projected-emissions.html?export');await page.evaluate(()=>document.fonts.ready);
+ const seek=async t=>page.evaluate(t=>document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000}),t);
+ const op=sel=>page.locator(sel).evaluate(e=>getComputedStyle(e).opacity);
+ const wipe=sel=>page.locator(sel).evaluate(e=>parseFloat(getComputedStyle(e).width));
+ await seek(1.5);assert.equal(await wipe('#wipeRest'),0,'nothing drawn before the developing world starts');
+ await seek(4);const w=await wipe('#wipeRest');assert.ok(w>0&&w<880,'developing world mid-wipe');assert.equal(await wipe('#wipeUs'),0);
+ assert.equal(await op('#restShare'),'0','88% hidden until the band is drawn');assert.equal(await op('#westShare'),'0','12% hidden until the West bands are drawn');
+ await seek(7.8);assert.equal(await op('#restShare'),'1');assert.equal(await wipe('#wipeUs'),0,'US only after the developing world');
+ await seek(11.5);assert.ok(await wipe('#wipeUs')===880&&await wipe('#wipeOecd')>0);
+ await seek(15);assert.equal(await op('#westShare'),'1');assert.equal(await op('#scenarioResult'),'0');
+ const before=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);
+ await seek(18.5);const mid=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);assert.notEqual(mid,before,'West band shape is morphing');
+ assert.equal(await op('#restShare'),'0','88% label cleared before the scenario');
+ await seek(22.5);assert.equal(await op('#scenarioResult'),'1');const end=await page.screenshot();
+ await seek(24);assert.ok(end.equals(await page.screenshot()),'final hold is still');
+ await seek(18.5);const again=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);assert.equal(again,mid,'reverse seek is deterministic');
+ await page.goto(base+'/11a-projected-emissions.html');await page.locator('[data-seek="19000"]').click();assert.equal(await page.locator('#scrubber').inputValue(),'19000');assert.equal(await page.getByRole('button',{name:'Render .mov',exact:true}).count(),1);
+ assert.deepEqual(errors,[]);console.log('PASS 11a: narration-order reveal, labels, morph, still hold, reverse seeking, controls');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});

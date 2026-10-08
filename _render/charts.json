@@ -242,5 +242,15 @@
     "html": "co2-molecule-overlay.html",
     "mov": "co2-molecules-alpha.mov",
     "duration": 10
+  },
+  {
+    "id": "11a",
+    "name": "Projected Global Emissions (placeholder)",
+    "subtitle": "Developing world vs the West, 2025-2100, then the West to zero by 2050",
+    "html": "11a-projected-emissions.html",
+    "mov": "11a-projected-emissions-alpha.mov",
+    "duration": 24,
+    "width": 1920,
+    "height": 1200
   }
 ]
