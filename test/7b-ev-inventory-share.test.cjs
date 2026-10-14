@@ -19,7 +19,9 @@ test('7B draws with regulation, then without, and registers for render',()=>{
  const t=p.TIMING;
  assert.ok(t.withStart<t.withEnd&&t.withEnd<=t.withoutStart,'with regulation completes before the second line starts');
  assert.ok(Math.abs(t.withStart+t.withDur-t.withEnd)<.5&&Math.abs(t.withoutStart+t.withoutDur-t.withoutEnd)<.5);
- assert.ok(t.withoutEnd+t.markerDur+1<=p.DURATION,'still hold at the end');
+ assert.ok(t.calloutStart>=t.withoutEnd,'the 18% callout lands after the second line finishes');
+ assert.ok(t.calloutStart+t.calloutDur+1<=p.DURATION,'still hold at the end');
+ assert.ok(/Math\.round\(last\)\+'%'/.test(html),'callout number is read from the data, not typed in');
  const e=JSON.parse(fs.readFileSync(path.join(root,'_render/charts.json'))).find(c=>c.id==='7b');
  assert.ok(e);assert.equal(e.duration,p.DURATION);assert.equal(e.html,'7b-ev-inventory-share.html');
  assert.ok(!/linearGradient/.test(html.split('<script')[0].replace(/<style[\s\S]*?<\/style>/,'').split('</svg>')[0].split('id="chartDefs"')[1]||''),'no gradient fills under the lines');
