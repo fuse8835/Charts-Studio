@@ -610,6 +610,7 @@
 <text x="130" y="630" text-anchor="middle" class="energy-tick">1800</text>
 <text x="115" y="607" text-anchor="end" class="energy-tick">0</text>
 <g id="legend"></g>
+<text id="sourceCredit" x="1128" y="714" text-anchor="end" class="energy-unit" style="font-size:17px;fill:#f8fbff">Source: Benichou, 2014; Etemad and Luciani, 1991; IEA, 2025; Lomborg, 2020; Smil, 2017</text>
 <g id="renewableEmphasis"><text x="1040" y="246" text-anchor="end"><tspan x="1040">Solar, wind and other renewables</tspan><tspan x="1040" dy="22">add to the total</tspan></text><path d="M1055 250 H1115" stroke="#04ffba" fill="none"/></g>
 </svg><div class="pins-layer" id="pinsLayer"></div></div></div>
 <div class="stage-wrap review-panel">
@@ -841,13 +842,14 @@ ERAS.forEach((era,i)=>{
  if(end!==undefined)frames.push({offset:end/DURATION,opacity:1},{offset:(end+.35)/DURATION,opacity:0});
  frames.push({offset:1,opacity:end===undefined?1:0});animate(label,frames);
 });
-const categories=[['Traditional wood and biomass','#ffb21c',130,670,2],['Coal','#d45463',480,670,2],['Oil','#a51b91',625,670,8],['Gas','#e30063',750,670,14],['Hydro','#0f875f',890,670,14],['Modern biofuels','#07669e',130,709,21],['Solar, wind and other renewables','#04ffba',480,709,23]];
+const categories=[['Traditional wood and biomass','#ffb21c',130,656,2],['Coal','#d45463',480,656,2],['Oil','#a51b91',625,656,8],['Gas','#e30063',750,656,14],['Hydro','#0f875f',890,656,14],['Modern biofuels','#07669e',130,684,21],['Solar, wind and other renewables','#04ffba',480,684,23]];
 for(const [name,color,x,y,start] of categories){
  const g=svg('g',{},document.getElementById('legend'));
  svg('rect',{x,y:y-13,width:15,height:15,rx:2,fill:color},g);
  svg('text',{x:x+25,y,class:'energy-legend'},g,name);
  animate(g,[{offset:0,opacity:0},{offset:start/DURATION,opacity:0},{offset:(start+.5)/DURATION,opacity:1},{offset:1,opacity:1}]);
 }
+animate(document.getElementById('sourceCredit'),[{offset:0,opacity:0},{offset:1/DURATION,opacity:0},{offset:1.6/DURATION,opacity:1},{offset:1,opacity:1}]);
 animate(document.getElementById('renewableEmphasis'),[{offset:0,opacity:0},{offset:27/29,opacity:0},{offset:28/29,opacity:1},{offset:1,opacity:1}]);
 const frame=document.getElementById('frame');
 // A constant-opacity animation supplies the full-length preview clock.
