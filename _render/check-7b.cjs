@@ -12,7 +12,7 @@ const {chromium}=require('playwright-core');const assert=require('node:assert/st
  await seek(6.4);assert.equal(await op('[data-marker="with"]'),'1');assert.equal(await wipe('#wipeWithout'),0);
  await seek(8);assert.ok(await wipe('#wipeWithout')>0);
  await seek(10.2);assert.equal(await op('#callout18'),'0','callout waits for the line to finish');
- await seek(12);assert.equal(await op('#callout18'),'1');assert.equal(await page.locator('#callout18').evaluate(e=>e.textContent.replace(/\s+/g,' ').trim()),'Only 18% of US car stock');
+ await seek(12);assert.equal(await op('#callout18'),'1');assert.equal(await page.locator('#callout18 text').evaluateAll(t=>t.map(x=>x.textContent).join(' ').replace(/\s+/g,' ').trim()),'Only 18% of US car stock');
  await seek(12);const end=await page.screenshot();assert.equal(await op('[data-marker="without"]'),'1');
  await seek(12.5);assert.ok(end.equals(await page.screenshot()),'final hold is still');
  await seek(4);const a=await page.screenshot();await seek(12.5);await seek(4);assert.ok(a.equals(await page.screenshot()),'reverse seeking is deterministic');
