@@ -35,8 +35,9 @@ test('co2-overlay is registered as an explainer and its files exist',()=>{
  assert.ok(fs.existsSync(path.join(root,entry.html)),'html exists');
  assert.ok(fs.existsSync(path.join(root,'vendor/three/three.module.min.js')),'vendored three.js');
  assert.ok(fs.existsSync(path.join(root,'vendor/three/three.core.min.js')),'vendored three core');
- assert.match(fs.readFileSync(path.join(root,'explainers.html'),'utf8'),/INCLUDE_IDS = new Set\([^)]*'co2-overlay'/);
- assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'),/EXCLUDE_IDS = new Set\([^)]*'co2-overlay'/);
+ assert.equal(entry.explainer,true,'listed on the Explainers page via the registry flag');
+ assert.match(fs.readFileSync(path.join(root,'explainers.html'),'utf8'),/c\.explainer/);
+ assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'),/!c\.explainer/);
 });
 
 test('a seek-hook page renders exactly duration x fps frames at the requested size, with no hold',async()=>{

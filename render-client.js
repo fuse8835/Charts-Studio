@@ -66,28 +66,75 @@
 
     const style = document.createElement('style');
     style.textContent = `
-      .studio-navigation { display:flex; gap:10px; flex-wrap:wrap; margin:0 0 14px; }
-      .studio-navigation a {
+      .studio-navigation { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:0 0 14px; }
+      .studio-navigation a, .studio-navigation select {
         display:inline-flex; align-items:center; gap:7px; padding:8px 13px;
         border:1px solid rgba(169,194,214,.25); border-radius:999px;
         background:rgba(255,255,255,.04); color:#dceaf4;
         font:600 14px/1.2 Rajdhani,sans-serif; text-decoration:none;
       }
-      .studio-navigation a:hover { background:rgba(4,255,186,.09); color:#04ffba; }
-      .studio-navigation a:focus-visible { outline:2px solid #04ffba; outline-offset:3px; }
+      .studio-navigation a:hover, .studio-navigation select:hover { background:rgba(4,255,186,.09); color:#04ffba; }
+      .studio-navigation a:focus-visible, .studio-navigation select:focus-visible { outline:2px solid #04ffba; outline-offset:3px; }
       .studio-navigation svg { width:15px; height:15px; }
+      .studio-nav-pager { display:flex; gap:8px; align-items:center; margin-right:6px; padding-right:16px; border-right:1px solid rgba(169,194,214,.2); }
+      .studio-nav-pager a[aria-disabled="true"] { opacity:.35; pointer-events:none; }
+      .studio-navigation select { max-width:min(420px,60vw); cursor:pointer; color-scheme:dark; background-color:rgba(11,39,64,.9); }
+      .studio-navigation select option, .studio-navigation select optgroup { background:#071b2c; color:#eef3fa; }
       body.export-mode .studio-navigation { display:none !important; }
     `;
     document.head.appendChild(style);
     const nav = document.createElement('nav');
     nav.className = 'studio-navigation';
     nav.setAttribute('aria-label', 'Charts Studio');
+    const arrow = (d) => '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
     nav.innerHTML =
+      '<div class="studio-nav-pager">' +
+      '<a data-nav="prev" aria-disabled="true" aria-label="Previous chart" title="Previous chart">' + arrow('m15 5-7 7 7 7') + '<span></span></a>' +
+      '<select aria-label="Jump to any chart" title="Jump to any chart"><option>Loading charts…</option></select>' +
+      '<a data-nav="next" aria-disabled="true" aria-label="Next chart" title="Next chart"><span></span>' + arrow('m9 5 7 7-7 7') + '</a>' +
+      '</div>' +
       '<a href="index.html" title="Charts Studio home — all charts">' +
       '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8"/></svg>Home</a>' +
       '<a href="explainers.html">Explainers</a>';
     frame.parentNode.insertBefore(nav, frame);
+
+    // Previous/next and the dropdown walk the same order as the landing pages: the numbered charts
+    // first (1A, 1B, 2A ...), then the explainers. The list comes from the render server's registry.
+    const pager = nav.querySelector('.studio-nav-pager');
+    const select = pager.querySelector('select');
+    const [prevLink, nextLink] = [pager.querySelector('[data-nav="prev"]'), pager.querySelector('[data-nav="next"]')];
+    const byId = (a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
+    const label = (c) => c.id.toUpperCase().replace(/-/g, ' ');
+    fetch('/api/charts').then((r) => r.json()).then((charts) => {
+      const series = charts.filter((c) => !c.explainer).sort(byId);
+      const explainers = charts.filter((c) => c.explainer).sort(byId);
+      const ordered = series.concat(explainers);
+      const here = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+      const index = ordered.findIndex((c) => c.html === here);
+      select.textContent = '';
+      if (index < 0) { const o = document.createElement('option'); o.textContent = 'Jump to a chart…'; o.value = ''; select.appendChild(o); }
+      for (const [title, list] of [['Charts', series], ['Explainers', explainers]]) {
+        if (!list.length) continue;
+        const group = document.createElement('optgroup'); group.label = title;
+        for (const c of list) {
+          const o = document.createElement('option');
+          o.value = c.html; o.textContent = label(c) + ' · ' + c.name;
+          if (c.html === here) o.selected = true;
+          group.appendChild(o);
+        }
+        select.appendChild(group);
+      }
+      select.addEventListener('change', () => { if (select.value) window.location.href = select.value; });
+      const wire = (link, target, side) => {
+        if (!target) return;
+        link.href = target.html; link.removeAttribute('aria-disabled');
+        link.title = (side === 'prev' ? 'Previous: ' : 'Next: ') + label(target) + ' · ' + target.name;
+        link.setAttribute('aria-label', link.title);
+        link.querySelector('span').textContent = label(target);
+      };
+      if (index >= 0) { wire(prevLink, ordered[index - 1], 'prev'); wire(nextLink, ordered[index + 1], 'next'); }
+    }).catch(() => { pager.remove(); });
   }
 
   // ---- dev-only pixel ruler: click to drop an anchor, then move the mouse to

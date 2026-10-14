@@ -105,7 +105,8 @@
     "mov": "4b-global-disaster-database-alpha.mov",
     "duration": 30,
     "width": 3840,
-    "height": 2160
+    "height": 2160,
+    "explainer": true
   },
   {
     "id": "4b-copy",
@@ -115,7 +116,8 @@
     "mov": "4b-global-disaster-database-copy-alpha.mov",
     "duration": 36,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "explainer": true
   },
   {
     "id": "5a",
@@ -141,7 +143,8 @@
     "mov": "5c-hunger-feedback-loop-alpha.mov",
     "duration": 11.71,
     "width": 1920,
-    "height": 1344
+    "height": 1344,
+    "explainer": true
   },
   {
     "id": "7a",
@@ -175,7 +178,8 @@
     "subtitle": "Battery storage still covers only minutes of world electricity demand, 2024 vs. 2050",
     "html": "battery-storage.html",
     "mov": "battery-storage-alpha.mov",
-    "duration": 10.0
+    "duration": 10.0,
+    "explainer": true
   },
   {
     "id": "8a",
@@ -199,7 +203,7 @@
   },
   {
     "id": "9b",
-    "name": "Electricity Price Increases in Canada Since 2000",
+    "name": "Growth in Residential Electricity Prices in Canada and the Provinces, 2000-2025",
     "subtitle": "Canada, then provinces, overall prices, and Manitoba/Quebec highlights",
     "html": "9b-electricity-prices.html",
     "mov": "9b-electricity-prices-alpha.mov",
@@ -209,7 +213,7 @@
   },
   {
     "id": "9a",
-    "name": "Energy Use and Prosperity — Research Placeholder",
+    "name": "Energy Use and GDP per Capita by Country, 2024",
     "subtitle": "2023 · Country scatterplot, then a low-energy / high-income region highlight",
     "html": "9a-energy-prosperity.html",
     "mov": "9a-energy-prosperity-alpha.mov",
@@ -219,7 +223,7 @@
   },
   {
     "id": "10a",
-    "name": "Policy Priorities among Africans",
+    "name": "Policy Priorities Among Africans from 39 Countries, 2021-2023",
     "subtitle": "39 countries · 2021–2023 · Climate change ranks 31st of 34",
     "html": "10a-african-priorities.html",
     "mov": "10a-african-priorities-alpha.mov",
@@ -229,7 +233,7 @@
   },
   {
     "id": "10b",
-    "name": "Canada’s Climate-Related Foreign Aid",
+    "name": "Canada’s Climate-Related Foreign Aid, 2012-2023",
     "subtitle": "2012–2023 · Adaptation and emissions-reduction spending",
     "html": "10b-climate-foreign-aid.html",
     "mov": "10b-climate-foreign-aid-alpha.mov",
@@ -243,7 +247,8 @@
     "subtitle": "3D particle explainer — transparent overlay with live controls (render uses the page's own settings)",
     "html": "co2-molecule-overlay.html",
     "mov": "co2-molecules-alpha.mov",
-    "duration": 10
+    "duration": 10,
+    "explainer": true
   },
   {
     "id": "11a",
