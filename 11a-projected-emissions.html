@@ -581,6 +581,7 @@
  <linearGradient id="restBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04ffba" stop-opacity=".88"/><stop offset=".55" stop-color="#079b79" stop-opacity=".78"/><stop offset="1" stop-color="#064a3e" stop-opacity=".68"/></linearGradient>
  <linearGradient id="usBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb21c" stop-opacity=".95"/><stop offset=".55" stop-color="#bc6412" stop-opacity=".85"/><stop offset="1" stop-color="#652508" stop-opacity=".78"/></linearGradient>
  <linearGradient id="oecdBand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d9bd6" stop-opacity=".95"/><stop offset=".55" stop-color="#08558a" stop-opacity=".88"/><stop offset="1" stop-color="#06283f" stop-opacity=".8"/></linearGradient>
+ <pattern id="avoidHatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="#f8fbff" fill-opacity=".16"/><line x1="0" y1="0" x2="0" y2="9" stroke="#f8fbff" stroke-opacity=".6" stroke-width="2.2"/></pattern>
  <clipPath id="clipRest"><rect id="wipeRest" x="130" y="150" width="0" height="480"/></clipPath>
  <clipPath id="clipUs"><rect id="wipeUs" x="130" y="150" width="0" height="480"/></clipPath>
  <clipPath id="clipOecd"><rect id="wipeOecd" x="130" y="150" width="0" height="480"/></clipPath>
@@ -685,6 +686,12 @@ makeBand('rest','restBand','#04ffba',zero,B.r,null,null,'Rest',TIMING.restStart,
 makeBand('us','usBand','#ffb21c',B.r,B.u,S.u,S.r,'Us',TIMING.usStart,TIMING.usDur,{edgeWidth:1.8});
 makeBand('oecd','oecdBand','#5fc3f2',B.u,B.o,S.o,S.u,'Oecd',TIMING.oecdStart,TIMING.oecdDur,{edgeWidth:1.8});
 
+// the emissions that disappear: the area between the original total and the reduced total. It grows as the West shrinks
+// (mostly the strip after 2050, where the West stays at zero while the original projection keeps emitting)
+const avoided=svg('g',{id:'avoidedRegion'},document.getElementById('ghostGroup'));
+{const t0=TIMING.morphStart,t1=TIMING.morphStart+TIMING.morphDur,a=area(B.o,B.o),b=area(B.o,S.o);
+ const region=svg('path',{d:a,fill:'url(#avoidHatch)'},avoided);
+ animate(region,[{offset:0,d:pathCss(a)},{offset:t0/DURATION,d:pathCss(a),easing:'cubic-bezier(.4,0,.2,1)'},{offset:t1/DURATION,d:pathCss(b)},{offset:1,d:pathCss(b)}]);}
 // ghost of the current projection, shown while the West shrinks
 const ghost=svg('path',{d:topLine(B.o),fill:'none',stroke:'#f8fbff','stroke-width':1.6,'stroke-dasharray':'3 6','stroke-linecap':'round','stroke-opacity':.8,id:'ghostLine'},document.getElementById('ghostGroup'));
 reveal(ghost,TIMING.ghostStart,.5);
@@ -693,6 +700,10 @@ reveal(ghost,TIMING.ghostStart,.5);
 const legend=[['rest','#04ffba','Developing world',200,TIMING.restStart+.4],['us','#ffb21c','United States',480,TIMING.usStart+.4],['oecd','#5fc3f2','Other OECD countries',700,TIMING.oecdStart+.4]];
 for(const [id,color,text,lx,t] of legend){const g=svg('g',{id:'legend-'+id},labels);svg('rect',{x:lx,y:666,width:16,height:16,rx:2,fill:color},g);svg('text',{x:lx+26,y:680,class:'energy-legend'},g,text);reveal(g,t,.5);}
 
+const avoidLeg=svg('g',{id:'legend-avoided'},labels);
+svg('rect',{x:930,y:666,width:16,height:16,rx:2,fill:'url(#avoidHatch)',stroke:'#f8fbff','stroke-opacity':.7,'stroke-width':1.2},avoidLeg);
+svg('text',{x:956,y:680,class:'energy-legend'},avoidLeg,'Emissions avoided');
+reveal(avoidLeg,TIMING.morphStart,.6);
 // labels on the chart
 const pct=v=>Math.round(v*100)+'%';
 const restLabel=svg('g',{id:'restLabel','text-anchor':'middle','font-family':'Rajdhani, sans-serif',fill:'#ffffff'},labels);
@@ -717,9 +728,10 @@ showHide(westShare,TIMING.westShare,.6,TIMING.morphStart-.4,.5);
 const caption=svg('text',{id:'scenarioCaption',x:right,y:216,'text-anchor':'end','font-family':'Rajdhani, sans-serif','font-size':23,'font-weight':600,fill:'#ffffff'},labels,'If the West cut its emissions to zero by 2050…');
 reveal(caption,TIMING.captionStart,.6);
 const result=svg('g',{id:'scenarioResult','font-family':'Rajdhani, sans-serif',fill:'#ffffff'},labels);
-svg('text',{x:right+22,y:ys(36)+10,'font-size':60,'font-weight':700,fill:'#ffb21c'},result,'−'+pct(RESULTS.reduction));
-svg('text',{x:right+22,y:ys(36)+38,'font-size':16,'font-weight':600},result,'cumulative emissions');
-svg('text',{x:right+22,y:ys(36)+58,'font-size':16,'font-weight':600},result,'2025–2100');
+svg('path',{d:`M${right+10} ${yWestTop}h8v${yWestBot-yWestTop}h-8`,fill:'none',stroke:'#f8fbff','stroke-width':1.6,'stroke-linejoin':'round'},result);
+svg('text',{x:right+30,y:yWestBot-6,'font-size':56,'font-weight':700,fill:'#ffb21c'},result,'−'+pct(RESULTS.reduction));
+svg('text',{x:right+30,y:yWestBot-72,'font-size':16,'font-weight':600},result,'Cumulative emissions');
+svg('text',{x:right+30,y:yWestBot-54,'font-size':16,'font-weight':600,'fill-opacity':.9},result,'2025–2100');
 reveal(result,TIMING.resultStart,.7);
 const frame=document.getElementById('frame');
 // A constant-opacity animation supplies the full-length preview clock.

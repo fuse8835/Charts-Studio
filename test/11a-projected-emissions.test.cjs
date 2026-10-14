@@ -39,3 +39,15 @@ test('11A reveals in the narration order and registers for render',()=>{
  const e=JSON.parse(fs.readFileSync(path.join(root,'_render/charts.json'))).find(c=>c.id==='11a');
  assert.ok(e);assert.equal(e.duration,p.DURATION);assert.equal(e.html,'11a-projected-emissions.html');assert.equal(e.width,1920);assert.equal(e.height,1200);
 });
+
+test('11A draws the avoided emissions as a region whose size is the -8%',()=>{
+ assert.ok(/id:'avoidedRegion'|id=\"avoidedRegion\"/.test(html)&&/avoidHatch/.test(html),'avoided region and its hatch pattern exist');
+ // the region is the gap between the original and reduced totals; its area over the century is the reduction
+ const yearly=(v)=>{const out=[];for(let yr=2025;yr<=2100;yr++){let i=0;while(i<p.DATA.years.length-2&&yr>p.DATA.years[i+1])i++;const t=(yr-p.DATA.years[i])/(p.DATA.years[i+1]-p.DATA.years[i]);out.push(v[i]+(v[i+1]-v[i])*t);}return out;};
+ const base=yearly(p.DATA.us.map((v,i)=>v+p.DATA.oecd_ex_us[i])),scen=yearly(p.SCEN.us.map((v,i)=>v+p.SCEN.oecd[i]));
+ const total=yearly(p.DATA.rest_of_world.map((v,i)=>v+p.DATA.us[i]+p.DATA.oecd_ex_us[i])).reduce((a,b)=>a+b,0);
+ const gap=base.map((v,i)=>v-scen[i]);
+ assert.ok(gap.every(g=>g>=-1e-9),'the reduced total is never above the original');
+ assert.ok(Math.abs(gap.reduce((a,b)=>a+b,0)/total-p.RESULTS.reduction)<1e-9,'region area equals the reported reduction');
+ assert.ok(gap.slice(25).reduce((a,b)=>a+b,0)>gap.slice(0,25).reduce((a,b)=>a+b,0),'most of the avoided emissions are after 2050');
+});

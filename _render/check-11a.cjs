@@ -14,7 +14,9 @@ const {chromium}=require('playwright-core');const assert=require('node:assert/st
  const before=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);
  await seek(18.5);const mid=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);assert.notEqual(mid,before,'West band shape is morphing');
  assert.equal(await op('#restShare'),'0','88% label cleared before the scenario');
- await seek(22.5);assert.equal(await op('#scenarioResult'),'1');const end=await page.screenshot();
+ const regionArea=()=>page.locator('#avoidedRegion path').evaluate(e=>{const n=(getComputedStyle(e).d.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);let a=0;for(let i=0;i<n.length;i+=2){const j=(i+2)%n.length;a+=n[i]*n[j+1]-n[j]*n[i+1];}return Math.abs(a/2);});
+ await seek(15);assert.ok(await regionArea()<1,'no avoided area before the West starts shrinking');
+ await seek(22.5);assert.ok(await regionArea()>1500,'the avoided emissions are drawn as a region once the West is at zero');assert.equal(await op('#legend-avoided'),'1');assert.equal(await op('#scenarioResult'),'1');const end=await page.screenshot();
  await seek(24);assert.ok(end.equals(await page.screenshot()),'final hold is still');
  await seek(18.5);const again=await page.locator('[data-band-fill="us"]').evaluate(e=>getComputedStyle(e).d);assert.equal(again,mid,'reverse seek is deterministic');
  await page.goto(base+'/11a-projected-emissions.html');await page.locator('[data-seek="19000"]').click();assert.equal(await page.locator('#scrubber').inputValue(),'19000');assert.equal(await page.getByRole('button',{name:'Render .mov',exact:true}).count(),1);
