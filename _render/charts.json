@@ -154,10 +154,12 @@
   {
     "id": "7b",
     "name": "Share of Battery Electric Car Inventory",
-    "subtitle": "With and without regulation, United States, 2020-2050",
+    "subtitle": "With and without regulation, United States 2026-2050 (two lines)",
     "html": "7b-ev-inventory-share.html",
     "mov": "7b-ev-inventory-share-alpha.mov",
-    "duration": 8.9
+    "duration": 12.5,
+    "width": 1920,
+    "height": 1200
   },
   {
     "id": "7c",

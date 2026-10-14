@@ -1,0 +1,19 @@
+const {chromium}=require('playwright-core');const assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
+ const page=await browser.newPage({viewport:{width:1200,height:750}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const base=process.env.CHART_BASE_URL||'http://localhost:8793';await page.goto(base+'/7b-ev-inventory-share.html?export');await page.evaluate(()=>document.fonts.ready);
+ const seek=async t=>page.evaluate(t=>document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000}),t);
+ const wipe=sel=>page.locator(sel).evaluate(e=>parseFloat(getComputedStyle(e).width));
+ const op=sel=>page.locator(sel).evaluate(e=>getComputedStyle(e).opacity);
+ assert.equal(await page.locator('[data-series]').count(),2);
+ await seek(1.5);assert.equal(await wipe('#wipeWith'),0);assert.equal(await wipe('#wipeWithout'),0);
+ await seek(4);assert.ok(await wipe('#wipeWith')>0&&await wipe('#wipeWith')<1030);assert.equal(await wipe('#wipeWithout'),0,'second line waits for the first');
+ assert.equal(await op('[data-marker="with"]'),'0','end marker appears only when the line reaches 2050');
+ await seek(6.4);assert.equal(await op('[data-marker="with"]'),'1');assert.equal(await wipe('#wipeWithout'),0);
+ await seek(8);assert.ok(await wipe('#wipeWithout')>0);
+ await seek(12);const end=await page.screenshot();assert.equal(await op('[data-marker="without"]'),'1');
+ await seek(12.5);assert.ok(end.equals(await page.screenshot()),'final hold is still');
+ await seek(4);const a=await page.screenshot();await seek(12.5);await seek(4);assert.ok(a.equals(await page.screenshot()),'reverse seeking is deterministic');
+ await page.goto(base+'/7b-ev-inventory-share.html');await page.locator('[data-seek="10600"]').click();assert.equal(await page.locator('#scrubber').inputValue(),'10600');assert.equal(await page.getByRole('button',{name:'Render .mov',exact:true}).count(),1);
+ assert.deepEqual(errors,[]);console.log('PASS 7b: line order, markers, still hold, reverse seeking, controls');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
